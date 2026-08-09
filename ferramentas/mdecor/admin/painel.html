@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Painel — Mdecor</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22><rect width=%2248%22 height=%2248%22 rx=%2211%22 fill=%22%233d2b1f%22/><g fill=%22%23b08d57%22><rect x=%229%22 y=%229%22 width=%2230%22 height=%2213%22 rx=%226%22/><rect x=%229%22 y=%2223%22 width=%2230%22 height=%2211%22 rx=%224%22/><rect x=%224%22 y=%2215%22 width=%227%22 height=%2219%22 rx=%223.5%22/><rect x=%2237%22 y=%2215%22 width=%227%22 height=%2219%22 rx=%223.5%22/></g></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="admin-logo"><span class="admin-logo-mark"><svg viewBox="0 0 48 48" width="16" height="16" fill="currentColor" aria-hidden="true"><rect x="9" y="9" width="30" height="13" rx="6"/><rect x="9" y="23" width="30" height="11" rx="4"/><rect x="4" y="15" width="7" height="19" rx="3.5"/><rect x="37" y="15" width="7" height="19" rx="3.5"/></svg></span>Mdecor</div>
+      <nav class="admin-nav">
+        <a href="painel.html" class="active">Painel</a>
+        <a href="agendamentos.html">Agendamentos</a>
+        <a href="produtos.html">Produtos</a>
+        <a href="depoimentos.html">Depoimentos</a>
+        <a href="../index.html" target="_blank">Ver site</a>
+      </nav>
+      <div class="admin-sidebar-bottom">
+        <a href="#" id="logout-link">Sair</a>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <button class="nav-toggle-admin" id="nav-toggle-admin">☰ Menu</button>
+      <div class="admin-topbar">
+        <div>
+          <h1>Olá, equipe Mdecor</h1>
+          <p>Aqui está um resumo rápido da loja hoje.</p>
+        </div>
+      </div>
+
+      <div class="stat-grid" id="stat-grid"></div>
+
+      <div class="panel-card">
+        <h3>Produtos com estoque baixo</h3>
+        <ul class="low-stock-list" id="low-stock-list"></ul>
+      </div>
+
+      <div class="panel-card">
+        <h3>Próximos agendamentos</h3>
+        <ul class="low-stock-list" id="next-appointments"></ul>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/products-data.js"></script>
+  <script src="../js/products-store.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin-shell.js"></script>
+  <script>
+    MdecorAuth.requireLogin();
+
+    function renderDashboard() {
+      const products = MdecorProducts.getAll();
+      const lowStock = products.filter((p) => MdecorProducts.isLowStock(p));
+      const outOfStock = products.filter((p) => MdecorProducts.isOutOfStock(p));
+      const appointments = MdecorStorage.getAll();
+      const todayISO = new Date().toISOString().slice(0, 10);
+      const pendentes = appointments.filter((a) => a.status === 'pendente');
+      const hoje = appointments.filter((a) => a.date === todayISO && a.status !== 'cancelado');
+
+      document.getElementById('stat-grid').innerHTML = `
+        <div class="stat-card">
+          <div class="stat-value">${hoje.length}</div>
+          <div class="stat-label">Visitas agendadas para hoje</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${pendentes.length}</div>
+          <div class="stat-label">Agendamentos aguardando confirmação</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${products.length}</div>
+          <div class="stat-label">Produtos cadastrados</div>
+        </div>
+        <div class="stat-card ${lowStock.length ? 'warn' : ''}">
+          <div class="stat-value">${lowStock.length}</div>
+          <div class="stat-label">Produtos com estoque baixo</div>
+        </div>
+      `;
+
+      const lowStockList = document.getElementById('low-stock-list');
+      const lowAndOut = [...lowStock, ...outOfStock];
+      lowStockList.innerHTML = lowAndOut.length
+        ? lowAndOut.map((p) => `
+            <li>
+              <span>${p.name}</span>
+              <span class="qty">${p.stock <= 0 ? 'Esgotado' : `${p.stock} unid.`}</span>
+            </li>
+          `).join('')
+        : '<li style="color:var(--ink-600)">Nenhum produto com estoque baixo no momento.</li>';
+
+      const next = appointments
+        .filter((a) => a.status !== 'cancelado' && a.date >= todayISO)
+        .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
+        .slice(0, 6);
+      const nextList = document.getElementById('next-appointments');
+      nextList.innerHTML = next.length
+        ? next.map((a) => `
+            <li>
+              <span>${a.name} — ${a.date.split('-').reverse().join('/')} às ${a.time}</span>
+              <span class="qty" style="color:var(--ink-600);font-weight:600">${a.status}</span>
+            </li>
+          `).join('')
+        : '<li style="color:var(--ink-600)">Nenhum agendamento futuro no momento.</li>';
+    }
+
+    renderDashboard();
+  </script>
+</body>
+</html>

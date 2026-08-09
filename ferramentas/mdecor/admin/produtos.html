@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Produtos — Mdecor</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22><rect width=%2248%22 height=%2248%22 rx=%2211%22 fill=%22%233d2b1f%22/><g fill=%22%23b08d57%22><rect x=%229%22 y=%229%22 width=%2230%22 height=%2213%22 rx=%226%22/><rect x=%229%22 y=%2223%22 width=%2230%22 height=%2211%22 rx=%224%22/><rect x=%224%22 y=%2215%22 width=%227%22 height=%2219%22 rx=%223.5%22/><rect x=%2237%22 y=%2215%22 width=%227%22 height=%2219%22 rx=%223.5%22/></g></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="admin-logo"><span class="admin-logo-mark"><svg viewBox="0 0 48 48" width="16" height="16" fill="currentColor" aria-hidden="true"><rect x="9" y="9" width="30" height="13" rx="6"/><rect x="9" y="23" width="30" height="11" rx="4"/><rect x="4" y="15" width="7" height="19" rx="3.5"/><rect x="37" y="15" width="7" height="19" rx="3.5"/></svg></span>Mdecor</div>
+      <nav class="admin-nav">
+        <a href="painel.html">Painel</a>
+        <a href="agendamentos.html">Agendamentos</a>
+        <a href="produtos.html" class="active">Produtos</a>
+        <a href="depoimentos.html">Depoimentos</a>
+        <a href="../index.html" target="_blank">Ver site</a>
+      </nav>
+      <div class="admin-sidebar-bottom">
+        <a href="#" id="logout-link">Sair</a>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <button class="nav-toggle-admin" id="nav-toggle-admin">☰ Menu</button>
+      <div class="admin-topbar">
+        <div>
+          <h1>Produtos</h1>
+          <p>Adicione, edite ou remova os móveis que aparecem no site. Produtos com estoque de <strong id="low-stock-hint-num"></strong> unidades ou menos ganham um aviso de "últimas unidades" automaticamente.</p>
+        </div>
+        <button class="btn btn-primary" id="btn-new-product">+ Adicionar produto</button>
+      </div>
+
+      <div class="admin-toolbar">
+        <input type="search" id="search-input" placeholder="Buscar produto pelo nome..." />
+        <span class="spacer"></span>
+      </div>
+
+      <div class="admin-products-grid" id="admin-products-grid"></div>
+    </main>
+  </div>
+
+  <!-- Modal de formulário de produto -->
+  <div class="modal-overlay" id="product-form-modal">
+    <div class="modal" style="grid-template-columns: 1fr; max-width: 620px;">
+      <button class="modal-close" id="form-close-btn" aria-label="Fechar">✕</button>
+      <div class="modal-body">
+        <h3 id="form-title">Adicionar produto</h3>
+        <form id="product-form">
+          <input type="hidden" id="f-id" />
+
+          <div class="form-row">
+            <label class="form-label" for="f-photo-input">Foto do produto</label>
+            <div class="photo-upload" id="photo-upload-area">
+              <span>Clique para escolher uma foto do computador ou celular</span>
+              <input type="file" id="f-photo-input" accept="image/*" style="display:none" />
+              <div class="photo-preview" id="photo-preview"><span class="photo-preview-placeholder">Sem foto</span></div>
+            </div>
+            <p class="form-hint">A foto fica salva só neste navegador (veja README.md). Escolha uma foto na horizontal para ficar melhor no site.</p>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label" for="f-name">Nome do produto</label>
+            <input class="form-input" type="text" id="f-name" placeholder="Ex: Sofá Retrátil 3 Lugares" required />
+          </div>
+
+          <div class="form-row form-grid-2">
+            <div>
+              <label class="form-label" for="f-category">Categoria</label>
+              <select class="form-select" id="f-category" required></select>
+            </div>
+            <div>
+              <label class="form-label" for="f-stock">Quantidade em estoque</label>
+              <input class="form-input" type="number" id="f-stock" min="0" step="1" placeholder="Ex: 10" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label" for="f-price">Preço (R$)</label>
+            <input class="form-input" type="number" id="f-price" min="0" step="0.01" placeholder="Ex: 1999.90" required />
+          </div>
+
+          <div class="form-row">
+            <label class="checkbox-label">
+              <input type="checkbox" id="f-discount-toggle" />
+              Este produto está com desconto
+            </label>
+          </div>
+
+          <div class="form-row form-grid-2 discount-fields" id="discount-fields" style="display:none">
+            <div>
+              <label class="form-label" for="f-old-price">Preço original (antes do desconto)</label>
+              <input class="form-input" type="number" id="f-old-price" min="0" step="0.01" placeholder="Ex: 2499.90" />
+            </div>
+            <div>
+              <label class="form-label">Desconto aplicado</label>
+              <p class="discount-hint" id="discount-hint">Preencha os dois preços para calcular</p>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label" for="f-badge">Selo promocional (opcional)</label>
+            <select class="form-select" id="f-badge">
+              <option value="">Nenhum</option>
+              <option value="Mais vendido">Mais vendido</option>
+              <option value="Novidade">Novidade</option>
+              <option value="Oferta">Oferta</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label" for="f-description">Descrição</label>
+            <textarea class="form-textarea" id="f-description" placeholder="Fale sobre o material, conforto, diferenciais do produto..."></textarea>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label" for="f-dimensions">Dimensões (opcional)</label>
+            <input class="form-input" type="text" id="f-dimensions" placeholder='Ex: 2,10m (L) x 0,95m (P) x 0,90m (A)' />
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Cores disponíveis</label>
+            <div id="color-rows"></div>
+            <button type="button" class="btn btn-outline btn-sm" id="add-color-btn">+ Adicionar cor</button>
+          </div>
+
+          <div class="modal-actions" style="padding-top: 12px;">
+            <button type="button" class="btn btn-outline btn-block" id="form-cancel-btn">Cancelar</button>
+            <button type="submit" class="btn btn-primary btn-block">Salvar produto</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/products-data.js"></script>
+  <script src="../js/products-store.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin-shell.js"></script>
+  <script src="js/produtos-admin.js"></script>
+</body>
+</html>
