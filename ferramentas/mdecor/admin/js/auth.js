@@ -7,10 +7,10 @@
 // login de verdade no backend (ver README.md, seção "Próximos passos").
 
 const ADMIN_USERNAME = 'admin';
-const ADMIN_PASSWORD = 'mdecor2026';
-const SESSION_KEY = 'mdecor_admin_session';
+const ADMIN_PASSWORD = 'cedrodecor2026';
+const SESSION_KEY = 'cedrodecor_admin_session';
 
-const MdecorAuth = {
+const CedroDecorAuth = {
   isLoggedIn() {
     return sessionStorage.getItem(SESSION_KEY) === 'true';
   },

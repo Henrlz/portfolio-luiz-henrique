@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>Painel — Mdecor</title>
+  <title>Painel — Cedro Decor</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22><rect width=%2248%22 height=%2248%22 rx=%2211%22 fill=%22%233d2b1f%22/><g fill=%22%23b08d57%22><rect x=%229%22 y=%229%22 width=%2230%22 height=%2213%22 rx=%226%22/><rect x=%229%22 y=%2223%22 width=%2230%22 height=%2211%22 rx=%224%22/><rect x=%224%22 y=%2215%22 width=%227%22 height=%2219%22 rx=%223.5%22/><rect x=%2237%22 y=%2215%22 width=%227%22 height=%2219%22 rx=%223.5%22/></g></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
@@ -14,7 +14,7 @@
 <body class="admin-body">
   <div class="admin-shell">
     <aside class="admin-sidebar" id="admin-sidebar">
-      <div class="admin-logo"><span class="admin-logo-mark"><svg viewBox="0 0 48 48" width="16" height="16" fill="currentColor" aria-hidden="true"><rect x="9" y="9" width="30" height="13" rx="6"/><rect x="9" y="23" width="30" height="11" rx="4"/><rect x="4" y="15" width="7" height="19" rx="3.5"/><rect x="37" y="15" width="7" height="19" rx="3.5"/></svg></span>Mdecor</div>
+      <div class="admin-logo"><span class="admin-logo-mark"><svg viewBox="0 0 48 48" width="16" height="16" fill="currentColor" aria-hidden="true"><rect x="9" y="9" width="30" height="13" rx="6"/><rect x="9" y="23" width="30" height="11" rx="4"/><rect x="4" y="15" width="7" height="19" rx="3.5"/><rect x="37" y="15" width="7" height="19" rx="3.5"/></svg></span>Cedro Decor</div>
       <nav class="admin-nav">
         <a href="painel.html" class="active">Painel</a>
         <a href="agendamentos.html">Agendamentos</a>
@@ -31,7 +31,7 @@
       <button class="nav-toggle-admin" id="nav-toggle-admin">☰ Menu</button>
       <div class="admin-topbar">
         <div>
-          <h1>Olá, equipe Mdecor</h1>
+          <h1>Olá, equipe Cedro Decor</h1>
           <p>Aqui está um resumo rápido da loja hoje.</p>
         </div>
       </div>
@@ -56,13 +56,13 @@
   <script src="js/auth.js"></script>
   <script src="js/admin-shell.js"></script>
   <script>
-    MdecorAuth.requireLogin();
+    CedroDecorAuth.requireLogin();
 
     function renderDashboard() {
-      const products = MdecorProducts.getAll();
-      const lowStock = products.filter((p) => MdecorProducts.isLowStock(p));
-      const outOfStock = products.filter((p) => MdecorProducts.isOutOfStock(p));
-      const appointments = MdecorStorage.getAll();
+      const products = CedroDecorProducts.getAll();
+      const lowStock = products.filter((p) => CedroDecorProducts.isLowStock(p));
+      const outOfStock = products.filter((p) => CedroDecorProducts.isOutOfStock(p));
+      const appointments = CedroDecorStorage.getAll();
       const todayISO = new Date().toISOString().slice(0, 10);
       const pendentes = appointments.filter((a) => a.status === 'pendente');
       const hoje = appointments.filter((a) => a.date === todayISO && a.status !== 'cancelado');

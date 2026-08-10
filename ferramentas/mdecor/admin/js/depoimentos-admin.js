@@ -1,7 +1,7 @@
 // Tela de depoimentos do painel — adicionar, editar e (principalmente)
 // excluir avaliações rapidamente, caso chegue algum comentário falso.
 
-MdecorAuth.requireLogin();
+CedroDecorAuth.requireLogin();
 
 let editingId = null;
 
@@ -12,7 +12,7 @@ function starRating(rating) {
 
 function renderList() {
   const container = document.getElementById('testimonials-admin-list');
-  const list = MdecorTestimonials.getAll();
+  const list = CedroDecorTestimonials.getAll();
 
   if (!list.length) {
     container.innerHTML = `<div class="empty-state"><p>Nenhum depoimento cadastrado. Clique em "+ Adicionar depoimento" para começar.</p></div>`;
@@ -44,7 +44,7 @@ function openForm(id) {
   resetForm();
   const overlay = document.getElementById('testimonial-form-modal');
   if (id) {
-    const t = MdecorTestimonials.getById(id);
+    const t = CedroDecorTestimonials.getById(id);
     editingId = id;
     document.getElementById('form-title').textContent = 'Editar depoimento';
     document.getElementById('t-name').value = t.name;
@@ -74,9 +74,9 @@ document.getElementById('testimonials-admin-list').addEventListener('click', (e)
   const id = btn.closest('.appt-card').dataset.id;
   if (btn.dataset.action === 'editar') openForm(id);
   if (btn.dataset.action === 'excluir') {
-    const t = MdecorTestimonials.getById(id);
+    const t = CedroDecorTestimonials.getById(id);
     if (confirm(`Tem certeza que deseja excluir o depoimento de "${t.name}"? Essa ação não pode ser desfeita.`)) {
-      MdecorTestimonials.remove(id);
+      CedroDecorTestimonials.remove(id);
       renderList();
       showToast('Depoimento excluído.');
     }
@@ -93,10 +93,10 @@ document.getElementById('testimonial-form').addEventListener('submit', (e) => {
   };
 
   if (editingId) {
-    MdecorTestimonials.update(editingId, patch);
+    CedroDecorTestimonials.update(editingId, patch);
     showToast('Depoimento atualizado com sucesso!');
   } else {
-    MdecorTestimonials.add(patch);
+    CedroDecorTestimonials.add(patch);
     showToast('Depoimento adicionado com sucesso!');
   }
   closeForm();

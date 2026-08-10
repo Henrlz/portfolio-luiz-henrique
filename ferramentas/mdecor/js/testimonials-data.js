@@ -15,7 +15,7 @@ const TESTIMONIALS = [
     name: 'Carlos Eduardo',
     role: 'Cliente desde 2022',
     rating: 5,
-    text: 'Montamos o quarto todo com a Mdecor. Qualidade dos móveis muito acima do preço que pagamos.',
+    text: 'Montamos o quarto todo com a Cedro Decor. Qualidade dos móveis muito acima do preço que pagamos.',
   },
   {
     id: 't03',

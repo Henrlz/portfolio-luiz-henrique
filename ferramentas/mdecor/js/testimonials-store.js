@@ -2,8 +2,8 @@
 // Guardado no localStorage, compartilhado entre o site e o /admin quando
 // acessados pela mesma origem (veja README.md).
 
-const MdecorTestimonials = (() => {
-  const KEY = 'mdecor_testimonials_v1';
+const CedroDecorTestimonials = (() => {
+  const KEY = 'cedrodecor_testimonials_v1';
 
   function seedIfEmpty() {
     if (localStorage.getItem(KEY) === null) {

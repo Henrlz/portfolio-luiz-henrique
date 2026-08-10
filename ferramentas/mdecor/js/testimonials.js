@@ -8,7 +8,7 @@ function starRating(rating) {
 function renderTestimonials() {
   const grid = document.getElementById('testimonials-grid');
   if (!grid) return;
-  const list = MdecorTestimonials.getAll();
+  const list = CedroDecorTestimonials.getAll();
 
   if (!list.length) {
     grid.innerHTML = '';
@@ -32,5 +32,5 @@ document.addEventListener('DOMContentLoaded', renderTestimonials);
 
 // Se o painel /admin alterar os depoimentos em outra aba, atualiza aqui também.
 window.addEventListener('storage', (e) => {
-  if (e.key === 'mdecor_testimonials_v1') renderTestimonials();
+  if (e.key === 'cedrodecor_testimonials_v1') renderTestimonials();
 });

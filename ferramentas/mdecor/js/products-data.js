@@ -1,4 +1,4 @@
-// Catálogo de produtos da Mdecor.
+// Catálogo de produtos da Cedro Decor.
 // Para adicionar/editar produtos, basta alterar este array.
 // "colors" define as opções de cor: name (nome exibido) e hex (usado no swatch e no preview).
 //

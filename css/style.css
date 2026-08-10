@@ -484,10 +484,6 @@ section {
   box-shadow: 0 0 0 1.5px var(--fg);
 }
 
-.timeline-future .timeline-dot {
-  background: var(--bg);
-}
-
 .timeline-tag {
   display: inline-block;
   font-size: 0.75rem;
@@ -509,10 +505,6 @@ section {
   color: var(--muted);
   font-size: 0.95rem;
   max-width: 560px;
-}
-
-.timeline-future .timeline-content {
-  opacity: 0.75;
 }
 
 /* Projects */

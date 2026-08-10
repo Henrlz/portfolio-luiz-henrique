@@ -1,7 +1,7 @@
 // Tela de agendamentos do painel — pensada para ser bem simples de usar:
 // listas por dia, filtros por status e botões grandes de ação.
 
-MdecorAuth.requireLogin();
+CedroDecorAuth.requireLogin();
 
 let statusFilter = 'todos';
 
@@ -19,7 +19,7 @@ function dayLabel(iso) {
 }
 
 function renderAppointments() {
-  const all = MdecorStorage.getAll();
+  const all = CedroDecorStorage.getAll();
   const list = statusFilter === 'todos' ? all : all.filter((a) => a.status === statusFilter);
   const container = document.getElementById('appointments-container');
 
@@ -88,16 +88,16 @@ document.getElementById('appointments-container').addEventListener('click', (e) 
   const { action } = btn.dataset;
 
   if (action === 'confirmar') {
-    MdecorStorage.updateStatus(id, 'confirmado');
+    CedroDecorStorage.updateStatus(id, 'confirmado');
     showToast('Agendamento confirmado!');
   }
   if (action === 'cancelar') {
-    MdecorStorage.updateStatus(id, 'cancelado');
+    CedroDecorStorage.updateStatus(id, 'cancelado');
     showToast('Agendamento cancelado.');
   }
   if (action === 'excluir') {
     if (confirm('Tem certeza que deseja excluir este agendamento? Essa ação não pode ser desfeita.')) {
-      MdecorStorage.remove(id);
+      CedroDecorStorage.remove(id);
       showToast('Agendamento excluído.');
     }
   }

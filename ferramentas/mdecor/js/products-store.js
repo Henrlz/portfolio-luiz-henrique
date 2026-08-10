@@ -6,8 +6,8 @@
 // Para os clientes verem os produtos de qualquer celular, é necessário um
 // backend de verdade (Firebase, Supabase, etc). Veja README.md.
 
-const MdecorProducts = (() => {
-  const KEY = 'mdecor_products_v1';
+const CedroDecorProducts = (() => {
+  const KEY = 'cedrodecor_products_v1';
 
   function seedIfEmpty() {
     if (localStorage.getItem(KEY) === null) {

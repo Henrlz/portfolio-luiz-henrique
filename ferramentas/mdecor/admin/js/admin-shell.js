@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (logout) {
     logout.addEventListener('click', (e) => {
       e.preventDefault();
-      if (confirm('Deseja sair do painel administrativo?')) MdecorAuth.logout();
+      if (confirm('Deseja sair do painel administrativo?')) CedroDecorAuth.logout();
     });
   }
 });

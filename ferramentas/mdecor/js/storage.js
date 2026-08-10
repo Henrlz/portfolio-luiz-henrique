@@ -9,8 +9,8 @@
 // em tempo real, é necessário trocar este arquivo por chamadas a um backend
 // (Firebase, Supabase, ou uma API própria). Veja README.md, seção "Próximos passos".
 
-const MdecorStorage = (() => {
-  const KEY = 'mdecor_appointments_v1';
+const CedroDecorStorage = (() => {
+  const KEY = 'cedrodecor_appointments_v1';
 
   function getAll() {
     try {

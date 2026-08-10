@@ -12,7 +12,7 @@ const STORE_HOURS = {
 };
 const WHATSAPP_NUMBER = '5511999999999'; // troque pelo número real da loja
 
-const MdecorChat = (() => {
+const CedroDecorChat = (() => {
   let booking = {};
   let launcherHasPing = true;
 
@@ -105,7 +105,7 @@ const MdecorChat = (() => {
     booking = {};
     document.getElementById('chat-body').innerHTML = '';
     withTyping(() => {
-      addBotMessage('Olá! Eu sou a assistente virtual da <strong>Mdecor</strong>. Posso te ajudar a agendar uma visita à loja, mostrar informações sobre os produtos ou o horário de funcionamento.');
+      addBotMessage('Olá! Eu sou a assistente virtual da <strong>Cedro Decor</strong>. Posso te ajudar a agendar uma visita à loja, mostrar informações sobre os produtos ou o horário de funcionamento.');
       askMainMenu();
     }, 400);
   }
@@ -153,7 +153,7 @@ const MdecorChat = (() => {
     if (choice === 'whatsapp') {
       withTyping(() => {
         addBotMessage('Você pode falar direto com a nossa equipe pelo WhatsApp, vou abrir uma conversa pra você.');
-        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá! Vim pelo site da Mdecor e gostaria de mais informações.')}`, '_blank');
+        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá! Vim pelo site da Cedro Decor e gostaria de mais informações.')}`, '_blank');
         setTimeout(askMainMenu, 300);
       });
     }
@@ -191,7 +191,7 @@ const MdecorChat = (() => {
     }
 
     let color = null;
-    const allColorNames = [...new Set(MdecorProducts.getAll().flatMap((p) => (p.colors || []).map((c) => c.name)))];
+    const allColorNames = [...new Set(CedroDecorProducts.getAll().flatMap((p) => (p.colors || []).map((c) => c.name)))];
     for (const c of allColorNames) {
       const normColor = stripAccents(c.toLowerCase());
       const firstWord = normColor.split(' ')[0];
@@ -211,7 +211,7 @@ const MdecorChat = (() => {
 
   function searchProductsForQA(text) {
     const { category, color, maxPrice, minPrice, norm } = parseProductQuery(text);
-    let list = MdecorProducts.getAll();
+    let list = CedroDecorProducts.getAll();
     const hasStructuredFilter = category || color || maxPrice != null || minPrice != null;
 
     if (category) list = list.filter((p) => p.category === category);
@@ -227,7 +227,7 @@ const MdecorChat = (() => {
       });
     }
 
-    return list.filter((p) => !MdecorProducts.isOutOfStock(p)).slice(0, 4);
+    return list.filter((p) => !CedroDecorProducts.isOutOfStock(p)).slice(0, 4);
   }
 
   function formatProductAnswer(list) {
@@ -240,7 +240,7 @@ const MdecorChat = (() => {
         <strong>${p.name}</strong><br>
         ${CATEGORY_LABELS[p.category] || p.category} · ${currency(p.price)}<br>
         Cores: ${(p.colors || []).map((c) => c.name).join(', ')}
-        ${MdecorProducts.isLowStock(p) ? `<br><span style="color:#b5452f;font-weight:700">Só restam ${p.stock} unidades!</span>` : ''}
+        ${CedroDecorProducts.isLowStock(p) ? `<br><span style="color:#b5452f;font-weight:700">Só restam ${p.stock} unidades!</span>` : ''}
       </div>
     `).join('');
     return `${intro}${items}`;
@@ -375,7 +375,7 @@ const MdecorChat = (() => {
   function askTime() {
     const day = new Date(booking.date + 'T12:00:00').getDay();
     const allSlots = STORE_HOURS[day].slots;
-    const taken = MdecorStorage.takenSlots(booking.date);
+    const taken = CedroDecorStorage.takenSlots(booking.date);
     const available = allSlots.filter((s) => !taken.includes(s));
 
     if (!available.length) {
@@ -416,7 +416,7 @@ const MdecorChat = (() => {
   }
 
   function saveBooking() {
-    MdecorStorage.add({
+    CedroDecorStorage.add({
       name: booking.name,
       phone: booking.phone,
       productCategory: booking.productCategory || null,
@@ -427,7 +427,7 @@ const MdecorChat = (() => {
     addBotMessage(`
       Agendamento recebido com sucesso!<br>
       Em breve nossa equipe confirma pelo telefone <strong>${booking.phone}</strong>.
-      Te esperamos dia <strong>${formatDateBR(booking.date)} às ${booking.time}</strong> na loja Mdecor!
+      Te esperamos dia <strong>${formatDateBR(booking.date)} às ${booking.time}</strong> na loja Cedro Decor!
     `);
     addQuickReplies([
       { label: 'Fazer outro agendamento', value: 'new' },
@@ -492,4 +492,4 @@ const MdecorChat = (() => {
   return { openChat, closeChat, openWithProduct };
 })();
 
-window.MdecorChat = MdecorChat;
+window.CedroDecorChat = CedroDecorChat;

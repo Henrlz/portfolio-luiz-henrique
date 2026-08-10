@@ -1,7 +1,7 @@
 // Tela de produtos do painel — pensada para uma pessoa sem experiência com
 // tecnologia conseguir cadastrar, editar e remover produtos sozinha.
 
-MdecorAuth.requireLogin();
+CedroDecorAuth.requireLogin();
 
 const CATEGORY_PLACEHOLDER = {
   sofas: 'Sofá',
@@ -32,7 +32,7 @@ fillCategorySelect();
 // ---------- Grade de produtos ----------
 function renderGrid() {
   const grid = document.getElementById('admin-products-grid');
-  const all = MdecorProducts.getAll();
+  const all = CedroDecorProducts.getAll();
   const list = searchTerm
     ? all.filter((p) => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
     : all;
@@ -44,8 +44,8 @@ function renderGrid() {
 
   grid.innerHTML = list.map((p) => {
     let pill = `<span class="stock-pill ok">${p.stock ?? 0} em estoque</span>`;
-    if (MdecorProducts.isOutOfStock(p)) pill = `<span class="stock-pill out">Esgotado</span>`;
-    else if (MdecorProducts.isLowStock(p)) pill = `<span class="stock-pill low">Últimas ${p.stock} unidades</span>`;
+    if (CedroDecorProducts.isOutOfStock(p)) pill = `<span class="stock-pill out">Esgotado</span>`;
+    else if (CedroDecorProducts.isLowStock(p)) pill = `<span class="stock-pill low">Últimas ${p.stock} unidades</span>`;
 
     const hasDiscount = p.oldPrice && p.oldPrice > p.price;
     const discountPercent = hasDiscount ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;
@@ -84,9 +84,9 @@ document.getElementById('admin-products-grid').addEventListener('click', (e) => 
   const id = btn.closest('.admin-product-card').dataset.id;
   if (btn.dataset.action === 'editar') openForm(id);
   if (btn.dataset.action === 'excluir') {
-    const p = MdecorProducts.getById(id);
+    const p = CedroDecorProducts.getById(id);
     if (confirm(`Tem certeza que deseja excluir "${p.name}"? Essa ação não pode ser desfeita.`)) {
-      MdecorProducts.remove(id);
+      CedroDecorProducts.remove(id);
       renderGrid();
       showToast('Produto excluído.');
     }
@@ -200,7 +200,7 @@ function openForm(id) {
   resetForm();
   const overlay = document.getElementById('product-form-modal');
   if (id) {
-    const p = MdecorProducts.getById(id);
+    const p = CedroDecorProducts.getById(id);
     editingId = id;
     document.getElementById('form-title').textContent = 'Editar produto';
     document.getElementById('f-name').value = p.name;
@@ -263,10 +263,10 @@ document.getElementById('product-form').addEventListener('submit', (e) => {
   };
 
   if (editingId) {
-    MdecorProducts.update(editingId, patch);
+    CedroDecorProducts.update(editingId, patch);
     showToast('Produto atualizado com sucesso!');
   } else {
-    MdecorProducts.add(patch);
+    CedroDecorProducts.add(patch);
     showToast('Produto adicionado com sucesso!');
   }
   closeForm();

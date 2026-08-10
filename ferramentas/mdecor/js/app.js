@@ -1,5 +1,5 @@
 // Renderização do catálogo, filtros de categoria e modal de detalhes.
-// Os produtos vêm do MdecorProducts (localStorage), que já nasce populado
+// Os produtos vêm do CedroDecorProducts (localStorage), que já nasce populado
 // com o catálogo de demonstração definido em products-data.js.
 
 // Texto mostrado como marcador de posição quando um produto ainda não tem foto.
@@ -37,7 +37,7 @@ let activeFilter = 'todos';
 const selectedColorIndex = {};
 
 function findProduct(id) {
-  return MdecorProducts.getById(id);
+  return CedroDecorProducts.getById(id);
 }
 
 function mediaBgStyle(product) {
@@ -47,10 +47,10 @@ function mediaBgStyle(product) {
 }
 
 function stockBadge(p) {
-  if (MdecorProducts.isOutOfStock(p)) {
+  if (CedroDecorProducts.isOutOfStock(p)) {
     return { text: 'Esgotado', className: 'badge-out' };
   }
-  if (MdecorProducts.isLowStock(p)) {
+  if (CedroDecorProducts.isLowStock(p)) {
     return { text: `Últimas ${p.stock} unidades`, className: 'badge-low' };
   }
   if (p.badge) {
@@ -74,7 +74,7 @@ function mediaTemplate(p, mediaId) {
 
 function renderProducts() {
   const grid = document.getElementById('products-grid');
-  const all = MdecorProducts.getAll();
+  const all = CedroDecorProducts.getAll();
   const list = activeFilter === 'todos'
     ? all
     : all.filter((p) => p.category === activeFilter);
@@ -89,8 +89,8 @@ function renderProducts() {
 
 function cardTemplate(p) {
   const idx = selectedColorIndex[p.id] || 0;
-  const outOfStock = MdecorProducts.isOutOfStock(p);
-  const lowStock = MdecorProducts.isLowStock(p);
+  const outOfStock = CedroDecorProducts.isOutOfStock(p);
+  const lowStock = CedroDecorProducts.isLowStock(p);
   return `
     <article class="product-card" data-id="${p.id}">
       ${mediaTemplate(p, `media-${p.id}`)}
@@ -127,8 +127,8 @@ function openProductModal(id) {
   const p = findProduct(id);
   if (!p) return;
   const idx = selectedColorIndex[p.id] || 0;
-  const outOfStock = MdecorProducts.isOutOfStock(p);
-  const lowStock = MdecorProducts.isLowStock(p);
+  const outOfStock = CedroDecorProducts.isOutOfStock(p);
+  const lowStock = CedroDecorProducts.isLowStock(p);
   const overlay = document.getElementById('product-modal');
   overlay.innerHTML = `
     <div class="modal">
@@ -207,7 +207,7 @@ function initProducts() {
     if (action === 'schedule') {
       const p = findProduct(id);
       closeProductModal();
-      window.MdecorChat.openWithProduct(p);
+      window.CedroDecorChat.openWithProduct(p);
     }
   });
 
@@ -226,7 +226,7 @@ function initProducts() {
     if (actionBtn && !actionBtn.disabled) {
       const p = findProduct(actionBtn.dataset.id);
       closeProductModal();
-      window.MdecorChat.openWithProduct(p);
+      window.CedroDecorChat.openWithProduct(p);
     }
   });
 
@@ -236,7 +236,7 @@ function initProducts() {
 
   // Se o painel /admin alterar os produtos em outra aba, atualiza a vitrine automaticamente.
   window.addEventListener('storage', (e) => {
-    if (e.key === 'mdecor_products_v1') renderProducts();
+    if (e.key === 'cedrodecor_products_v1') renderProducts();
   });
 }
 
