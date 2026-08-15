@@ -13,6 +13,18 @@
     localStorage.setItem('theme', next);
   });
 
+  var cookieBanner = document.getElementById('cookieBanner');
+  var cookieAccept = document.getElementById('cookieAccept');
+  if (cookieBanner && cookieAccept) {
+    if (!localStorage.getItem('cookieConsent')) {
+      setTimeout(function () { cookieBanner.classList.add('show'); }, 500);
+    }
+    cookieAccept.addEventListener('click', function () {
+      localStorage.setItem('cookieConsent', '1');
+      cookieBanner.classList.remove('show');
+    });
+  }
+
   document.querySelectorAll('.hero-actions .btn').forEach(function (btn) {
     btn.addEventListener('click', function (e) {
       var href = btn.getAttribute('href');
