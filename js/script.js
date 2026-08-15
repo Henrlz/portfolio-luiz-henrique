@@ -54,19 +54,26 @@
 
   var navToggle = document.getElementById('navToggle');
   var nav = document.getElementById('nav');
+  var navOverlay = document.getElementById('navOverlay');
+
+  function closeNav() {
+    nav.classList.remove('is-open');
+    navToggle.classList.remove('is-open');
+    navToggle.setAttribute('aria-expanded', 'false');
+    if (navOverlay) navOverlay.classList.remove('is-open');
+  }
 
   navToggle.addEventListener('click', function () {
     var isOpen = nav.classList.toggle('is-open');
     navToggle.classList.toggle('is-open', isOpen);
     navToggle.setAttribute('aria-expanded', String(isOpen));
+    if (navOverlay) navOverlay.classList.toggle('is-open', isOpen);
   });
 
+  if (navOverlay) navOverlay.addEventListener('click', closeNav);
+
   nav.querySelectorAll('.nav-link').forEach(function (link) {
-    link.addEventListener('click', function () {
-      nav.classList.remove('is-open');
-      navToggle.classList.remove('is-open');
-      navToggle.setAttribute('aria-expanded', 'false');
-    });
+    link.addEventListener('click', closeNav);
   });
 
   var navLinks = Array.prototype.slice.call(document.querySelectorAll('.nav-link'));

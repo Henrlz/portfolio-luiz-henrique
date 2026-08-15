@@ -106,8 +106,30 @@ section {
 }
 
 .nav {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 72px;
   display: flex;
+  align-items: center;
   gap: 32px;
+  z-index: 101;
+}
+
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: 150;
+}
+
+.nav-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .nav-link {
@@ -686,26 +708,25 @@ section {
 /* Responsive */
 @media (max-width: 800px) {
   .nav {
-    position: fixed;
-    top: 72px;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0;
+    left: auto;
+    right: -320px;
+    transform: none;
+    height: 100vh;
+    width: min(300px, 80vw);
     background: var(--bg);
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 28px;
-    transform: translateY(-8px);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s ease, transform 0.25s ease;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 26px;
+    padding: 100px 28px 28px;
+    box-shadow: -24px 0 48px rgba(0, 0, 0, 0.18);
+    transition: right 0.28s ease;
+    z-index: 210;
   }
 
   .nav.is-open {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
+    right: 0;
   }
 
   .nav-link {
