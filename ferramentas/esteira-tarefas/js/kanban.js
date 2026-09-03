@@ -229,7 +229,11 @@ function executarTransicao(t, destino, acaoExigida, motivo) {
   t.updated_at = new Date().toISOString();
   let detalhes = `${origem} → ${destino}`;
   if (motivo) detalhes += ` — Motivo: ${motivo}`;
-  t.log.push({ acao: ACAO_LOG_POR_TRANSICAO[acaoExigida], detalhes, usuario: usuarioAtual(), created_at: new Date().toISOString() });
+  const acaoLog = ACAO_LOG_POR_TRANSICAO[acaoExigida];
+  t.log.push({ acao: acaoLog, detalhes, usuario: usuarioAtual(), created_at: new Date().toISOString() });
+  if (acaoExigida === "validar" || acaoExigida === "reprovar") {
+    notificarResultado(t, acaoLog, motivo, usuarioAtual());
+  }
   persistirTarefas();
   if (historicoAberto === t.idmaster) preencherDetalhe(t);
 }
@@ -261,6 +265,7 @@ function persistirTarefas() {
 function renderTudo() {
   renderStats();
   renderBoardEFiltros();
+  atualizarBadgeEmails();
 }
 function renderBoardEFiltros() {
   const algumFiltro = filtroBusca.value.trim() || filtroPrioridade.value || filtroVencidas.checked;
@@ -280,6 +285,7 @@ btnNovaTarefa.addEventListener("click", () => {
   novosItensChecklistCriacao = [];
   novosAnexosCriacao = [];
   renderChecklistCriacao();
+  document.getElementById("campoAnexosWrapper").hidden = !podeAtual("anexar");
   const sel = document.getElementById("campoResponsavelSugerido");
   sel.innerHTML = '<option value="">Nenhum</option>';
   getUsuarios().forEach((u) => sel.appendChild(el("option", { value: u.nome }, [u.nome])));
@@ -287,8 +293,30 @@ btnNovaTarefa.addEventListener("click", () => {
 });
 
 document.getElementById("campoAnexos").addEventListener("change", (e) => {
-  novosAnexosCriacao = Array.from(e.target.files).map((f) => ({ nome_original: f.name }));
+  novosAnexosCriacao = [];
+  const arquivos = Array.from(e.target.files);
+  arquivos.forEach((f) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      novosAnexosCriacao.push({
+        idmaster: uid("an"), nome_original: f.name, url: reader.result,
+        criado_por: usuarioAtual(), created_at: new Date().toISOString(),
+      });
+      renderAnexosCriacao();
+    };
+    reader.readAsDataURL(f);
+  });
 });
+
+function renderAnexosCriacao() {
+  const lista = document.getElementById("listaAnexosCriacao");
+  lista.innerHTML = "";
+  novosAnexosCriacao.forEach((a) => {
+    lista.appendChild(el("div", { class: "checklist-mini-row" }, [
+      el("span", { style: "flex:1;font-size:0.82rem" }, [`📎 ${a.nome_original}`]),
+    ]));
+  });
+}
 
 document.getElementById("btnAddItemChecklistCriacao").addEventListener("click", adicionarItemChecklistCriacao);
 document.getElementById("campoNovoItemChecklist").addEventListener("keydown", (e) => {
@@ -339,9 +367,10 @@ document.getElementById("btnConfirmarCriar").addEventListener("click", () => {
     log: [{ acao: "criada", detalhes: "", usuario: usuarioAtual(), created_at: agora }],
   };
   tarefas.unshift(nova);
+  notificarCriacao(nova);
   persistirTarefas();
   fecharModal("modalCriar");
-  showSuccess("Tarefa criada", "Quem pode assumir já foi avisado no Teams.");
+  showSuccess("Tarefa criada", "Quem pode assumir foi avisado no Teams e a lista de e-mail foi notificada.");
 });
 
 // ---------- Detalhe / histórico ----------
@@ -444,9 +473,38 @@ function preencherDetalhe(t) {
     main.appendChild(el("hr", { style: "border:none;border-top:1px solid var(--border);margin:0.8rem 0" }));
     main.appendChild(el("p", {}, [el("b", {}, ["Observações: "]), t.observacoes]));
   }
+
+  main.appendChild(el("hr", { style: "border:none;border-top:1px solid var(--border);margin:0.8rem 0" }));
+  main.appendChild(el("strong", { style: "font-size:0.88rem" }, ["Anexos"]));
+  const listaAnexos = el("div", { style: "margin-top:0.4rem" });
   if (t.anexos.length) {
-    main.appendChild(el("strong", { style: "font-size:0.88rem;display:block;margin-top:0.8rem" }, ["Anexos"]));
-    t.anexos.forEach((a) => main.appendChild(el("div", { style: "font-size:0.85rem;color:var(--primary)" }, [`📎 ${a.nome_original}`])));
+    t.anexos.forEach((a) => {
+      const rotulo = a.url
+        ? el("a", { href: a.url, download: a.nome_original, style: "flex:1;color:var(--primary);font-size:0.85rem" }, [`📎 ${a.nome_original}`])
+        : el("span", { style: "flex:1;font-size:0.85rem;color:var(--text-soft)", title: "Anexo de exemplo — sem arquivo real nesta demo" }, [`📎 ${a.nome_original}`]);
+      listaAnexos.appendChild(el("div", { class: "checklist-item-row" }, [
+        rotulo,
+        el("span", { style: "font-size:0.72rem;color:var(--text-soft)" }, [a.criado_por ? a.criado_por.nome : "—"]),
+        podeAtual("anexar") ? el("button", { class: "icon-btn", title: "Remover anexo", onclick: () => removerAnexo(t, a) }, ["🗑"]) : null,
+      ]));
+    });
+  } else {
+    listaAnexos.appendChild(el("p", { class: "empty-note" }, ["Nenhum anexo."]));
+  }
+  main.appendChild(listaAnexos);
+  if (podeAtual("anexar")) {
+    const inputArquivo = el("input", { type: "file", style: "font-size:0.8rem;margin-top:0.5rem" });
+    inputArquivo.addEventListener("change", (e) => {
+      const arquivo = e.target.files[0];
+      if (!arquivo) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        anexarArquivo(t, arquivo.name, reader.result);
+        inputArquivo.value = "";
+      };
+      reader.readAsDataURL(arquivo);
+    });
+    main.appendChild(inputArquivo);
   }
 
   renderFeed(t);
@@ -474,6 +532,21 @@ function adicionarChecklistItem(t, texto) {
   t.checklist.push({ idmaster: uid("c"), texto, concluido: false, criado_por: usuarioAtual(), created_at: new Date().toISOString() });
   t.log.push({ acao: "checklist_adicionado", detalhes: texto, usuario: usuarioAtual(), created_at: new Date().toISOString() });
   setTarefas(tarefas);
+  preencherDetalhe(t);
+}
+
+function anexarArquivo(t, nome, dataUrl) {
+  const agora = new Date().toISOString();
+  t.anexos.push({ idmaster: uid("an"), nome_original: nome, url: dataUrl, criado_por: usuarioAtual(), created_at: agora });
+  t.log.push({ acao: "anexo_adicionado", detalhes: nome, usuario: usuarioAtual(), created_at: agora });
+  persistirTarefas();
+  preencherDetalhe(t);
+}
+
+function removerAnexo(t, anexo) {
+  t.anexos = t.anexos.filter((a) => a.idmaster !== anexo.idmaster);
+  t.log.push({ acao: "anexo_removido", detalhes: anexo.nome_original, usuario: usuarioAtual(), created_at: new Date().toISOString() });
+  persistirTarefas();
   preencherDetalhe(t);
 }
 
@@ -539,7 +612,7 @@ function renderInputComentario(t) {
       el("button", { onclick: () => { imagemColada = null; renderInputComentario(t); } }, ["✕"]),
     ]));
   }
-  const campo = el("textarea", { rows: "1", placeholder: "Digite uma mensagem... (cole uma imagem com Ctrl+V)" });
+  const campo = el("textarea", { rows: "1", placeholder: "Digite uma mensagem...", title: "Você pode colar um print direto aqui (Ctrl+V)" });
   campo.addEventListener("paste", (e) => {
     const item = Array.from(e.clipboardData.items || []).find((i) => i.type.startsWith("image/"));
     if (!item) return;
@@ -602,4 +675,54 @@ btnExcluidas.addEventListener("click", () => {
   abrirModal("modalExcluidas");
 });
 
+// ---------- Notificações (e-mails) ----------
+document.getElementById("btnNotificacoes").addEventListener("click", () => {
+  renderNotificacoes();
+  abrirModal("modalNotificacoes");
+});
+
+document.getElementById("btnRodarPrazos").addEventListener("click", () => {
+  const enviados = rodarRotinaPrazos();
+  tarefas = getTarefas();
+  renderTudo();
+  renderNotificacoes();
+  if (enviados) {
+    showSuccess(`${enviados} e-mail(s) enviado(s)`, "Lembretes de prazo D-1 e de atraso.");
+  } else {
+    showSuccess("Nada a enviar", "As tarefas elegíveis já tinham sido avisadas — a rotina é idempotente.");
+  }
+});
+
+function renderNotificacoes() {
+  const conteudo = document.getElementById("conteudoNotificacoes");
+  const emails = getEmails();
+  conteudo.innerHTML = "";
+  if (!emails.length) {
+    conteudo.appendChild(el("p", { class: "empty-note" }, [
+      "Nenhum e-mail enviado ainda. Crie uma tarefa, valide/reprove uma, ou rode a rotina de prazos acima.",
+    ]));
+  } else {
+    emails.forEach((m) => {
+      const corpo = el("div", { class: "email-preview" });
+      corpo.innerHTML = m.corpo_html;
+      conteudo.appendChild(el("details", { class: "email-item" }, [
+        el("summary", {}, [
+          el("strong", {}, [m.assunto]),
+          el("span", { class: "email-meta" }, [`para ${m.destinatarios.join(", ")} · ${formatarDataHora(m.enviado_em)}`]),
+        ]),
+        corpo,
+      ]));
+    });
+  }
+  atualizarBadgeEmails();
+}
+
+function atualizarBadgeEmails() {
+  const n = getEmails().length;
+  const badge = document.getElementById("badgeEmails");
+  badge.textContent = n ? String(n) : "";
+  badge.hidden = !n;
+}
+
+atualizarBadgeEmails();
 renderTudo();

@@ -58,12 +58,15 @@ const ROTULO_ACAO_LOG = {
   reprovada: "reprovou a tarefa",
   excluida: "excluiu a tarefa",
   anexo_adicionado: "anexou um arquivo",
+  anexo_removido: "removeu um anexo",
   comentario: "comentou",
   checklist_adicionado: "adicionou um item ao checklist",
   checklist_atualizado: "atualizou um item do checklist",
   checklist_removido: "removeu um item do checklist",
   movida_livre: "moveu a tarefa livremente",
   prioridade_alterada: "alterou a prioridade",
+  lembrete_prazo: "lembrete de prazo próximo enviado pelo sistema",
+  lembrete_atrasada: "aviso de atraso enviado ao criador",
 };
 
 const REPRESENTANTE_POR_NIVEL = {
@@ -81,8 +84,80 @@ const CHAVES = {
   usuarios: "ett:usuarios",
   matriz: "ett:matriz",
   nivel: "ett:nivelAtual",
+  emails: "ett:emails",
   seeded: "ett:seeded",
 };
+
+// Recriação fiel dos templates de e-mail do backend (_layout_resultado /
+// _campo / _caixa_destaque): tabelas aninhadas, que é o que sobrevive à
+// maioria dos clientes de e-mail.
+function escapeHtml(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+function emailCampo(icone, rotulo, valor) {
+  return `
+    <tr>
+      <td style="padding:9px 0; border-bottom:1px solid #f3f4f6; vertical-align:top; width:28px;">${icone}</td>
+      <td style="padding:9px 0 9px 4px; border-bottom:1px solid #f3f4f6; vertical-align:top;">
+        <div style="color:#9ca3af; font-size:11px; text-transform:uppercase; letter-spacing:.04em;">${rotulo}</div>
+        <div style="color:#111827; font-size:14px; margin-top:2px;">${valor}</div>
+      </td>
+    </tr>`;
+}
+
+function emailCaixaDestaque(cor, corFundo, rotulo, texto) {
+  return `
+    <div style="margin-top:16px; padding:12px 14px; background:${corFundo}; border-left:3px solid ${cor}; border-radius:6px;">
+      <div style="color:${cor}; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;">${rotulo}</div>
+      <div style="color:#374151; font-size:14px; margin-top:4px;">${texto}</div>
+    </div>`;
+}
+
+function emailLayout(cor, corFundo, selo, titulo, camposHtml) {
+  return `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+           style="background:#f3f4f6; padding:32px 16px; font-family: Arial, Helvetica, sans-serif;">
+      <tr><td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+               style="max-width:520px; background:#ffffff; border-radius:16px; overflow:hidden; border:1px solid #e5e7eb;">
+          <tr><td style="background:${corFundo}; padding:20px 28px;">
+            <span style="display:inline-block; background:${cor}; color:#fff; font-size:11px; font-weight:700;
+                         letter-spacing:.05em; padding:4px 12px; border-radius:999px; text-transform:uppercase;">${selo}</span>
+            <h1 style="margin:12px 0 0; font-size:20px; color:#111827;">${titulo}</h1>
+          </td></tr>
+          <tr><td style="padding:24px 28px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;">${camposHtml}</table>
+            <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:28px;">
+              <tr><td style="border-radius:10px; background:${cor};">
+                <span style="display:inline-block; padding:13px 26px; color:#fff; font-size:14px; font-weight:700;">Abrir a tarefa →</span>
+              </td></tr>
+            </table>
+          </td></tr>
+          <tr><td style="padding:16px 28px; border-top:1px solid #f3f4f6;">
+            <p style="margin:0; color:#9ca3af; font-size:11px;">Esteira de Tarefas · Task Management</p>
+          </td></tr>
+        </table>
+      </td></tr>
+    </table>`;
+}
+
+function getEmails() { return loadJSON(CHAVES.emails, []); }
+function setEmails(v) { saveJSON(CHAVES.emails, v); }
+
+function registrarEmail({ assunto, destinatarios, corpoHtml }) {
+  const caixa = getEmails();
+  caixa.unshift({
+    id: uid("mail"),
+    assunto,
+    destinatarios: destinatarios.filter(Boolean),
+    corpo_html: corpoHtml,
+    enviado_em: new Date().toISOString(),
+  });
+  setEmails(caixa.slice(0, 50));
+}
 
 function loadJSON(chave, padrao) {
   try {
@@ -149,6 +224,15 @@ function usuario(nome) {
   return nome ? { nome } : null;
 }
 
+// `url: null` = anexo de exemplo sem conteúdo real (não foi enviado nesta
+// sessão); os que o visitante anexa viram data URL e baixam de verdade.
+function anexoSeed(nome, autor, diasAtrasN) {
+  return {
+    idmaster: uid("an"), nome_original: nome, url: null,
+    criado_por: usuario(autor), created_at: diasAtras(diasAtrasN),
+  };
+}
+
 function seedUsuarios() {
   return [
     { id: 1, nome: "Bruna Ramos", email: "bruna.ramos@empresa-demo.com.br", nivel: "ASSISTENTE", notificar_criacao_email: false },
@@ -174,7 +258,7 @@ function seedTarefas() {
     idmaster: uid("t"), titulo: "Cadastro de novo fornecedor — insumos de embalagem", descricao: "Validar documentação fiscal e cadastrar no sistema.",
     observacoes: "", prazo: diaISOemDias(3), status: "FALTA_ASSUMIR", prioridade: "MEDIA",
     cliente: { nome: "Toque Gourmet Especial" }, criado_por: usuario("Diego Martins"), responsavel_atual: null, responsavel_sugerido: null,
-    anexos: [{ nome_original: "ficha-cadastral.pdf" }], comentarios: [], checklist: [
+    anexos: [anexoSeed("ficha-cadastral.pdf", "Diego Martins", 1)], comentarios: [], checklist: [
       { idmaster: uid("c"), texto: "Confirmar CNAE compatível", concluido: false, criado_por: usuario("Diego Martins"), created_at: diasAtras(1) },
     ],
     created_at: diasAtras(1), updated_at: diasAtras(1),
@@ -209,7 +293,7 @@ function seedTarefas() {
     idmaster: uid("t"), titulo: "Revisão de contrato — prestação de serviço", descricao: "Conferir cláusulas e agendar assinatura.",
     observacoes: "", prazo: diaISOAtras(2), status: "EXECUTANDO", prioridade: "ALTA",
     cliente: { nome: "Estúdio Iris" }, criado_por: usuario("Carla Nogueira"), responsavel_atual: usuario("Diego Martins"), responsavel_sugerido: null,
-    anexos: [{ nome_original: "minuta-contrato.docx" }], comentarios: [], checklist: [], created_at: diasAtras(6), updated_at: diasAtras(2),
+    anexos: [anexoSeed("minuta-contrato.docx", "Carla Nogueira", 6)], comentarios: [], checklist: [], created_at: diasAtras(6), updated_at: diasAtras(2),
     log: [
       { acao: "criada", detalhes: "", usuario: usuario("Carla Nogueira"), created_at: diasAtras(6) },
       { acao: "assumida", detalhes: "FALTA_ASSUMIR → EXECUTANDO", usuario: usuario("Diego Martins"), created_at: diasAtras(5) },
@@ -259,7 +343,7 @@ function seedTarefas() {
     idmaster: uid("t"), titulo: "Fechamento mensal de despesas administrativas", descricao: "Fechamento mensal das despesas de todos os setores.",
     observacoes: "", prazo: diaISOAtras(10), status: "FINALIZADA", prioridade: "MEDIA",
     cliente: null, criado_por: usuario("Rafael Souza"), responsavel_atual: usuario("Carla Nogueira"), responsavel_sugerido: null,
-    anexos: [{ nome_original: "fechamento-outubro.xlsx" }], comentarios: [], checklist: [], created_at: diasAtras(20), updated_at: diasAtras(9),
+    anexos: [anexoSeed("fechamento-outubro.xlsx", "Carla Nogueira", 18)], comentarios: [], checklist: [], created_at: diasAtras(20), updated_at: diasAtras(9),
     log: [
       { acao: "criada", detalhes: "", usuario: usuario("Rafael Souza"), created_at: diasAtras(20) },
       { acao: "assumida", detalhes: "FALTA_ASSUMIR → EXECUTANDO", usuario: usuario("Carla Nogueira"), created_at: diasAtras(18) },
@@ -289,12 +373,135 @@ function seedExcluidas() {
   ];
 }
 
+function labelStatus(status) {
+  return (COLUNAS.find((c) => c.status === status) || {}).titulo || status;
+}
+
+function camposTarefa(t, extras) {
+  let campos =
+    emailCampo("📋", "Tarefa", `<b>${escapeHtml(t.titulo)}</b>`) +
+    emailCampo("🏢", "Cliente", t.cliente ? escapeHtml(t.cliente.nome) : "—");
+  (extras || []).forEach((c) => { campos += c; });
+  campos += emailCampo("📅", "Prazo", t.prazo ? formatarData(t.prazo) : "sem prazo definido");
+  return campos;
+}
+
+// Espelha notificar_criacao_tarefa_task: e-mail para a lista marcada em
+// Permissões (notificar_criacao_email).
+function notificarCriacao(t) {
+  const destinatarios = getUsuarios().filter((u) => u.notificar_criacao_email).map((u) => u.email);
+  if (!destinatarios.length) return;
+  let campos =
+    emailCampo("📋", "Tarefa", `<b>${escapeHtml(t.titulo)}</b>`) +
+    emailCampo("🏢", "Cliente", t.cliente ? escapeHtml(t.cliente.nome) : "—") +
+    emailCampo("🙋", "Criada por", escapeHtml(t.criado_por ? t.criado_por.nome : "—")) +
+    emailCampo("📅", "Prazo", t.prazo ? formatarData(t.prazo) : "sem prazo definido");
+  if (t.responsavel_sugerido) {
+    campos += emailCampo("💡", "Sugestão de responsável", escapeHtml(t.responsavel_sugerido.nome));
+  }
+  registrarEmail({
+    assunto: `Nova tarefa: ${t.titulo}`,
+    destinatarios,
+    corpoHtml: emailLayout("#2563eb", "#eff6ff", "Nova tarefa", t.titulo, campos),
+  });
+}
+
+// Espelha notificar_resultado_tarefa_task: vai para o responsável e para
+// quem validou/reprovou; na reprovação inclui o motivo.
+function notificarResultado(t, acao, motivo, ator) {
+  const aprovada = acao === "validada";
+  const destinatarios = Array.from(new Set([
+    t.responsavel_atual ? emailDe(t.responsavel_atual.nome) : null,
+    ator ? emailDe(ator.nome) : null,
+  ].filter(Boolean)));
+  if (!destinatarios.length) return;
+
+  const cor = aprovada ? "#16a34a" : "#dc2626";
+  const corFundo = aprovada ? "#f0fdf4" : "#fef2f2";
+  const titulo = aprovada ? "Tarefa validada e concluída" : "Tarefa reprovada";
+
+  let campos = camposTarefa(t, [
+    emailCampo("👤", "Responsável", escapeHtml(t.responsavel_atual ? t.responsavel_atual.nome : "—")),
+  ]);
+  campos += emailCampo(
+    aprovada ? "✅" : "↩️",
+    aprovada ? "Validada por" : "Reprovada por",
+    escapeHtml(ator ? ator.nome : "—"),
+  );
+  let extras = "";
+  if (t.descricao) {
+    extras += emailCaixaDestaque("#6b7280", "#f9fafb", "Descrição da tarefa", escapeHtml(t.descricao).replace(/\n/g, "<br>"));
+  }
+  if (!aprovada) {
+    extras += emailCaixaDestaque(cor, corFundo, "Motivo da reprovação", escapeHtml(motivo));
+  }
+  if (extras) campos += `<tr><td colspan="2">${extras}</td></tr>`;
+
+  registrarEmail({
+    assunto: `${titulo}: ${t.titulo}`,
+    destinatarios,
+    corpoHtml: emailLayout(cor, corFundo, aprovada ? "Validada" : "Reprovada", titulo, campos),
+  });
+}
+
+function emailDe(nome) {
+  const u = getUsuarios().find((x) => x.nome === nome);
+  return u ? u.email : null;
+}
+
+// Espelha verificar_prazos_tarefas_trabalhistas_task: D-1 e atraso, cada um
+// enviado só uma vez por tarefa — a idempotência vem de uma checagem no
+// próprio log, então reprocessar o dia não duplica e-mail.
+function rodarRotinaPrazos() {
+  const tarefas = getTarefas();
+  const hoje = hojeISO();
+  const amanha = diaISOemDias(1);
+  let enviados = 0;
+
+  const camposDaTarefa = (t) => camposTarefa(t, [
+    emailCampo("📌", "Status atual", escapeHtml(labelStatus(t.status))),
+    emailCampo("👤", "Responsável", escapeHtml(t.responsavel_atual ? t.responsavel_atual.nome : "ainda não foi assumida")),
+  ]);
+  const jaAvisado = (t, acao) => t.log.some((l) => l.acao === acao);
+
+  tarefas.forEach((t) => {
+    if (t.status === "FINALIZADA" || !t.prazo) return;
+
+    if (t.prazo === amanha && !jaAvisado(t, "lembrete_prazo")) {
+      const destinatario = t.responsavel_atual || t.criado_por;
+      if (destinatario) {
+        registrarEmail({
+          assunto: `Prazo vence amanhã: ${t.titulo}`,
+          destinatarios: [emailDe(destinatario.nome)],
+          corpoHtml: emailLayout("#d97706", "#fffbeb", "Prazo amanhã", "O prazo desta tarefa vence amanhã", camposDaTarefa(t)),
+        });
+        t.log.push({ acao: "lembrete_prazo", detalhes: "Lembrete D-1 enviado", usuario: null, created_at: new Date().toISOString() });
+        enviados++;
+      }
+    }
+
+    if (t.prazo < hoje && !jaAvisado(t, "lembrete_atrasada") && t.criado_por) {
+      registrarEmail({
+        assunto: `Tarefa atrasada: ${t.titulo}`,
+        destinatarios: [emailDe(t.criado_por.nome)],
+        corpoHtml: emailLayout("#dc2626", "#fef2f2", "Atrasada", "Uma tarefa que você criou está atrasada", camposDaTarefa(t)),
+      });
+      t.log.push({ acao: "lembrete_atrasada", detalhes: "Aviso de atraso enviado", usuario: null, created_at: new Date().toISOString() });
+      enviados++;
+    }
+  });
+
+  setTarefas(tarefas);
+  return enviados;
+}
+
 function ensureSeeded() {
   if (localStorage.getItem(CHAVES.seeded)) return;
   saveJSON(CHAVES.tarefas, seedTarefas());
   saveJSON(CHAVES.excluidas, seedExcluidas());
   saveJSON(CHAVES.usuarios, seedUsuarios());
   saveJSON(CHAVES.matriz, MATRIZ_DEFAULT);
+  saveJSON(CHAVES.emails, []);
   localStorage.setItem(CHAVES.nivel, "DESENVOLVEDOR");
   localStorage.setItem(CHAVES.seeded, "1");
 }

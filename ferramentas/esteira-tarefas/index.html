@@ -22,6 +22,7 @@
       <span>Ver como</span>
       <select id="seletorNivel"></select>
     </label>
+    <button id="btnNotificacoes" class="btn btn-outline">✉ Notificações <span id="badgeEmails" class="count-chip"></span></button>
     <button id="btnExcluidas" class="btn btn-outline">Tarefas excluídas</button>
     <a id="btnPermissoes" class="btn btn-outline" href="permissoes.html" hidden>Permissões</a>
     <button id="btnNovaTarefa" class="btn btn-primary" hidden>+ Nova tarefa</button>
@@ -85,9 +86,10 @@
         <label>Sugerir responsável (opcional)</label>
         <select id="campoResponsavelSugerido"><option value="">Nenhum</option></select>
       </div>
-      <div class="field">
+      <div class="field" id="campoAnexosWrapper">
         <label>Anexos</label>
         <input type="file" id="campoAnexos" multiple />
+        <div id="listaAnexosCriacao"></div>
       </div>
       <div class="field">
         <label>Checklist (opcional)</label>
@@ -132,6 +134,20 @@
     <div class="modal-foot">
       <button class="btn btn-outline" data-close="modalReprovar">Cancelar</button>
       <button class="btn btn-danger-outline" id="btnConfirmarReprovar">Reprovar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalNotificacoes" hidden>
+  <div class="modal modal-wide">
+    <div class="modal-head"><h3>Notificações por e-mail</h3><button class="modal-close" data-close="modalNotificacoes">×</button></div>
+    <div class="modal-body">
+      <p class="empty-note" style="margin-bottom:0.8rem;">
+        No sistema real esses e-mails saem por tasks assíncronas (Celery) na criação, na validação/reprovação (com o motivo),
+        e numa rotina diária que avisa prazo D-1 e atraso. Aqui eles são renderizados com o mesmo template HTML do backend.
+      </p>
+      <button id="btnRodarPrazos" class="btn btn-outline" style="margin-bottom:1rem;">▷ Rodar rotina diária de prazos</button>
+      <div id="conteudoNotificacoes"></div>
     </div>
   </div>
 </div>

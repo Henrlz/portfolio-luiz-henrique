@@ -351,6 +351,18 @@ button, select, input, textarea { font: inherit; color: inherit; }
 .field-row .field { flex: 1; }
 
 .checklist-add-row, .comment-input-row { display: flex; gap: 0.5rem; align-items: flex-start; }
+.checklist-add-row input, .comment-input-row textarea {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.85rem;
+  background: var(--panel);
+  resize: vertical;
+  font-family: inherit;
+}
+.comment-input-row textarea { max-height: 120px; }
 .checklist-item-row, .checklist-mini-row {
   display: flex; align-items: center; gap: 0.45rem; padding: 0.15rem 0;
 }
@@ -394,6 +406,15 @@ table.matrix-table th:first-child, table.matrix-table td:first-child { text-alig
 .table-scroll table.data-table th, .table-scroll table.data-table td { border-left: none; border-right: none; }
 
 .empty-note { color: var(--text-soft); font-size: 0.85rem; }
+
+.email-item { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.6rem; overflow: hidden; }
+.email-item summary {
+  cursor: pointer; padding: 0.7rem 0.9rem; background: #f8f9fc; display: flex;
+  flex-direction: column; gap: 0.15rem; font-size: 0.86rem;
+}
+.email-item summary::marker { color: var(--text-soft); }
+.email-item .email-meta { font-size: 0.74rem; color: var(--text-soft); font-weight: 400; }
+.email-preview { border-top: 1px solid var(--border); overflow-x: auto; }
 
 .toast-stack { position: fixed; bottom: 1.2rem; right: 1.2rem; display: flex; flex-direction: column; gap: 0.6rem; z-index: 200; }
 .toast {
