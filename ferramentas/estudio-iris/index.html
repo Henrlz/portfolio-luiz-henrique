@@ -4,126 +4,70 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Studio Íris — Fotografia</title>
-<meta name="description" content="Studio Íris: fotografia de casamentos, ensaios, retratos corporativos e eventos." />
+<meta name="description" content="Studio Íris: fotografia de casamentos, ensaios, aniversários e retratos corporativos." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
 <header class="site-header" id="siteHeader">
   <div class="container">
-    <a href="#topo" class="logo">Studio <span>Íris</span></a>
+    <a href="#topo" class="logo">Studio Íris<span>Fotografia</span></a>
     <nav>
       <ul class="nav-links" id="navLinks">
-        <li><a href="#sobre">Sobre</a></li>
-        <li><a href="#servicos">Serviços</a></li>
-        <li><a href="#portfolio">Portfólio</a></li>
+        <li><a href="#sobre">Sobre mim</a></li>
+        <li class="has-dropdown" id="dropdownItem">
+          <a href="#portfolio" id="dropdownTrigger">Seguimentos</a>
+          <ul class="dropdown">
+            <li><a href="#portfolio" data-filter-link="casamento">Casamentos</a></li>
+            <li><a href="#portfolio" data-filter-link="casal">Ensaio de Casal</a></li>
+            <li><a href="#portfolio" data-filter-link="infantil">Aniversário Infantil</a></li>
+            <li><a href="#portfolio" data-filter-link="15anos">Aniversário de 15 Anos</a></li>
+            <li><a href="#portfolio" data-filter-link="corporativo">Corporativo</a></li>
+            <li><a href="#portfolio" data-filter-link="gestante">Ensaio Gestante</a></li>
+          </ul>
+        </li>
         <li><a href="#depoimentos">Depoimentos</a></li>
         <li><a href="#contato">Contato</a></li>
       </ul>
     </nav>
-    <div class="nav-extra">
-      <button class="fav-toggle" id="favToggle" type="button" title="Ver favoritos">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.35-9.5-8.8C1 8 2.3 4.7 5.4 4.1c1.9-.4 3.8.5 4.9 2.1C11.4 4.6 13.3 3.7 15.2 4.1c3.1.6 4.4 3.9 2.9 7.1C15.6 15.65 12 20 12 20z"/></svg>
-        <span class="fav-count" id="favCount">0</span>
-      </button>
-      <button class="nav-toggle" id="navToggle" type="button" aria-label="Abrir menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-      </button>
-    </div>
+    <a href="#contato" class="nav-cta">Contato</a>
+    <button class="nav-toggle" id="navToggle" type="button" aria-label="Abrir menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
   </div>
 </header>
 
 <section class="hero" id="topo">
+  <div class="hero-bg"><div class="grain"></div></div>
   <div class="container">
-    <div class="hero-copy">
-      <span class="eyebrow">Studio de fotografia · desde 2015</span>
-      <h1>Histórias contadas<br>através da luz.</h1>
-      <p>Fotografia autoral de casamentos, ensaios e retratos corporativos. Cada clique carrega a atmosfera exata do momento — sem poses forçadas, sem pressa.</p>
-      <div class="hero-actions">
-        <a class="btn btn-primary" href="#contato">Agendar sessão</a>
-        <a class="btn btn-ghost" href="#portfolio">Ver portfólio</a>
-      </div>
-      <div class="hero-stats">
-        <div><strong>420+</strong><span>ensaios entregues</span></div>
-        <div><strong>9</strong><span>anos de estúdio</span></div>
-        <div><strong>98%</strong><span>clientes que indicam</span></div>
-      </div>
-    </div>
-    <div class="hero-frame">
-      <div class="ph ph-1">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7l1.5-3h5L16 7"/><circle cx="12" cy="13.5" r="3.2"/></svg>
-        <span>Sessão · Luz natural</span>
-      </div>
+    <span class="hero-eyebrow">Studio Íris · fotografia desde 2018</span>
+    <h1>O sonho é seu.<br>O compromisso é nosso.</h1>
+    <p>Fotografia autoral de casamentos, ensaios e retratos que carregam a atmosfera exata do momento — sem poses forçadas, sem pressa.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#contato">Agendar ensaio</a>
+      <a class="btn btn-outline" href="#portfolio">Ver portfólio</a>
     </div>
   </div>
   <div class="scroll-cue"><span class="line"></span>role para explorar</div>
 </section>
 
-<section class="sobre" id="sobre">
-  <div class="container">
-    <div class="sobre-portrait">
-      <div class="ph ph-2"><span>A fotógrafa</span></div>
-    </div>
-    <div class="sobre-text">
-      <span class="eyebrow">Sobre o studio</span>
-      <h2>Fotografia que respeita o instante real</h2>
-      <p>O Studio Íris nasceu da vontade de registrar pessoas como elas realmente são: no dia do casamento, na espera de um filho, na rotina de um negócio. Trabalhamos com luz natural sempre que possível e um olhar documental, guardando os pequenos detalhes que a memória apaga primeiro.</p>
-      <ul class="sobre-list">
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Atendimento personalizado do primeiro contato à entrega</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Edição autoral, sem filtros de aplicativo</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Galeria online privada para cada cliente</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<section class="servicos" id="servicos">
+<section class="seguimentos" id="seguimentos">
   <div class="container">
     <div class="section-head">
-      <span class="eyebrow">O que fazemos</span>
-      <h2>Serviços</h2>
-      <p>Pacotes flexíveis, ajustados ao momento que você quer registrar.</p>
+      <span class="eyebrow">O que fotografamos</span>
+      <h2>Seguimentos</h2>
+      <p>Toque em uma categoria para ver os trabalhos direto no portfólio.</p>
     </div>
-    <div class="servicos-grid">
-      <div class="servico-card">
-        <div class="servico-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5c-5-3.2-9-6.8-9-11 0-2.9 2.2-5 5-5 1.7 0 3.2.9 4 2.3.8-1.4 2.3-2.3 4-2.3 2.8 0 5 2.1 5 5 0 4.2-4 7.8-9 11z"/></svg></div>
-        <h3>Casamentos</h3>
-        <p>Cobertura completa da cerimônia e festa, com equipe dupla e álbum fine art incluso.</p>
-        <span class="servico-price">A partir de R$ 3.200</span>
-      </div>
-      <div class="servico-card">
-        <div class="servico-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
-        <h3>Ensaios & Retratos</h3>
-        <p>Gestante, newborn, família ou individual — em estúdio ou externa, com direção leve.</p>
-        <span class="servico-price">A partir de R$ 650</span>
-      </div>
-      <div class="servico-card">
-        <div class="servico-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg></div>
-        <h3>Corporativo</h3>
-        <p>Retratos de equipe, eventos internos e conteúdo para redes sociais da sua marca.</p>
-        <span class="servico-price">Sob orçamento</span>
-      </div>
-      <div class="servico-card">
-        <div class="servico-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg></div>
-        <h3>Produto</h3>
-        <p>Catálogo fotográfico para e-commerce, com iluminação e fundo padronizados.</p>
-        <span class="servico-price">A partir de R$ 480</span>
-      </div>
-      <div class="servico-card">
-        <div class="servico-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l16 16M4 20L20 4"/></svg></div>
-        <h3>Eventos</h3>
-        <p>Aniversários, formaturas e confraternizações, com entrega ágil das melhores fotos.</p>
-        <span class="servico-price">A partir de R$ 900</span>
-      </div>
-      <div class="servico-card">
-        <div class="servico-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3m0 12v3m9-9h-3M6 12H3m14.5-6.5l-2 2m-9 9l-2 2m0-13l2 2m9 9l2 2"/><circle cx="12" cy="12" r="4"/></svg></div>
-        <h3>Álbuns & Impressão</h3>
-        <p>Álbuns fine art impressos e quadros em canvas para eternizar os ensaios.</p>
-        <span class="servico-price">A partir de R$ 380</span>
-      </div>
+    <div class="cat-grid" id="catGrid">
+      <div class="cat-card" data-filter-link="casamento"><div class="ph ph-1"></div><div class="cat-label"><span>Casamentos</span></div></div>
+      <div class="cat-card" data-filter-link="casal"><div class="ph ph-2"></div><div class="cat-label"><span>Ensaio de Casal</span></div></div>
+      <div class="cat-card" data-filter-link="infantil"><div class="ph ph-3"></div><div class="cat-label"><span>Aniversário Infantil</span></div></div>
+      <div class="cat-card" data-filter-link="15anos"><div class="ph ph-4"></div><div class="cat-label"><span>Aniversário de 15 Anos</span></div></div>
+      <div class="cat-card" data-filter-link="corporativo"><div class="ph ph-5"></div><div class="cat-label"><span>Corporativo</span></div></div>
+      <div class="cat-card" data-filter-link="gestante"><div class="ph ph-6"></div><div class="cat-label"><span>Ensaio Gestante</span></div></div>
     </div>
   </div>
 </section>
@@ -137,13 +81,35 @@
     </div>
     <div class="filters" id="filters">
       <button class="filter-btn is-active" data-filter="todos">Todos</button>
-      <button class="filter-btn" data-filter="casamento">Casamento</button>
-      <button class="filter-btn" data-filter="ensaio">Ensaio</button>
+      <button class="filter-btn" data-filter="casamento">Casamentos</button>
+      <button class="filter-btn" data-filter="casal">Ensaio de Casal</button>
+      <button class="filter-btn" data-filter="infantil">Aniversário Infantil</button>
+      <button class="filter-btn" data-filter="15anos">15 Anos</button>
       <button class="filter-btn" data-filter="corporativo">Corporativo</button>
-      <button class="filter-btn" data-filter="evento">Evento</button>
+      <button class="filter-btn" data-filter="gestante">Gestante</button>
     </div>
     <div class="gallery-grid" id="galleryGrid"></div>
     <p class="gallery-empty" id="galleryEmpty">Nenhuma foto favoritada ainda — clique no coração de uma foto para guardá-la aqui.</p>
+  </div>
+</section>
+
+<section class="sobre" id="sobre">
+  <div class="container">
+    <div class="sobre-portrait">
+      <div class="ph ph-6"></div>
+      <div class="sobre-badge"><strong>7+</strong><span>anos de estúdio</span></div>
+    </div>
+    <div class="sobre-text">
+      <span class="eyebrow">Quem fotografa</span>
+      <h2>Studio Íris?</h2>
+      <p>Tudo começou em 2018, fotografando o casamento de um amigo próximo por pura vontade de registrar aquele dia. O resultado emocionou tanto a família que virou profissão: hoje o Studio Íris já esteve em mais de 400 celebrações, sempre com o mesmo compromisso do primeiro ensaio.</p>
+      <p class="sobre-quote">"Minha missão é eternizar momentos únicos com genuinidade — sem cenas montadas, sem pressa."</p>
+      <ul class="sobre-facts">
+        <li><strong>420+</strong><span>ensaios entregues</span></li>
+        <li><strong>7</strong><span>anos de estúdio</span></li>
+        <li><strong>98%</strong><span>clientes que indicam</span></li>
+      </ul>
+    </div>
   </div>
 </section>
 
@@ -153,7 +119,7 @@
       <span class="eyebrow">Quem já viveu a experiência</span>
       <h2>Depoimentos</h2>
     </div>
-    <div class="testi-track" id="testiTrack"></div>
+    <div class="testi-grid" id="testiGrid"></div>
   </div>
 </section>
 
@@ -171,6 +137,7 @@
       <div class="social-row">
         <a href="https://wa.me/5511999998888" target="_blank" rel="noopener" title="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 01-12.4 7.5L3 20l1.1-5.4A8.5 8.5 0 1121 11.5z"/></svg></a>
         <a href="https://instagram.com" target="_blank" rel="noopener" title="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor"/></svg></a>
+        <a href="https://facebook.com" target="_blank" rel="noopener" title="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9h3V6h-3a3 3 0 00-3 3v2H9v3h2v6h3v-6h3l1-3h-4V9a1 1 0 011-1z"/></svg></a>
       </div>
     </div>
     <form class="contato-form" id="contatoForm">
@@ -188,10 +155,11 @@
         <label for="tipo">Tipo de sessão</label>
         <select id="tipo">
           <option>Casamento</option>
-          <option>Ensaio ou retrato</option>
+          <option>Ensaio de Casal</option>
+          <option>Aniversário Infantil</option>
+          <option>Aniversário de 15 Anos</option>
           <option>Corporativo</option>
-          <option>Produto</option>
-          <option>Evento</option>
+          <option>Ensaio Gestante</option>
         </select>
       </div>
       <div class="form-field">
@@ -206,8 +174,18 @@
 
 <footer class="site-footer">
   <div class="container">
-    <span>© <span id="anoAtual"></span> Studio Íris Fotografia · projeto demonstrativo de portfólio</span>
-    <a href="#topo" class="back-to-top">Voltar ao topo ↑</a>
+    <div class="footer-top">
+      <div class="footer-logo">Studio Íris<span>Fotografia</span></div>
+      <div class="footer-social">
+        <a href="https://instagram.com" target="_blank" rel="noopener" title="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor"/></svg></a>
+        <a href="https://facebook.com" target="_blank" rel="noopener" title="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9h3V6h-3a3 3 0 00-3 3v2H9v3h2v6h3v-6h3l1-3h-4V9a1 1 0 011-1z"/></svg></a>
+        <a href="https://tiktok.com" target="_blank" rel="noopener" title="TikTok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3v10.5a3.5 3.5 0 11-3-3.46"/><path d="M15 3c.3 2.4 2 4.2 4 4.5"/></svg></a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="anoAtual"></span> Studio Íris Fotografia · projeto demonstrativo de portfólio</span>
+      <a href="#topo" class="back-to-top">Voltar ao topo ↑</a>
+    </div>
   </div>
 </footer>
 

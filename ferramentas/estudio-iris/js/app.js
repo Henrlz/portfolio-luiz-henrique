@@ -1,30 +1,30 @@
 (function () {
   "use strict";
 
-  const CAMERA_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7l1.5-3h5L16 7"/><circle cx="12" cy="13.5" r="3.2"/></svg>';
   const HEART_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.35-9.5-8.8C1 8 2.3 4.7 5.4 4.1c1.9-.4 3.8.5 4.9 2.1C11.4 4.6 13.3 3.7 15.2 4.1c3.1.6 4.4 3.9 2.9 7.1C15.6 15.65 12 20 12 20z"/></svg>';
   const HEART_ICON_FILLED = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.35-9.5-8.8C1 8 2.3 4.7 5.4 4.1c1.9-.4 3.8.5 4.9 2.1C11.4 4.6 13.3 3.7 15.2 4.1c3.1.6 4.4 3.9 2.9 7.1C15.6 15.65 12 20 12 20z"/></svg>';
+  const STAR_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l2.9 6.6 7.1.7-5.4 4.8 1.6 7-6.2-3.7L6 21.1l1.6-7L2.2 9.3l7.1-.7z"/></svg>';
 
   const PHOTOS = [
     { id: "p1", tone: "ph-1", category: "casamento", title: "Cerimônia ao pôr do sol", shape: "wide", caption: "Casamento de Marina & Diego — luz natural, fim de tarde." },
-    { id: "p2", tone: "ph-2", category: "ensaio", title: "Ensaio gestante", shape: "tall", caption: "Ensaio gestante em estúdio, luz suave." },
-    { id: "p3", tone: "ph-3", category: "corporativo", title: "Retrato executivo", shape: "", caption: "Retrato corporativo para equipe comercial." },
-    { id: "p4", tone: "ph-4", category: "evento", title: "Formatura de turma", shape: "", caption: "Cobertura de formatura — turno da noite." },
-    { id: "p5", tone: "ph-5", category: "casamento", title: "Making of da noiva", shape: "", caption: "Preparação da noiva, detalhes do vestido." },
-    { id: "p6", tone: "ph-6", category: "ensaio", title: "Ensaio de família", shape: "wide", caption: "Ensaio externo em família, luz da manhã." },
-    { id: "p7", tone: "ph-7", category: "corporativo", title: "Evento de lançamento", shape: "", caption: "Cobertura do lançamento de produto." },
-    { id: "p8", tone: "ph-8", category: "evento", title: "Aniversário de 15 anos", shape: "tall", caption: "Festa de debutante, salão de festas." },
+    { id: "p2", tone: "ph-2", category: "casal", title: "Ensaio de casal", shape: "tall", caption: "Ensaio de casal ao ar livre, luz da tarde." },
+    { id: "p3", tone: "ph-5", category: "corporativo", title: "Retrato executivo", shape: "", caption: "Retrato corporativo para equipe comercial." },
+    { id: "p4", tone: "ph-4", category: "15anos", title: "Festa de debutante", shape: "", caption: "Aniversário de 15 anos, salão de festas." },
+    { id: "p5", tone: "ph-1", category: "casamento", title: "Making of da noiva", shape: "", caption: "Preparação da noiva, detalhes do vestido." },
+    { id: "p6", tone: "ph-3", category: "infantil", title: "Festa infantil", shape: "wide", caption: "Aniversário infantil, tema safári." },
+    { id: "p7", tone: "ph-6", category: "corporativo", title: "Evento de lançamento", shape: "", caption: "Cobertura do lançamento de produto." },
+    { id: "p8", tone: "ph-6", category: "gestante", title: "Ensaio gestante", shape: "tall", caption: "Ensaio gestante em estúdio, luz suave." },
     { id: "p9", tone: "ph-1", category: "casamento", title: "Primeira dança", shape: "", caption: "Primeira dança dos noivos, festa." },
-    { id: "p10", tone: "ph-3", category: "ensaio", title: "Retrato individual", shape: "", caption: "Ensaio de retrato individual, luz de janela." },
-    { id: "p11", tone: "ph-5", category: "corporativo", title: "Reunião de equipe", shape: "", caption: "Registro de dia a dia da empresa." },
-    { id: "p12", tone: "ph-6", category: "evento", title: "Confraternização", shape: "", caption: "Confraternização de fim de ano da equipe." },
+    { id: "p10", tone: "ph-2", category: "casal", title: "Pôr do sol a dois", shape: "", caption: "Ensaio pré-wedding ao entardecer." },
+    { id: "p11", tone: "ph-3", category: "infantil", title: "Bolo e balões", shape: "", caption: "Detalhes de decoração da festa infantil." },
+    { id: "p12", tone: "ph-4", category: "15anos", title: "Valsa dos 15 anos", shape: "", caption: "Valsa de abertura da festa de debutante." },
   ];
 
   const TESTIMONIALS = [
-    { quote: "As fotos do nosso casamento contam a história do dia inteiro, não só os posados. Choramos vendo a galeria.", author: "Marina & Diego", role: "Casamento, 2025" },
-    { quote: "Fiz o ensaio gestante em um dia corrido e mesmo assim o resultado ficou natural, sem nenhuma pose forçada.", author: "Camila Souza", role: "Ensaio gestante, 2024" },
-    { quote: "Contratamos para os retratos da equipe toda e a entrega foi rápida, com um padrão visual muito consistente.", author: "Rafael Nogueira", role: "Retratos corporativos, 2025" },
-    { quote: "Indiquei o Studio Íris pra três amigas depois da minha formatura. Atendimento atencioso do início ao fim.", author: "Beatriz Lima", role: "Evento de formatura, 2024" },
+    { quote: "As fotos do nosso casamento contam a história do dia inteiro, não só os posados. Choramos vendo a galeria.", author: "Marina & Diego", role: "Casamento" },
+    { quote: "Fiz o ensaio gestante em um dia corrido e mesmo assim o resultado ficou natural, sem nenhuma pose forçada.", author: "Camila Souza", role: "Gestante" },
+    { quote: "Contratamos para os retratos da equipe toda e a entrega foi rápida, com um padrão visual muito consistente.", author: "Rafael Nogueira", role: "Corporativo" },
+    { quote: "A festa de 15 anos da minha filha ficou eternizada com um cuidado que a gente não esperava. Recomendo de olhos fechados.", author: "Andrea Nunes", role: "Aniversário de 15 Anos" },
   ];
 
   const FAV_KEY = "studio-iris-favoritos";
@@ -50,13 +50,7 @@
       favs.push(id);
     }
     setFavorites(favs);
-    renderFavCount();
     return favs.includes(id);
-  }
-
-  function renderFavCount() {
-    const el = document.getElementById("favCount");
-    if (el) el.textContent = String(getFavorites().length);
   }
 
   function photoNode(photo) {
@@ -70,29 +64,30 @@
       '<button class="fav-btn' + (isFav ? " is-active" : "") + '" data-fav="' + photo.id + '" title="Favoritar" type="button">' +
         (isFav ? HEART_ICON_FILLED : HEART_ICON) +
       '</button>' +
-      '<div class="ph ' + photo.tone + '">' + CAMERA_ICON + '<span>' + photo.title + '</span></div>';
+      '<div class="ph ' + photo.tone + '"></div>';
     return el;
   }
 
   let currentFilter = "todos";
   let showOnlyFavorites = false;
 
-  function renderGallery() {
-    const grid = document.getElementById("galleryGrid");
-    const empty = document.getElementById("galleryEmpty");
-    grid.innerHTML = "";
-
+  function visiblePhotos() {
     const favs = getFavorites();
-    let list = PHOTOS.filter(function (p) {
+    return PHOTOS.filter(function (p) {
       const matchesFilter = currentFilter === "todos" || p.category === currentFilter;
       const matchesFav = !showOnlyFavorites || favs.includes(p.id);
       return matchesFilter && matchesFav;
     });
+  }
 
+  function renderGallery() {
+    const grid = document.getElementById("galleryGrid");
+    const empty = document.getElementById("galleryEmpty");
+    grid.innerHTML = "";
+    const list = visiblePhotos();
     list.forEach(function (photo) {
       grid.appendChild(photoNode(photo));
     });
-
     empty.classList.toggle("is-visible", showOnlyFavorites && list.length === 0);
   }
 
@@ -102,26 +97,29 @@
     });
   }
 
+  function applyFilter(filter) {
+    currentFilter = filter;
+    showOnlyFavorites = false;
+    setActiveFilterButton(filter);
+    renderGallery();
+  }
+
   function initFilters() {
     document.getElementById("filters").addEventListener("click", function (e) {
       const btn = e.target.closest(".filter-btn");
       if (!btn) return;
-      currentFilter = btn.dataset.filter;
-      showOnlyFavorites = false;
-      setActiveFilterButton(currentFilter);
-      renderGallery();
+      applyFilter(btn.dataset.filter);
     });
   }
 
-  function initFavToggleNav() {
-    document.getElementById("favToggle").addEventListener("click", function () {
-      showOnlyFavorites = !showOnlyFavorites;
-      if (showOnlyFavorites) {
-        currentFilter = "todos";
-        setActiveFilterButton("");
-      }
-      document.getElementById("portfolio").scrollIntoView({ behavior: "smooth" });
-      renderGallery();
+  function initCategoryLinks() {
+    document.querySelectorAll("[data-filter-link]").forEach(function (el) {
+      el.addEventListener("click", function (e) {
+        e.preventDefault();
+        applyFilter(el.dataset.filterLink);
+        document.getElementById("portfolio").scrollIntoView({ behavior: "smooth" });
+        document.getElementById("navLinks").classList.remove("is-open");
+      });
     });
   }
 
@@ -143,17 +141,8 @@
   let lightboxList = [];
   let lightboxIndex = 0;
 
-  function currentVisiblePhotos() {
-    const favs = getFavorites();
-    return PHOTOS.filter(function (p) {
-      const matchesFilter = currentFilter === "todos" || p.category === currentFilter;
-      const matchesFav = !showOnlyFavorites || favs.includes(p.id);
-      return matchesFilter && matchesFav;
-    });
-  }
-
   function openLightbox(id) {
-    lightboxList = currentVisiblePhotos();
+    lightboxList = visiblePhotos();
     lightboxIndex = lightboxList.findIndex(function (p) { return p.id === id; });
     if (lightboxIndex < 0) lightboxIndex = 0;
     renderLightbox();
@@ -193,42 +182,18 @@
     });
   }
 
-  let testiIndex = 0;
-  let testiTimer = null;
-
   function renderTestimonials() {
-    const track = document.getElementById("testiTrack");
-    track.innerHTML = TESTIMONIALS.map(function (t, i) {
-      return '<div class="testi-card' + (i === testiIndex ? " is-active" : "") + '">' +
+    const grid = document.getElementById("testiGrid");
+    grid.innerHTML = TESTIMONIALS.map(function (t) {
+      return '<div class="testi-card">' +
+        '<div class="testi-stars">' + STAR_ICON.repeat(5) + '</div>' +
         '<p class="testi-quote">“' + t.quote + '”</p>' +
-        '<p class="testi-author">' + t.author + '</p>' +
-        '<p class="testi-role">' + t.role + '</p>' +
-        '</div>';
-    }).join("") +
-      '<div class="testi-dots">' + TESTIMONIALS.map(function (_, i) {
-        return '<button data-dot="' + i + '" class="' + (i === testiIndex ? "is-active" : "") + '"></button>';
-      }).join("") + '</div>';
-  }
-
-  function goToTestimonial(i) {
-    testiIndex = (i + TESTIMONIALS.length) % TESTIMONIALS.length;
-    renderTestimonials();
-  }
-
-  function initTestimonials() {
-    renderTestimonials();
-    document.getElementById("testiTrack").addEventListener("click", function (e) {
-      const dot = e.target.closest("[data-dot]");
-      if (!dot) return;
-      goToTestimonial(Number(dot.dataset.dot));
-      resetTestiTimer();
-    });
-    resetTestiTimer();
-  }
-
-  function resetTestiTimer() {
-    clearInterval(testiTimer);
-    testiTimer = setInterval(function () { goToTestimonial(testiIndex + 1); }, 6000);
+        '<div class="testi-foot">' +
+          '<span class="testi-author">' + t.author + '</span>' +
+          '<span class="testi-role">' + t.role + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join("");
   }
 
   function initHeaderScroll() {
@@ -243,11 +208,24 @@
   function initMobileNav() {
     const toggle = document.getElementById("navToggle");
     const links = document.getElementById("navLinks");
+    const dropdownItem = document.getElementById("dropdownItem");
+    const dropdownTrigger = document.getElementById("dropdownTrigger");
+
     toggle.addEventListener("click", function () {
       links.classList.toggle("is-open");
     });
+
+    dropdownTrigger.addEventListener("click", function (e) {
+      if (window.innerWidth > 720) return;
+      e.preventDefault();
+      dropdownItem.classList.toggle("is-open");
+    });
+
     links.addEventListener("click", function (e) {
-      if (e.target.tagName === "A") links.classList.remove("is-open");
+      const link = e.target.closest("a");
+      if (!link) return;
+      if (link === dropdownTrigger || link.closest(".dropdown")) return;
+      links.classList.remove("is-open");
     });
   }
 
@@ -278,13 +256,12 @@
 
   document.getElementById("anoAtual").textContent = new Date().getFullYear();
 
-  renderFavCount();
   renderGallery();
+  renderTestimonials();
   initFilters();
-  initFavToggleNav();
+  initCategoryLinks();
   initGalleryClicks();
   initLightbox();
-  initTestimonials();
   initHeaderScroll();
   initMobileNav();
   initContactForm();
