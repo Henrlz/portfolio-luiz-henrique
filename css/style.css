@@ -705,6 +705,211 @@ section {
   transform: translateY(0);
 }
 
+/* Lamp backdrop — seção Projetos ------------------------------------------
+   Porte em CSS puro do efeito "lamp" (originalmente React + Tailwind +
+   framer-motion). Os cones são conic-gradients cujas bordas são apagadas por
+   retângulos da própria cor de fundo com mask-image — mesma técnica do
+   original, que funciona em qualquer navegador com mask.
+
+   A seção vira uma faixa escura própria: os tokens redefinidos abaixo fazem
+   títulos, cards, chips e links seguirem o tema escuro aqui dentro,
+   independente do tema global do site, sem precisar de regra nova pra cada
+   elemento. */
+.section.alt.has-lamp {
+  --lamp-bg: #0d1117;
+  --lamp: #a371f7;
+  --lamp-hot: #c297ff;
+
+  --bg: #0d1117;
+  --bg-alt: #161b22;
+  --fg: #e6edf3;
+  --muted: #8b949e;
+  --border: #30363d;
+  --accent: #a371f7;
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--lamp-bg);
+  color: var(--fg);
+  /* Espaço extra no topo: a luz acende acima do título, como no original,
+     em vez de esbarrar no menu fixo. */
+  padding-top: 190px;
+}
+
+.has-lamp > .container {
+  position: relative;
+  z-index: 1;
+}
+
+.lamp {
+  position: absolute;
+  /* Desce o filamento o suficiente pra ele não ficar atrás do menu fixo. */
+  top: 40px;
+  left: 0;
+  width: 100%;
+  height: 340px;
+  z-index: 0;
+  pointer-events: none;
+  transform: scaleY(1.25);
+  transform-origin: top center;
+}
+
+.lamp > * {
+  position: absolute;
+}
+
+/* Cones de luz */
+.lamp-cone {
+  top: 50%;
+  height: 14rem;
+  width: 15rem;
+  opacity: 0.5;
+  transform: translateY(-50%);
+  transition: width 0.8s ease-in-out 0.3s, opacity 0.8s ease-in-out 0.3s;
+}
+
+.lamp-cone-left {
+  right: 50%;
+  background-image: conic-gradient(from 70deg at center top, var(--lamp), transparent 50%, transparent);
+}
+
+.lamp-cone-right {
+  left: 50%;
+  background-image: conic-gradient(from 290deg at center top, transparent, transparent 50%, var(--lamp));
+}
+
+.lamp.is-visible .lamp-cone {
+  width: 30rem;
+  opacity: 1;
+}
+
+/* Apaga as bordas dos cones contra o fundo */
+.lamp-cone span {
+  position: absolute;
+  bottom: 0;
+  background: var(--lamp-bg);
+}
+
+.lamp-fade-bottom {
+  left: 0;
+  width: 100%;
+  height: 10rem;
+  -webkit-mask-image: linear-gradient(to top, #000, transparent);
+  mask-image: linear-gradient(to top, #000, transparent);
+}
+
+.lamp-fade-left {
+  left: 0;
+  width: 10rem;
+  height: 100%;
+  -webkit-mask-image: linear-gradient(to right, #000, transparent);
+  mask-image: linear-gradient(to right, #000, transparent);
+}
+
+.lamp-fade-right {
+  right: 0;
+  width: 10rem;
+  height: 100%;
+  -webkit-mask-image: linear-gradient(to left, #000, transparent);
+  mask-image: linear-gradient(to left, #000, transparent);
+}
+
+/* Névoa que corta a base da luz */
+.lamp-haze {
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 12rem;
+  background: var(--lamp-bg);
+  filter: blur(40px);
+  transform: translateY(3rem) scaleX(1.5);
+}
+
+/* Halo largo */
+.lamp-glow {
+  top: 50%;
+  left: 50%;
+  width: 28rem;
+  height: 9rem;
+  border-radius: 999px;
+  background: var(--lamp);
+  opacity: 0.5;
+  filter: blur(64px);
+  transform: translate(-50%, -100%);
+}
+
+/* Núcleo quente logo acima da linha */
+.lamp-core {
+  top: 50%;
+  left: 50%;
+  width: 8rem;
+  height: 9rem;
+  border-radius: 999px;
+  background: var(--lamp-hot);
+  filter: blur(40px);
+  transform: translate(-50%, calc(-50% - 6rem));
+  transition: width 0.8s ease-in-out 0.3s;
+}
+
+.lamp.is-visible .lamp-core {
+  width: 16rem;
+}
+
+/* Filamento */
+.lamp-line {
+  top: 50%;
+  left: 50%;
+  width: 15rem;
+  height: 2px;
+  background: var(--lamp-hot);
+  transform: translate(-50%, calc(-50% - 7rem));
+  transition: width 0.8s ease-in-out 0.3s;
+}
+
+.lamp.is-visible .lamp-line {
+  width: 30rem;
+}
+
+/* Tampa: esconde tudo que passa acima do filamento */
+.lamp-cap {
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 11rem;
+  background: var(--lamp-bg);
+  transform: translate(-50%, calc(-50% - 12.5rem));
+}
+
+/* No celular a luz é estreitada e suavizada — na largura menor o mesmo brilho
+   lava o texto do cabeçalho. A composição vertical é mantida. */
+@media (max-width: 700px) {
+  .section.alt.has-lamp {
+    padding-top: 170px;
+  }
+  .lamp.is-visible .lamp-cone {
+    width: 20rem;
+  }
+  .lamp.is-visible .lamp-line {
+    width: 18rem;
+  }
+  .lamp.is-visible .lamp-core {
+    width: 10rem;
+  }
+  .lamp-glow {
+    width: 18rem;
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lamp-cone,
+  .lamp-core,
+  .lamp-line {
+    transition: none;
+  }
+}
+
 /* Responsive */
 @media (max-width: 800px) {
   .nav {
