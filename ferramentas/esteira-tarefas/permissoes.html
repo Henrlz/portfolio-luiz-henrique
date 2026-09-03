@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Permissões da Esteira — Demo</title>
+<meta name="robots" content="noindex" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" href="../../index.html#projetos">← Portfólio</a>
+    <div>
+      <h1>Permissões da Esteira</h1>
+      <p>Só quem é nível Desenvolvedor acessa esta tela</p>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <label class="role-switch">
+      <span>Ver como</span>
+      <select id="seletorNivel"></select>
+    </label>
+    <a class="btn btn-outline" href="index.html">← Voltar para as tarefas</a>
+  </div>
+</header>
+
+<div id="avisoRestrito" class="restricted-banner" hidden>
+  <span>Você está vendo como um nível sem acesso a esta tela. Em produção, isso devolveria "403 — só o nível Desenvolvedor administra os acessos da esteira".</span>
+  <button id="btnVerComoDev" class="link-button" style="color:#92251f;font-weight:700;background:none;border:none;text-decoration:underline;cursor:pointer;">Ver como Desenvolvedor</button>
+</div>
+
+<main class="container">
+  <section class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:0.6rem;">
+      <h2 style="margin:0;">Nível de cada usuário</h2>
+      <input type="text" id="buscaUsuario" placeholder="Pesquisar por nome ou e-mail" style="border:1px solid var(--border);border-radius:8px;padding:0.5rem 0.7rem;min-width:260px;" />
+    </div>
+    <p class="empty-note" id="contagemUsuarios" style="margin-bottom:0.6rem;"></p>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>Usuário</th><th>E-mail</th><th>Nível</th><th style="text-align:center">Avisar por e-mail ao criar tarefa</th></tr></thead>
+        <tbody id="corpoUsuarios"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;">
+      <h2 style="margin:0;">O que cada nível pode fazer</h2>
+      <button id="btnSalvarMatriz" class="btn btn-primary">Salvar</button>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table matrix-table">
+        <thead><tr id="cabecalhoMatriz"><th>Nível</th></tr></thead>
+        <tbody id="corpoMatriz"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script src="js/common.js"></script>
+<script src="js/permissoes.js"></script>
+</body>
+</html>

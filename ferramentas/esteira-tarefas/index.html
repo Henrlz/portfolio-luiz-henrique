@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Esteira de Tarefas — Demo</title>
+<meta name="robots" content="noindex" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" href="../../index.html#projetos">← Portfólio</a>
+    <div>
+      <h1>Task Management</h1>
+      <p>Esteira de aprovação de tarefas internas, por nível de acesso</p>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <label class="role-switch">
+      <span>Ver como</span>
+      <select id="seletorNivel"></select>
+    </label>
+    <button id="btnExcluidas" class="btn btn-outline">Tarefas excluídas</button>
+    <a id="btnPermissoes" class="btn btn-outline" href="permissoes.html" hidden>Permissões</a>
+    <button id="btnNovaTarefa" class="btn btn-primary" hidden>+ Nova tarefa</button>
+  </div>
+</header>
+
+<div class="demo-banner">
+  <span>Demonstração interativa com dados fictícios — recorte anonimizado de uma automação real (Django Ninja + Next.js). Troque o nível em "Ver como" para ver os botões e permissões mudarem.</span>
+
+  <button id="btnResetDemo" class="link-button">Restaurar dados de demonstração</button>
+</div>
+
+<main class="container">
+  <section class="card">
+    <h2>Visão geral</h2>
+    <div class="stats-grid">
+      <div class="stat-tile tone-primary"><span class="stat-value" id="statTotal">0</span><span class="stat-label">Total de tarefas</span></div>
+      <div class="stat-tile tone-warning"><span class="stat-value" id="statSemResponsavel">0</span><span class="stat-label">Sem responsável</span></div>
+      <div class="stat-tile tone-error"><span class="stat-value" id="statAtrasadas">0</span><span class="stat-label">Em atraso</span></div>
+      <div class="stat-tile tone-success"><span class="stat-value" id="statFinalizadas">0</span><span class="stat-label">Finalizadas</span></div>
+    </div>
+    <div class="bar-chart" id="barChart"></div>
+  </section>
+
+  <section class="card">
+    <div class="filters">
+      <input type="text" id="filtroBusca" placeholder="Buscar por título, cliente ou responsável..." />
+      <select id="filtroPrioridade">
+        <option value="">Todas as prioridades</option>
+        <option value="BAIXA">Baixa</option>
+        <option value="MEDIA">Média</option>
+        <option value="ALTA">Alta</option>
+      </select>
+      <label><input type="checkbox" id="filtroVencidas" /> Somente vencidas</label>
+      <button id="btnLimparFiltros" class="btn btn-text" hidden>Limpar filtros</button>
+    </div>
+    <div class="board" id="board"></div>
+  </section>
+</main>
+
+<div class="modal-overlay" id="modalCriar" hidden>
+  <div class="modal">
+    <div class="modal-head"><h3>Nova tarefa</h3><button class="modal-close" data-close="modalCriar">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Título</label><input type="text" id="campoTitulo" /></div>
+      <div class="field"><label>Cliente (opcional)</label><input type="text" id="campoCliente" placeholder="Nome do cliente" /></div>
+      <div class="field"><label>Descrição</label><textarea id="campoDescricao" rows="3"></textarea></div>
+      <div class="field"><label>Observações</label><textarea id="campoObservacoes" rows="2"></textarea></div>
+      <div class="field-row">
+        <div class="field"><label>Prazo</label><input type="date" id="campoPrazo" /></div>
+        <div class="field">
+          <label>Prioridade</label>
+          <select id="campoPrioridade">
+            <option value="BAIXA">Baixa</option>
+            <option value="MEDIA" selected>Média</option>
+            <option value="ALTA">Alta</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Sugerir responsável (opcional)</label>
+        <select id="campoResponsavelSugerido"><option value="">Nenhum</option></select>
+      </div>
+      <div class="field">
+        <label>Anexos</label>
+        <input type="file" id="campoAnexos" multiple />
+      </div>
+      <div class="field">
+        <label>Checklist (opcional)</label>
+        <div id="listaChecklistCriacao"></div>
+        <div class="checklist-add-row">
+          <input type="text" id="campoNovoItemChecklist" placeholder="Adicionar item ao checklist..." />
+          <button type="button" id="btnAddItemChecklistCriacao" class="btn btn-outline">Adicionar</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" data-close="modalCriar">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmarCriar">Criar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalDetalhe" hidden>
+  <div class="modal modal-wide" style="max-height: 82vh;">
+    <div class="modal-head"><h3 id="detalheTitulo">Detalhes da tarefa</h3><button class="modal-close" data-close="modalDetalhe">×</button></div>
+    <div class="detail-layout" style="overflow: hidden; flex: 1;">
+      <div class="detail-main" id="detalheMain"></div>
+      <div class="detail-chat">
+        <div class="detail-chat-head">
+          <h4>Chat da tarefa</h4>
+          <p>Histórico de movimentações e ocorrências, em ordem cronológica.</p>
+        </div>
+        <div class="detail-chat-feed" id="detalheFeed"></div>
+        <div class="detail-chat-input" id="detalheInputComentario"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalReprovar" hidden>
+  <div class="modal">
+    <div class="modal-head"><h3>Reprovar tarefa</h3><button class="modal-close" data-close="modalReprovar">×</button></div>
+    <div class="modal-body">
+      <p class="empty-note">Explique o motivo — a tarefa volta para "Executando" e o motivo fica registrado no histórico.</p>
+      <div class="field"><label>Motivo da reprovação</label><textarea id="campoMotivoReprovacao" rows="3"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" data-close="modalReprovar">Cancelar</button>
+      <button class="btn btn-danger-outline" id="btnConfirmarReprovar">Reprovar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalExcluidas" hidden>
+  <div class="modal modal-wide">
+    <div class="modal-head"><h3>Tarefas excluídas</h3><button class="modal-close" data-close="modalExcluidas">×</button></div>
+    <div class="modal-body">
+      <p class="empty-note">A tarefa em si já foi removida — esta lista vem do log de auditoria, que sobrevive à exclusão. Não é possível restaurar por aqui.</p>
+      <div id="conteudoExcluidas"></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/common.js"></script>
+<script src="js/kanban.js"></script>
+</body>
+</html>
