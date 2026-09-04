@@ -148,17 +148,29 @@
 
   document.getElementById('year').textContent = new Date().getFullYear();
 
-  var roles = [
+  var FALLBACK_ROLES = [
     'Desenvolvedor Web',
     'Inteligência Artificial',
     'Web Design',
     'Automação de Processos',
     'Desenvolvedor de Sistemas'
   ];
+  var roles = (window.I18N && window.I18N.roles()) || FALLBACK_ROLES;
   var typewriterEl = document.getElementById('typewriter');
   var roleIndex = 0;
   var charIndex = 0;
   var deleting = false;
+
+  // Ao trocar de idioma, recomeça a digitação com a lista traduzida.
+  document.addEventListener('i18n:changed', function () {
+    roles = (window.I18N && window.I18N.roles()) || FALLBACK_ROLES;
+    roleIndex = 0;
+    charIndex = 0;
+    deleting = false;
+    // Limpa na hora: sem isso a palavra do idioma anterior fica na tela até o
+    // próximo tick, que pode demorar a pausa inteira de 1,5s.
+    typewriterEl.textContent = '';
+  });
 
   function typeLoop() {
     var current = roles[roleIndex];
