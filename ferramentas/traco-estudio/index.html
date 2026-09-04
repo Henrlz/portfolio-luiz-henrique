@@ -13,6 +13,35 @@
 </head>
 <body>
 
+<div class="carregando" id="carregando" role="status" aria-live="polite" aria-label="Carregando">
+  <div class="cena">
+    <svg class="cena-linha" viewBox="0 0 240 80" fill="none" aria-hidden="true">
+      <path class="guia" d="M22 54 C 58 22, 92 74, 126 44 S 196 30, 218 50"/>
+      <!-- pathLength=1 normaliza o comprimento: assim a fração desenhada é
+           exatamente a fração da animação, batendo com o offset-distance da
+           máquina, que também anda por comprimento de arco. -->
+      <path class="tinta-linha" pathLength="1" d="M22 54 C 58 22, 92 74, 126 44 S 196 30, 218 50"/>
+    </svg>
+    <span class="cena-maq" aria-hidden="true">
+      <span class="buzz">
+        <svg viewBox="0 0 120 172" fill="none" stroke="currentColor" stroke-width="7"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M26 28 H84"/>
+          <path d="M84 28 L95 43"/>
+          <rect x="29" y="43" width="22" height="35" rx="4" fill="currentColor" stroke="none"/>
+          <rect x="61" y="43" width="22" height="35" rx="4" fill="currentColor" stroke="none"/>
+          <path d="M26 84 H86 L76 104 H36 Z" fill="currentColor" stroke="none"/>
+          <rect x="49" y="104" width="22" height="40" rx="7"/>
+          <path d="M54 144 L60 157 L66 144 Z" fill="currentColor" stroke="none"/>
+          <path d="M60 157 V170" stroke-width="4"/>
+        </svg>
+      </span>
+    </span>
+  </div>
+  <p class="cena-txt">tatuando<span>.</span><span>.</span><span>.</span></p>
+</div>
+<noscript><style>.carregando { display: none !important; }</style></noscript>
+
 <a class="skip" href="#flash">Pular para o flash</a>
 
 <span class="crop crop-tl" aria-hidden="true"></span>

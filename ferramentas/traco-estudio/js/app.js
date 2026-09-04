@@ -3,6 +3,17 @@
 
   var reduzido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  /* ---------------- carregando ---------------- */
+  var carregando = document.getElementById('carregando');
+  if (carregando) {
+    var esconder = function () { carregando.classList.add('sumiu'); };
+    if (document.readyState === 'complete') esconder();
+    else window.addEventListener('load', esconder);
+    // Se algum recurso travar o load, a página não pode ficar presa atrás
+    // do overlay.
+    setTimeout(esconder, 6000);
+  }
+
   /* ---------------- folha de flash ---------------- */
   var PECAS = [
     { cat: 'tradicional', nome: 'Andorinha', nota: 'peito · 3 h' },
