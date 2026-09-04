@@ -3,230 +3,234 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Traço — estúdio de tatuagem</title>
-<meta name="description" content="Traço é um estúdio de tatuagem autoral: fineline, blackwork, realismo e lettering. Agende uma conversa.">
+<title>TRAÇO — tatuagem · Campinas</title>
+<meta name="description" content="Traço: estúdio de tatuagem em Campinas. Tradicional, blackwork, fineline e lettering. Uma cadeira, uma tatuagem por dia.">
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<a class="skip" href="#trabalhos">Pular para os trabalhos</a>
+<a class="skip" href="#flash">Pular para o flash</a>
 
-<header class="topbar" id="topbar">
-  <a class="brand" href="#topo">
-    <span class="brand-mark" aria-hidden="true"></span>
-    Traço
-  </a>
+<span class="crop crop-tl" aria-hidden="true"></span>
+<span class="crop crop-tr" aria-hidden="true"></span>
+<span class="crop crop-bl" aria-hidden="true"></span>
+<span class="crop crop-br" aria-hidden="true"></span>
 
-  <nav class="menu" id="menu" aria-label="Principal">
-    <a href="#trabalhos">Trabalhos</a>
-    <a href="#estudio">Estúdio</a>
-    <a href="#processo">Como funciona</a>
-    <a href="#duvidas">Dúvidas</a>
+<header class="bar" id="bar">
+  <a class="brand" href="#topo">TRAÇO<span class="brand-sub">est. 2017</span></a>
+
+  <nav class="nav" id="nav" aria-label="Principal">
+    <a href="#flash">flash</a>
+    <a href="#casa">a casa</a>
+    <a href="#perguntas">perguntas</a>
+    <a href="#marcar">marcar</a>
   </nav>
 
-  <div class="topbar-end">
-    <a class="cta" href="#contato">Agendar</a>
-    <button class="burger" id="burger" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu">
-      <span></span><span></span>
-    </button>
-  </div>
+  <button class="burger" id="burger" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav">
+    <span></span><span></span><span></span>
+  </button>
 </header>
 
 <main>
 
   <section class="hero" id="topo">
-    <div class="hero-copy">
-      <p class="kicker">estúdio de tatuagem · campinas</p>
-      <h1>A pele guarda<br><em>o que a pressa</em><br>não escreve.</h1>
-      <p class="lead">
-        Trabalho autoral em fineline, blackwork e realismo. Uma tatuagem por dia,
-        sem fila, sem pressa — o tempo que o desenho pedir.
+    <div class="hero-type">
+      <span class="overline">Campinas · SP — agulha 9RL, tinta preta</span>
+      <h1>
+        <span class="l1">TATUAGEM</span>
+        <span class="l2">TRADICIONAL</span>
+        <span class="l3">&amp; FINELINE</span>
+      </h1>
+      <p class="hero-lead">
+        Uma cadeira. Uma tatuagem por dia. Sem catálogo pronto,
+        sem “passa aí que a gente vê”.
       </p>
-      <div class="hero-actions">
-        <a class="btn" href="#contato">Começar uma conversa</a>
-        <a class="btn btn-quiet" href="#trabalhos">Ver trabalhos</a>
+      <div class="hero-links">
+        <a class="lnk" href="#marcar">[ marcar horário ]</a>
+        <a class="lnk" href="#flash">[ ver o flash ]</a>
       </div>
     </div>
 
-    <figure class="hero-art">
-      <div class="ph ph-tall" data-ph="sua foto"></div>
-      <figcaption>Fineline · braço fechado em três sessões</figcaption>
-    </figure>
-
-    <a class="scroll-cue" href="#trabalhos" aria-label="Rolar para os trabalhos">
-      <span></span>
-    </a>
+    <div class="hero-art">
+      <div class="taped rot-r">
+        <div class="ph" data-ph="sua foto"><span class="ph-num">#00</span></div>
+      </div>
+      <span class="stamp">sem pressa</span>
+    </div>
   </section>
 
-  <section class="block" id="trabalhos">
-    <div class="block-head">
-      <h2>Trabalhos</h2>
-      <p>Um recorte do que saiu do estúdio nos últimos meses.</p>
+  <div class="rule" aria-hidden="true">
+    <span>TRAÇO</span><span>·</span><span>TATUAGEM</span><span>·</span><span>CAMPINAS</span><span>·</span><span>TRAÇO</span><span>·</span><span>TATUAGEM</span><span>·</span><span>CAMPINAS</span>
+  </div>
+
+  <section class="sheet" id="flash">
+    <div class="sheet-head">
+      <h2>FLASH<span class="sheet-no">folha 04</span></h2>
+      <p>Desenhos disponíveis e trabalhos fechados. Cada um sai uma vez só — quem levar, leva sozinho.</p>
     </div>
 
-    <div class="filters" role="tablist" aria-label="Filtrar trabalhos">
-      <button class="filter is-active" role="tab" aria-selected="true" data-filter="todos">Todos</button>
-      <button class="filter" role="tab" aria-selected="false" data-filter="fineline">Fineline</button>
-      <button class="filter" role="tab" aria-selected="false" data-filter="blackwork">Blackwork</button>
-      <button class="filter" role="tab" aria-selected="false" data-filter="realismo">Realismo</button>
-      <button class="filter" role="tab" aria-selected="false" data-filter="lettering">Lettering</button>
+    <div class="picks" role="tablist" aria-label="Filtrar">
+      <button class="pick is-on" role="tab" aria-selected="true" data-filter="todos">todos</button>
+      <button class="pick" role="tab" aria-selected="false" data-filter="tradicional">tradicional</button>
+      <button class="pick" role="tab" aria-selected="false" data-filter="blackwork">blackwork</button>
+      <button class="pick" role="tab" aria-selected="false" data-filter="fineline">fineline</button>
+      <button class="pick" role="tab" aria-selected="false" data-filter="lettering">lettering</button>
     </div>
 
-    <div class="gallery" id="gallery"></div>
-    <p class="gallery-empty" id="galleryEmpty" hidden>Nada por aqui ainda nessa categoria.</p>
+    <div class="grid" id="grid"></div>
+    <p class="vazio" id="vazio" hidden>Nada nessa categoria por enquanto.</p>
   </section>
 
-  <section class="block block-split" id="estudio">
-    <figure class="split-art">
-      <div class="ph ph-wide" data-ph="sua foto"></div>
-    </figure>
-    <div class="split-copy">
-      <h2>O estúdio</h2>
+  <section class="casa" id="casa">
+    <div class="casa-art">
+      <div class="taped rot-l">
+        <div class="ph ph-wide" data-ph="sua foto"><span class="ph-num">#00</span></div>
+      </div>
+    </div>
+
+    <div class="casa-copy">
+      <h2>A CASA</h2>
       <p>
-        Uma sala só, luz natural e uma cadeira. Atendo com hora marcada porque
-        acredito que tatuagem não combina com sala de espera cheia.
+        Sala única, luz de janela, uma cadeira só. Atendo com hora marcada
+        porque sala de espera cheia não combina com agulha.
       </p>
-      <p>
-        Todo material é descartável e aberto na sua frente. O desenho é feito
-        pra você e não se repete em outra pele.
-      </p>
-      <dl class="facts">
-        <div><dt>Desde</dt><dd>2017</dd></div>
-        <div><dt>Sessões</dt><dd>1 por dia</dd></div>
-        <div><dt>Retoque</dt><dd>incluso em 90 dias</dd></div>
-      </dl>
-    </div>
-  </section>
 
-  <section class="block" id="processo">
-    <div class="block-head">
-      <h2>Como funciona</h2>
-      <p>Do primeiro “oi” até o retoque, são quatro passos.</p>
-    </div>
-
-    <ol class="steps">
-      <li>
-        <span class="step-n">01</span>
-        <div>
-          <h3>Conversa</h3>
-          <p>Você manda a ideia, a região do corpo e um tamanho aproximado. Respondo com uma faixa de valor e as datas livres.</p>
-        </div>
-      </li>
-      <li>
-        <span class="step-n">02</span>
-        <div>
-          <h3>Desenho</h3>
-          <p>Faço o estudo depois do sinal. Ajusto quantas vezes precisar antes do dia — no dia, não.</p>
-        </div>
-      </li>
-      <li>
-        <span class="step-n">03</span>
-        <div>
-          <h3>Sessão</h3>
-          <p>Chega alimentado e sem ressaca. Pausas quando quiser. Sessões longas passam de seis horas raramente.</p>
-        </div>
-      </li>
-      <li>
-        <span class="step-n">04</span>
-        <div>
-          <h3>Cicatrização</h3>
-          <p>Sai daqui com o cuidado escrito. Em 90 dias a gente se vê pro retoque, se ele fizer falta.</p>
-        </div>
-      </li>
-    </ol>
-  </section>
-
-  <section class="block" id="duvidas">
-    <div class="block-head">
-      <h2>Dúvidas</h2>
-      <p>O que mais me perguntam antes de marcar.</p>
-    </div>
-
-    <div class="faq" id="faq">
-      <details>
-        <summary>Quanto custa?</summary>
-        <p>Depende do tamanho, da região e do tempo de desenho. Peças pequenas começam em R$ 350; braço fechado é orçado por sessão. Mando a faixa exata na primeira resposta.</p>
-      </details>
-      <details>
-        <summary>Preciso pagar sinal?</summary>
-        <p>Sim, 30% pra reservar a data e cobrir o estudo do desenho. O valor entra no total. Remarcando com mais de 72h de antecedência, o sinal segue válido.</p>
-      </details>
-      <details>
-        <summary>Faço em qualquer região do corpo?</summary>
-        <p>Quase todas. Não tatuo rosto, pescoço e mãos em quem não tem outras tatuagens — é uma decisão que costuma pesar depois.</p>
-      </details>
-      <details>
-        <summary>Cobre uma tatuagem antiga?</summary>
-        <p>Faço cobertura, sim. Manda foto com boa luz e sem filtro que eu digo se dá pra cobrir ou se vale clarear antes a laser.</p>
-      </details>
-      <details>
-        <summary>Menor de idade?</summary>
-        <p>Só a partir dos 18. Sem exceção, mesmo acompanhado.</p>
-      </details>
-    </div>
-  </section>
-
-  <section class="block block-contact" id="contato">
-    <div class="contact-copy">
-      <h2>Vamos<br><em>desenhar</em><br>isso?</h2>
-      <p>
-        Preencha e o WhatsApp abre com a mensagem pronta. Se preferir,
-        <a href="mailto:Luizhepe04@outlook.com">escreva um e-mail</a>.
-      </p>
-      <ul class="contact-direct">
-        <li><a href="https://wa.me/5519982449452" target="_blank" rel="noopener">(19) 98244-9452</a></li>
-        <li><a href="mailto:Luizhepe04@outlook.com">Luizhepe04@outlook.com</a></li>
+      <p class="regras-titulo">REGRAS DA CASA</p>
+      <ul class="regras">
+        <li>Material descartável, aberto na sua frente.</li>
+        <li>Sinal de 30% reserva a data e paga o desenho.</li>
+        <li>O desenho fica pronto antes do dia. No dia, não se muda.</li>
+        <li>Chega alimentado e sem ressaca — pele bêbada sangra.</li>
+        <li>Retoque em 90 dias, por conta da casa.</li>
+        <li>18 anos. Sem exceção, nem acompanhado.</li>
       </ul>
     </div>
+  </section>
 
-    <form class="form" id="form" novalidate>
-      <div class="field">
-        <label for="nome">Seu nome</label>
+  <section class="viva" id="numeros">
+    <div class="viva-rail" id="vivaRail">
+      <div class="trilho"><span class="tinta" id="tinta"></span></div>
+      <div class="maq" id="maq">
+        <svg viewBox="0 0 120 172" fill="none" stroke="currentColor" stroke-width="5"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M26 28 H84"/>
+          <path d="M84 28 L95 43"/>
+          <rect x="29" y="43" width="22" height="35" rx="4" fill="currentColor" stroke="none"/>
+          <rect x="61" y="43" width="22" height="35" rx="4" fill="currentColor" stroke="none"/>
+          <path d="M26 43 H54 M58 43 H86"/>
+          <path d="M26 84 H86 L76 104 H36 Z" fill="currentColor" stroke="none"/>
+          <rect x="49" y="104" width="22" height="40" rx="7"/>
+          <path d="M49 118 H71 M49 131 H71"/>
+          <path d="M54 144 L60 157 L66 144 Z" fill="currentColor" stroke="none"/>
+          <path d="M60 157 V170" stroke-width="3"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="viva-dados">
+      <h2>A CASA<span class="viva-sub">em números</span></h2>
+      <p class="viva-intro">Role — a agulha vai passando e puxando os dados.</p>
+
+      <ol class="dados" id="dados">
+        <li class="dado"><span class="dado-n">2017</span><span class="dado-t">ano em que a cadeira abriu</span></li>
+        <li class="dado"><span class="dado-n">1</span><span class="dado-t">tatuagem por dia, sem fila</span></li>
+        <li class="dado"><span class="dado-n">9RL</span><span class="dado-t">agulha padrão da casa</span></li>
+        <li class="dado"><span class="dado-n">R$ 350</span><span class="dado-t">de onde parte uma peça pequena</span></li>
+        <li class="dado"><span class="dado-n">72 h</span><span class="dado-t">para remarcar sem perder o sinal</span></li>
+        <li class="dado"><span class="dado-n">90 dias</span><span class="dado-t">de retoque por conta da casa</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="faq" id="perguntas">
+    <h2>PERGUNTAS<span class="faq-sub">que chegam toda semana</span></h2>
+
+    <div class="qa">
+      <details>
+        <summary>Quanto sai?</summary>
+        <p>Peça pequena começa em R$ 350. Braço fechado é orçado por sessão. Manda a ideia que eu devolvo a faixa exata — não trabalho com tabela fixa porque tamanho e região mudam tudo.</p>
+      </details>
+      <details>
+        <summary>Cobre tatuagem antiga?</summary>
+        <p>Cubro. Manda foto com luz do dia e sem filtro. Se não der pra cobrir direito, eu falo — às vezes vale clarear no laser antes em vez de empilhar tinta.</p>
+      </details>
+      <details>
+        <summary>Faz em qualquer lugar do corpo?</summary>
+        <p>Quase. Rosto, pescoço e mão só em quem já tem outras. Não é frescura: é a parte que você não esconde numa entrevista de emprego.</p>
+      </details>
+      <details>
+        <summary>Posso levar acompanhante?</summary>
+        <p>Uma pessoa, se a sessão for longa. Mais que isso vira plateia e atrapalha.</p>
+      </details>
+      <details>
+        <summary>E se eu precisar remarcar?</summary>
+        <p>Com mais de 72 h de antecedência o sinal continua valendo. Abaixo disso o desenho já foi feito e o dia já foi bloqueado.</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="marcar" id="marcar">
+    <div class="marcar-copy">
+      <h2>MARCAR</h2>
+      <p>
+        Preenche que o WhatsApp abre com tudo escrito. Prefere e-mail?
+        <a href="mailto:Luizhepe04@outlook.com">Luizhepe04@outlook.com</a>
+      </p>
+      <p class="direto">
+        <a href="https://wa.me/5519982449452" target="_blank" rel="noopener">(19) 98244-9452</a>
+      </p>
+      <span class="stamp stamp-red">responde em 24 h</span>
+    </div>
+
+    <form class="ficha" id="ficha" novalidate>
+      <p class="ficha-titulo">FICHA DE ORÇAMENTO</p>
+
+      <div class="linha">
+        <label for="nome">nome</label>
         <input id="nome" name="nome" type="text" autocomplete="name" required>
       </div>
-      <div class="field">
-        <label for="ideia">A ideia</label>
-        <textarea id="ideia" name="ideia" rows="3" placeholder="O que você quer tatuar" required></textarea>
+      <div class="linha">
+        <label for="ideia">o que quer tatuar</label>
+        <textarea id="ideia" name="ideia" rows="2" required></textarea>
       </div>
-      <div class="field-row">
-        <div class="field">
-          <label for="regiao">Região do corpo</label>
-          <input id="regiao" name="regiao" type="text" placeholder="antebraço, costela..." required>
-        </div>
-        <div class="field">
-          <label for="tamanho">Tamanho aprox.</label>
-          <input id="tamanho" name="tamanho" type="text" placeholder="10 cm" required>
-        </div>
+      <div class="linha">
+        <label for="regiao">onde no corpo</label>
+        <input id="regiao" name="regiao" type="text" required>
       </div>
-      <button class="btn btn-solid" type="submit">Abrir no WhatsApp</button>
-      <p class="form-note" id="formNote" role="status"></p>
+      <div class="linha">
+        <label for="tamanho">tamanho aprox.</label>
+        <input id="tamanho" name="tamanho" type="text" placeholder="12 cm" required>
+      </div>
+
+      <button class="carimbo" type="submit">ENVIAR NO WHATSAPP</button>
+      <p class="nota" id="nota" role="status"></p>
     </form>
   </section>
 
 </main>
 
-<footer class="foot">
-  <span>Traço · estúdio fictício criado para portfólio</span>
+<footer class="rodape">
+  <span>TRAÇO · estúdio fictício, feito para portfólio</span>
   <a href="../../index.html#projetos">← voltar ao portfólio</a>
 </footer>
 
-<div class="lightbox" id="lightbox" hidden>
-  <button class="lb-close" id="lbClose" aria-label="Fechar">✕</button>
-  <button class="lb-nav lb-prev" id="lbPrev" aria-label="Anterior">‹</button>
-  <figure class="lb-figure">
-    <div class="ph ph-lb" id="lbImage" data-ph="sua foto"></div>
-    <figcaption id="lbCaption"></figcaption>
+<div class="lupa" id="lupa" hidden>
+  <button class="lupa-x" id="lupaX" aria-label="Fechar">FECHAR ✕</button>
+  <button class="lupa-nav lupa-ant" id="lupaAnt" aria-label="Anterior">←</button>
+  <figure>
+    <div class="ph ph-lupa" id="lupaImg" data-ph="sua foto"><span class="ph-num" id="lupaNum">#00</span></div>
+    <figcaption id="lupaCap"></figcaption>
   </figure>
-  <button class="lb-nav lb-next" id="lbNext" aria-label="Próxima">›</button>
+  <button class="lupa-nav lupa-prox" id="lupaProx" aria-label="Próxima">→</button>
 </div>
 
-<div class="cookie" id="cookie" hidden>
-  <p>Uso só o armazenamento do navegador pra lembrar que você já viu este aviso.</p>
-  <button class="btn btn-solid btn-sm" id="cookieOk" type="button">Ok</button>
+<div class="aviso" id="aviso" hidden>
+  <p>Guardo no navegador só que você já viu este aviso.</p>
+  <button class="carimbo carimbo-sm" id="avisoOk" type="button">OK</button>
 </div>
 
 <script src="js/app.js"></script>

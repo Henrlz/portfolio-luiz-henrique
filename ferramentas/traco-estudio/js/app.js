@@ -1,219 +1,269 @@
 (function () {
   'use strict';
 
-  /* ---------------- galeria ---------------- */
-  // As "fotos" são placeholders: o objetivo aqui é a interação (filtro,
-  // lightbox, teclado), não o acervo.
-  var SHOTS = [
-    { cat: 'fineline', titulo: 'Ramo de oliveira', nota: 'antebraço · 2 h', ratio: '3 / 4' },
-    { cat: 'blackwork', titulo: 'Mancha geométrica', nota: 'ombro · 5 h', ratio: '1 / 1' },
-    { cat: 'realismo', titulo: 'Retrato de perfil', nota: 'coxa · 3 sessões', ratio: '3 / 4' },
-    { cat: 'lettering', titulo: 'Frase manuscrita', nota: 'costela · 1 h', ratio: '4 / 3' },
-    { cat: 'fineline', titulo: 'Constelação', nota: 'costas · 2 h', ratio: '1 / 1' },
-    { cat: 'blackwork', titulo: 'Bracelete sólido', nota: 'braço · 4 h', ratio: '3 / 4' },
-    { cat: 'realismo', titulo: 'Mão e linha', nota: 'panturrilha · 6 h', ratio: '4 / 3' },
-    { cat: 'fineline', titulo: 'Andorinha', nota: 'pulso · 1 h', ratio: '1 / 1' },
-    { cat: 'lettering', titulo: 'Inicial em serifa', nota: 'nuca · 40 min', ratio: '3 / 4' },
-    { cat: 'blackwork', titulo: 'Preenchimento fechado', nota: 'perna · 2 sessões', ratio: '4 / 3' },
-    { cat: 'realismo', titulo: 'Olho em grafite', nota: 'antebraço · 4 h', ratio: '1 / 1' },
-    { cat: 'fineline', titulo: 'Linha contínua', nota: 'costas · 3 h', ratio: '3 / 4' }
+  var reduzido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------- folha de flash ---------------- */
+  var PECAS = [
+    { cat: 'tradicional', nome: 'Andorinha', nota: 'peito · 3 h' },
+    { cat: 'blackwork', nome: 'Mancha sólida', nota: 'ombro · 5 h' },
+    { cat: 'fineline', nome: 'Ramo de oliveira', nota: 'antebraço · 2 h' },
+    { cat: 'lettering', nome: 'Frase manuscrita', nota: 'costela · 1 h' },
+    { cat: 'tradicional', nome: 'Âncora', nota: 'panturrilha · 4 h' },
+    { cat: 'blackwork', nome: 'Bracelete', nota: 'braço · 4 h' },
+    { cat: 'fineline', nome: 'Constelação', nota: 'costas · 2 h' },
+    { cat: 'tradicional', nome: 'Rosa clássica', nota: 'antebraço · 3 h' },
+    { cat: 'lettering', nome: 'Inicial em serifa', nota: 'nuca · 40 min' },
+    { cat: 'blackwork', nome: 'Preenchimento', nota: 'perna · 2 sessões' },
+    { cat: 'fineline', nome: 'Linha contínua', nota: 'costas · 3 h' },
+    { cat: 'tradicional', nome: 'Punhal', nota: 'coxa · 4 h' }
   ];
 
-  var gallery = document.getElementById('gallery');
-  var galleryEmpty = document.getElementById('galleryEmpty');
-  var filtroAtual = 'todos';
-  var visiveis = [];
+  var grid = document.getElementById('grid');
+  var vazio = document.getElementById('vazio');
+  var filtro = 'todos';
+  var naTela = [];
 
-  var shotObserver = 'IntersectionObserver' in window
-    ? new IntersectionObserver(function (entries, obs) {
-        entries.forEach(function (entry) {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add('is-in');
-          obs.unobserve(entry.target);
+  var obsFlash = 'IntersectionObserver' in window && !reduzido
+    ? new IntersectionObserver(function (entradas, obs) {
+        entradas.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          e.target.classList.add('is-in');
+          obs.unobserve(e.target);
         });
-      }, { threshold: 0.08 })
+      }, { threshold: 0.06 })
     : null;
 
-  function renderGallery() {
-    visiveis = SHOTS.filter(function (s) {
-      return filtroAtual === 'todos' || s.cat === filtroAtual;
-    });
+  function numero(i) { return '#' + String(i + 1).padStart(2, '0'); }
 
-    gallery.innerHTML = '';
-    visiveis.forEach(function (shot, i) {
+  function desenharGrid() {
+    naTela = PECAS.filter(function (p) { return filtro === 'todos' || p.cat === filtro; });
+    grid.innerHTML = '';
+
+    naTela.forEach(function (peca, i) {
       var btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'shot';
-      btn.setAttribute('data-index', String(i));
-      btn.setAttribute('aria-label', 'Ampliar ' + shot.titulo);
+      btn.className = 'flash';
+      btn.setAttribute('aria-label', 'Ampliar ' + peca.nome);
 
-      var ph = document.createElement('div');
+      var wrap = document.createElement('span');
+      wrap.className = 'wrap';
+
+      var ph = document.createElement('span');
       ph.className = 'ph';
       ph.setAttribute('data-ph', 'sua foto');
-      ph.style.aspectRatio = shot.ratio;
+
+      var num = document.createElement('span');
+      num.className = 'ph-num';
+      num.textContent = numero(i);
+      ph.appendChild(num);
+      wrap.appendChild(ph);
 
       var cap = document.createElement('figcaption');
-      cap.innerHTML = '<span>' + shot.titulo + '</span><span class="tag">' + shot.cat + '</span>';
+      cap.innerHTML = '<span>' + peca.nome + '</span><span class="cat">' + peca.cat + '</span>';
 
-      btn.appendChild(ph);
+      btn.appendChild(wrap);
       btn.appendChild(cap);
-      btn.addEventListener('click', function () { abrirLightbox(i); });
-      gallery.appendChild(btn);
+      btn.addEventListener('click', function () { abrirLupa(i); });
+      grid.appendChild(btn);
 
-      if (shotObserver) shotObserver.observe(btn);
+      if (obsFlash) obsFlash.observe(btn);
       else btn.classList.add('is-in');
     });
 
-    galleryEmpty.hidden = visiveis.length > 0;
+    vazio.hidden = naTela.length > 0;
   }
 
-  document.querySelectorAll('.filter').forEach(function (btn) {
+  document.querySelectorAll('.pick').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      document.querySelectorAll('.filter').forEach(function (b) {
-        b.classList.remove('is-active');
+      document.querySelectorAll('.pick').forEach(function (b) {
+        b.classList.remove('is-on');
         b.setAttribute('aria-selected', 'false');
       });
-      btn.classList.add('is-active');
+      btn.classList.add('is-on');
       btn.setAttribute('aria-selected', 'true');
-      filtroAtual = btn.getAttribute('data-filter');
-      renderGallery();
+      filtro = btn.getAttribute('data-filter');
+      desenharGrid();
     });
   });
 
-  renderGallery();
+  desenharGrid();
 
-  /* ---------------- lightbox ---------------- */
-  var lightbox = document.getElementById('lightbox');
-  var lbImage = document.getElementById('lbImage');
-  var lbCaption = document.getElementById('lbCaption');
-  var lbClose = document.getElementById('lbClose');
-  var lbPrev = document.getElementById('lbPrev');
-  var lbNext = document.getElementById('lbNext');
-  var lbIndex = 0;
-  var ultimoFoco = null;
+  /* ---------------- lupa ---------------- */
+  var lupa = document.getElementById('lupa');
+  var lupaNum = document.getElementById('lupaNum');
+  var lupaCap = document.getElementById('lupaCap');
+  var lupaX = document.getElementById('lupaX');
+  var lupaAnt = document.getElementById('lupaAnt');
+  var lupaProx = document.getElementById('lupaProx');
+  var iLupa = 0;
+  var focoAnterior = null;
 
-  function pintarLightbox() {
-    var shot = visiveis[lbIndex];
-    if (!shot) return;
-    lbImage.style.aspectRatio = shot.ratio;
-    lbCaption.innerHTML =
-      '<span>' + shot.titulo + '</span><span>' + shot.nota + '</span>';
+  function pintarLupa() {
+    var peca = naTela[iLupa];
+    if (!peca) return;
+    lupaNum.textContent = numero(iLupa);
+    lupaCap.innerHTML = '<span>' + peca.nome + '</span><span>' + peca.nota + '</span>';
   }
 
-  function abrirLightbox(i) {
-    lbIndex = i;
-    ultimoFoco = document.activeElement;
-    pintarLightbox();
-    lightbox.hidden = false;
+  function abrirLupa(i) {
+    iLupa = i;
+    focoAnterior = document.activeElement;
+    pintarLupa();
+    lupa.hidden = false;
     document.body.style.overflow = 'hidden';
-    lbClose.focus();
+    lupaX.focus();
   }
 
-  function fecharLightbox() {
-    lightbox.hidden = true;
+  function fecharLupa() {
+    lupa.hidden = true;
     document.body.style.overflow = '';
-    if (ultimoFoco) ultimoFoco.focus();
+    if (focoAnterior) focoAnterior.focus();
   }
 
-  function passar(delta) {
-    if (!visiveis.length) return;
-    lbIndex = (lbIndex + delta + visiveis.length) % visiveis.length;
-    pintarLightbox();
+  function girar(d) {
+    if (!naTela.length) return;
+    iLupa = (iLupa + d + naTela.length) % naTela.length;
+    pintarLupa();
   }
 
-  lbClose.addEventListener('click', fecharLightbox);
-  lbPrev.addEventListener('click', function () { passar(-1); });
-  lbNext.addEventListener('click', function () { passar(1); });
-  lightbox.addEventListener('click', function (e) {
-    if (e.target === lightbox) fecharLightbox();
-  });
+  lupaX.addEventListener('click', fecharLupa);
+  lupaAnt.addEventListener('click', function () { girar(-1); });
+  lupaProx.addEventListener('click', function () { girar(1); });
+  lupa.addEventListener('click', function (e) { if (e.target === lupa) fecharLupa(); });
 
   document.addEventListener('keydown', function (e) {
-    if (lightbox.hidden) return;
-    if (e.key === 'Escape') fecharLightbox();
-    else if (e.key === 'ArrowLeft') passar(-1);
-    else if (e.key === 'ArrowRight') passar(1);
+    if (lupa.hidden) return;
+    if (e.key === 'Escape') fecharLupa();
+    else if (e.key === 'ArrowLeft') girar(-1);
+    else if (e.key === 'ArrowRight') girar(1);
   });
+
+  /* ---------------- máquina que tatua a linha ---------------- */
+  // A máquina fica presa na tela enquanto a seção passa. A altura da tinta é
+  // sempre a distância entre o topo da seção e a ponta da agulha, então os
+  // dois nunca saem de sincronia — nem em resize, nem em zoom.
+  var viva = document.getElementById('numeros');
+  var rail = document.getElementById('vivaRail');
+  var tinta = document.getElementById('tinta');
+  var maq = document.getElementById('maq');
+  var dados = Array.prototype.slice.call(document.querySelectorAll('.dado'));
+  var pingos = [];
+
+  function montarPingos() {
+    pingos.forEach(function (p) { p.remove(); });
+    pingos = [];
+    var railTop = rail.getBoundingClientRect().top;
+    dados.forEach(function (dado) {
+      var r = dado.getBoundingClientRect();
+      var pingo = document.createElement('span');
+      pingo.className = 'pingo';
+      pingo.style.top = (r.top + r.height / 2 - railTop) + 'px';
+      rail.appendChild(pingo);
+      pingos.push(pingo);
+    });
+  }
+
+  function tatuar() {
+    var rRail = rail.getBoundingClientRect();
+    var pontaAgulha = maq.getBoundingClientRect().bottom;
+    var altura = Math.max(0, Math.min(pontaAgulha - rRail.top, rRail.height));
+    tinta.style.height = altura + 'px';
+
+    dados.forEach(function (dado, i) {
+      var r = dado.getBoundingClientRect();
+      var passou = r.top + r.height / 2 < pontaAgulha;
+      dado.classList.toggle('is-on', passou);
+      if (pingos[i]) pingos[i].classList.toggle('is-on', passou);
+    });
+  }
+
+  if (viva && rail && tinta && maq) {
+    if (reduzido) {
+      // Sem movimento: entrega a linha inteira tatuada e os dados legíveis.
+      tinta.style.height = '100%';
+      dados.forEach(function (d) { d.classList.add('is-on'); });
+      montarPingos();
+      pingos.forEach(function (p) { p.classList.add('is-on'); });
+    } else {
+      var agendado = false;
+      var aoRolar = function () {
+        if (agendado) return;
+        agendado = true;
+        window.requestAnimationFrame(function () {
+          tatuar();
+          agendado = false;
+        });
+      };
+      montarPingos();
+      tatuar();
+      window.addEventListener('scroll', aoRolar, { passive: true });
+      window.addEventListener('resize', function () {
+        montarPingos();
+        tatuar();
+      });
+      window.addEventListener('load', function () {
+        montarPingos();
+        tatuar();
+      });
+    }
+  }
 
   /* ---------------- menu ---------------- */
   var burger = document.getElementById('burger');
-  var menu = document.getElementById('menu');
+  var nav = document.getElementById('nav');
 
   burger.addEventListener('click', function () {
-    var aberto = menu.classList.toggle('is-open');
-    burger.classList.toggle('is-open', aberto);
+    var aberto = nav.classList.toggle('is-open');
     burger.setAttribute('aria-expanded', String(aberto));
     document.body.style.overflow = aberto ? 'hidden' : '';
   });
 
-  menu.querySelectorAll('a').forEach(function (a) {
+  nav.querySelectorAll('a').forEach(function (a) {
     a.addEventListener('click', function () {
-      menu.classList.remove('is-open');
-      burger.classList.remove('is-open');
+      nav.classList.remove('is-open');
       burger.setAttribute('aria-expanded', 'false');
       document.body.style.overflow = '';
     });
   });
 
-  /* ---------------- topo fixo + link ativo ---------------- */
-  var topbar = document.getElementById('topbar');
-  window.addEventListener('scroll', function () {
-    topbar.classList.toggle('is-stuck', window.scrollY > 24);
-  }, { passive: true });
-
-  var links = Array.prototype.slice.call(document.querySelectorAll('.menu a'));
-  var alvos = links
+  var linksNav = Array.prototype.slice.call(nav.querySelectorAll('a'));
+  var secoes = linksNav
     .map(function (a) { return document.querySelector(a.getAttribute('href')); })
     .filter(Boolean);
 
-  if ('IntersectionObserver' in window && alvos.length) {
-    var navObserver = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        links.forEach(function (a) {
-          a.classList.toggle('is-current', a.getAttribute('href') === '#' + entry.target.id);
+  if ('IntersectionObserver' in window && secoes.length) {
+    var obsNav = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        linksNav.forEach(function (a) {
+          a.classList.toggle('is-on', a.getAttribute('href') === '#' + e.target.id);
         });
       });
-    }, { rootMargin: '-48% 0px -48% 0px' });
-    alvos.forEach(function (s) { navObserver.observe(s); });
+    }, { rootMargin: '-45% 0px -45% 0px' });
+    secoes.forEach(function (s) { obsNav.observe(s); });
   }
 
-  /* ---------------- revelação ---------------- */
-  if ('IntersectionObserver' in window) {
-    var alvosReveal = document.querySelectorAll(
-      '.block-head, .split-art, .split-copy, .steps li, .faq details, .contact-copy, .form, .hero-art'
-    );
-    alvosReveal.forEach(function (el) { el.classList.add('reveal'); });
-    var revealObserver = new IntersectionObserver(function (entries, obs) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('is-in');
-        obs.unobserve(entry.target);
-      });
-    }, { threshold: 0.12 });
-    alvosReveal.forEach(function (el) { revealObserver.observe(el); });
-  }
+  /* ---------------- ficha → WhatsApp ---------------- */
+  var ZAP = '5519982449452';
+  var ficha = document.getElementById('ficha');
+  var nota = document.getElementById('nota');
 
-  /* ---------------- formulário → WhatsApp ---------------- */
-  var WHATSAPP = '5519982449452';
-  var form = document.getElementById('form');
-  var formNote = document.getElementById('formNote');
-
-  form.addEventListener('submit', function (e) {
+  ficha.addEventListener('submit', function (e) {
     e.preventDefault();
 
-    var campos = ['nome', 'ideia', 'regiao', 'tamanho'];
+    var ids = ['nome', 'ideia', 'regiao', 'tamanho'];
     var faltando = [];
 
-    campos.forEach(function (id) {
-      var input = document.getElementById(id);
-      var vazio = !input.value.trim();
-      input.closest('.field').classList.toggle('has-error', vazio);
-      if (vazio) faltando.push(id);
+    ids.forEach(function (id) {
+      var campo = document.getElementById(id);
+      var vazioCampo = !campo.value.trim();
+      campo.closest('.linha').classList.toggle('erro', vazioCampo);
+      if (vazioCampo) faltando.push(id);
     });
 
     if (faltando.length) {
-      formNote.textContent = 'Preencha os campos destacados antes de enviar.';
+      nota.textContent = 'Falta preencher o que está marcado em vermelho.';
       document.getElementById(faltando[0]).focus();
       return;
     }
@@ -221,34 +271,32 @@
     var texto =
       'Oi! Sou ' + document.getElementById('nome').value.trim() + '.\n' +
       'Ideia: ' + document.getElementById('ideia').value.trim() + '\n' +
-      'Região: ' + document.getElementById('regiao').value.trim() + '\n' +
+      'Onde: ' + document.getElementById('regiao').value.trim() + '\n' +
       'Tamanho: ' + document.getElementById('tamanho').value.trim();
 
-    formNote.textContent = 'Abrindo o WhatsApp com sua mensagem...';
-    window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(texto), '_blank', 'noopener');
+    nota.textContent = 'Abrindo o WhatsApp...';
+    window.open('https://wa.me/' + ZAP + '?text=' + encodeURIComponent(texto), '_blank', 'noopener');
   });
 
-  form.querySelectorAll('input, textarea').forEach(function (el) {
-    el.addEventListener('input', function () {
-      el.closest('.field').classList.remove('has-error');
+  ficha.querySelectorAll('input, textarea').forEach(function (campo) {
+    campo.addEventListener('input', function () {
+      campo.closest('.linha').classList.remove('erro');
     });
   });
 
-  /* ---------------- aviso de cookies ---------------- */
-  var cookie = document.getElementById('cookie');
-  var cookieOk = document.getElementById('cookieOk');
+  /* ---------------- aviso ---------------- */
+  var aviso = document.getElementById('aviso');
+  var avisoOk = document.getElementById('avisoOk');
   var CHAVE = 'traco:aviso';
 
   function jaViu() {
     try { return localStorage.getItem(CHAVE) === '1'; } catch (e) { return true; }
   }
 
-  if (!jaViu()) {
-    setTimeout(function () { cookie.hidden = false; }, 900);
-  }
+  if (!jaViu()) setTimeout(function () { aviso.hidden = false; }, 900);
 
-  cookieOk.addEventListener('click', function () {
+  avisoOk.addEventListener('click', function () {
     try { localStorage.setItem(CHAVE, '1'); } catch (e) { /* modo privado */ }
-    cookie.hidden = true;
+    aviso.hidden = true;
   });
 })();
