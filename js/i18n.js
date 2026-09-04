@@ -99,11 +99,7 @@
       'projects.wedding.icon': 'Planner de casamento',
       'projects.wedding.desc': 'App romântico para planejar um casamento a dois: convidados, orçamento, fornecedores, checklist e contagem regressiva, com uma tela de entrada protegida por senha e animações autorais. <em>(demo pessoal, código de acesso: 0809)</em>',
 
-      'projects.photo.icon': 'Fotografia',
-      // projects.teo.desc não tem entrada em pt de propósito: o texto desse
-      // card está sendo reescrito em outra frente de trabalho, então o
-      // português continua vindo do próprio HTML (fonte da verdade) e só as
-      // traduções ficam aqui. Chave sem valor é ignorada pelo apply().
+      'projects.tattoo.icon': 'Estúdio de tatuagem',
 
       'projects.automations_title': 'Automações · Power Automate',
       'projects.automations_intro': 'Fluxos de automação desenvolvidos com o Power Automate, integrados a outras ferramentas do dia a dia. Sem interface própria, mas ainda assim desenvolvimento.',
@@ -209,8 +205,8 @@
       'projects.wedding.icon': 'Wedding planner',
       'projects.wedding.desc': 'A romantic app for planning a wedding together: guests, budget, vendors, checklist and countdown, with a password-protected entry screen and original animations. <em>(personal demo, access code: 0809)</em>',
 
-      'projects.photo.icon': 'Photography',
-      'projects.teo.desc': 'Institutional site for a wedding photographer, in the format the market actually uses: full-screen hero, a menu with a segments submenu, a mosaic gallery with category filtering, a lightbox you can navigate by keyboard, and pagination. It also has a pricing table, an accordion FAQ, a form that composes the message and opens WhatsApp, and a cookie notice with preferences saved in the browser. The “about” block has a stack of photos that spreads out on hover and rearranges on click. <em>(fictitious studio; third-party photos under a free licence, credited in the repository)</em>',
+      'projects.tattoo.icon': 'Tattoo studio',
+      'projects.tattoo.desc': 'Site for a tattoo studio, in an editorial monochrome design: serif typography and a hierarchy built from space and 1px rules rather than cards. Mosaic gallery with a style filter and a lightbox you can navigate by keyboard, a step-by-step of how a booking works, an accordion FAQ, and a form that composes the message and opens WhatsApp. <em>(fictitious studio; the images are placeholders marked “sua foto”, ready for the real portfolio)</em>',
 
       'projects.automations_title': 'Automations · Power Automate',
       'projects.automations_intro': 'Automation flows built with Power Automate, integrated with other everyday tools. No interface of their own, but development all the same.',
@@ -316,8 +312,8 @@
       'projects.wedding.icon': 'Organizador de boda',
       'projects.wedding.desc': 'App romántica para planificar una boda en pareja: invitados, presupuesto, proveedores, checklist y cuenta regresiva, con una pantalla de entrada protegida por contraseña y animaciones propias. <em>(demo personal, código de acceso: 0809)</em>',
 
-      'projects.photo.icon': 'Fotografía',
-      'projects.teo.desc': 'Sitio institucional para un fotógrafo de bodas, en el formato que el mercado realmente usa: hero a pantalla completa, menú con submenú de segmentos, galería en mosaico con filtro por categoría, lightbox navegable con el teclado y paginación. Tiene también tabla de inversión, FAQ en acordeón, formulario que arma el mensaje y abre WhatsApp, y un aviso de cookies con preferencias guardadas en el navegador. El bloque «sobre» trae una pila de fotos que se despliega al pasar el cursor y se reorganiza al hacer clic. <em>(estudio ficticio; fotos de terceros bajo licencia libre, con créditos en el repositorio)</em>',
+      'projects.tattoo.icon': 'Estudio de tatuajes',
+      'projects.tattoo.desc': 'Sitio para un estudio de tatuajes, con un diseño editorial y monocromático: tipografía con serifa y una jerarquía hecha de espacio y filetes de 1px en lugar de tarjetas. Galería en mosaico con filtro por estilo y lightbox navegable con el teclado, paso a paso de la atención, FAQ en acordeón y un formulario que arma el mensaje y abre WhatsApp. <em>(estudio ficticio; las imágenes son espacios reservados marcados «sua foto», listos para el acervo real)</em>',
 
       'projects.automations_title': 'Automatizaciones · Power Automate',
       'projects.automations_intro': 'Flujos de automatización desarrollados con Power Automate, integrados con otras herramientas del día a día. Sin interfaz propia, pero desarrollo igualmente.',
