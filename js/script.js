@@ -123,21 +123,6 @@
 
   revealTargets.forEach(function (el) { revealObserver.observe(el); });
 
-  // Acende a lâmpada da seção Projetos quando ela entra na tela (equivale ao
-  // whileInView do componente original).
-  var lamp = document.querySelector('.lamp');
-  if (lamp) {
-    var lampObserver = new IntersectionObserver(function (entries, obs) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          obs.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.25 });
-    lampObserver.observe(lamp);
-  }
-
   var timeline = document.getElementById('timeline');
   var timelineProgress = document.getElementById('timelineProgress');
   var ticking = false;
