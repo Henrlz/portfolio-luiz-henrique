@@ -1,5 +1,22 @@
 (function () {
   var root = document.documentElement;
+
+  var pageLoader = document.getElementById('pageLoader');
+  if (pageLoader) {
+    var hideLoader = function () { pageLoader.classList.add('is-hidden'); };
+    var showLoader = function () { pageLoader.classList.remove('is-hidden'); };
+
+    if (document.readyState === 'complete') hideLoader();
+    else window.addEventListener('load', hideLoader);
+    // Rede de segurança: se algum recurso travar o evento load, a página não
+    // pode ficar presa atrás do overlay.
+    setTimeout(hideLoader, 6000);
+
+    document.addEventListener('i18n:changing', showLoader);
+    document.addEventListener('i18n:changed', function () {
+      setTimeout(hideLoader, 120);
+    });
+  }
   var themeToggle = document.getElementById('themeToggle');
   var stored = localStorage.getItem('theme');
   if (stored) root.setAttribute('data-theme', stored);

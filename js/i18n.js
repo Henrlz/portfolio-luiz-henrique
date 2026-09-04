@@ -35,6 +35,7 @@
       'a11y.menu': 'Abrir menu',
       'a11y.scroll': 'Rolar para a seção Sobre',
       'a11y.lang': 'Escolher idioma',
+      'a11y.loading': 'Carregando',
 
       'hero.greeting': 'Olá, eu sou',
       'hero.desc': 'Trabalho com desenvolvimento back-end, front-end, automações e banco de dados, criando soluções práticas para o dia a dia, de sites a sistemas internos.',
@@ -99,6 +100,10 @@
       'projects.wedding.desc': 'App romântico para planejar um casamento a dois: convidados, orçamento, fornecedores, checklist e contagem regressiva, com uma tela de entrada protegida por senha e animações autorais. <em>(demo pessoal, código de acesso: 0809)</em>',
 
       'projects.photo.icon': 'Fotografia',
+      // projects.teo.desc não tem entrada em pt de propósito: o texto desse
+      // card está sendo reescrito em outra frente de trabalho, então o
+      // português continua vindo do próprio HTML (fonte da verdade) e só as
+      // traduções ficam aqui. Chave sem valor é ignorada pelo apply().
 
       'projects.automations_title': 'Automações · Power Automate',
       'projects.automations_intro': 'Fluxos de automação desenvolvidos com o Power Automate, integrados a outras ferramentas do dia a dia. Sem interface própria, mas ainda assim desenvolvimento.',
@@ -140,6 +145,7 @@
       'a11y.menu': 'Open menu',
       'a11y.scroll': 'Scroll to the About section',
       'a11y.lang': 'Choose language',
+      'a11y.loading': 'Loading',
 
       'hero.greeting': 'Hi, I’m',
       'hero.desc': 'I work with back-end and front-end development, automation and databases, building practical everyday solutions — from websites to internal systems.',
@@ -204,6 +210,7 @@
       'projects.wedding.desc': 'A romantic app for planning a wedding together: guests, budget, vendors, checklist and countdown, with a password-protected entry screen and original animations. <em>(personal demo, access code: 0809)</em>',
 
       'projects.photo.icon': 'Photography',
+      'projects.teo.desc': 'Institutional site for a wedding photographer, in the format the market actually uses: full-screen hero, a menu with a segments submenu, a mosaic gallery with category filtering, a lightbox you can navigate by keyboard, and pagination. It also has a pricing table, an accordion FAQ, a form that composes the message and opens WhatsApp, and a cookie notice with preferences saved in the browser. The “about” block has a stack of photos that spreads out on hover and rearranges on click. <em>(fictitious studio; third-party photos under a free licence, credited in the repository)</em>',
 
       'projects.automations_title': 'Automations · Power Automate',
       'projects.automations_intro': 'Automation flows built with Power Automate, integrated with other everyday tools. No interface of their own, but development all the same.',
@@ -245,6 +252,7 @@
       'a11y.menu': 'Abrir menú',
       'a11y.scroll': 'Desplazarse a la sección Sobre mí',
       'a11y.lang': 'Elegir idioma',
+      'a11y.loading': 'Cargando',
 
       'hero.greeting': 'Hola, soy',
       'hero.desc': 'Trabajo con desarrollo back-end, front-end, automatizaciones y bases de datos, creando soluciones prácticas para el día a día, desde sitios web hasta sistemas internos.',
@@ -309,6 +317,7 @@
       'projects.wedding.desc': 'App romántica para planificar una boda en pareja: invitados, presupuesto, proveedores, checklist y cuenta regresiva, con una pantalla de entrada protegida por contraseña y animaciones propias. <em>(demo personal, código de acceso: 0809)</em>',
 
       'projects.photo.icon': 'Fotografía',
+      'projects.teo.desc': 'Sitio institucional para un fotógrafo de bodas, en el formato que el mercado realmente usa: hero a pantalla completa, menú con submenú de segmentos, galería en mosaico con filtro por categoría, lightbox navegable con el teclado y paginación. Tiene también tabla de inversión, FAQ en acordeón, formulario que arma el mensaje y abre WhatsApp, y un aviso de cookies con preferencias guardadas en el navegador. El bloque «sobre» trae una pila de fotos que se despliega al pasar el cursor y se reorganiza al hacer clic. <em>(estudio ficticio; fotos de terceros bajo licencia libre, con créditos en el repositorio)</em>',
 
       'projects.automations_title': 'Automatizaciones · Power Automate',
       'projects.automations_intro': 'Flujos de automatización desarrollados con Power Automate, integrados con otras herramientas del día a día. Sin interfaz propia, pero desarrollo igualmente.',
@@ -347,9 +356,23 @@
 
   function dict() { return DICT[current] || DICT[FALLBACK]; }
 
+  // Guarda o conteúdo original (português, escrito direto no HTML) antes da
+  // primeira tradução. Sem isso, uma chave que exista só em en/es deixaria o
+  // elemento preso no último idioma aplicado ao voltar pro português.
+  var ORIGINAL = new WeakMap();
+
+  function original(el, key, read) {
+    var store = ORIGINAL.get(el);
+    if (!store) { store = {}; ORIGINAL.set(el, store); }
+    if (!(key in store)) store[key] = read();
+    return store[key];
+  }
+
   function setAttrFromData(attrData, attrName) {
     document.querySelectorAll('[' + attrData + ']').forEach(function (el) {
+      var fallback = original(el, attrName, function () { return el.getAttribute(attrName); });
       var value = dict()[el.getAttribute(attrData)];
+      if (value == null) value = fallback;
       if (value != null) el.setAttribute(attrName, value);
     });
   }
@@ -362,7 +385,9 @@
     document.documentElement.setAttribute('lang', meta.htmlLang);
 
     document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var fallback = original(el, 'html', function () { return el.innerHTML; });
       var value = d[el.getAttribute('data-i18n')];
+      if (value == null) value = fallback;
       // innerHTML porque algumas traduções carregam <em>/<code>; o conteúdo é
       // todo estático deste arquivo, não vem de entrada de usuário.
       if (value != null) el.innerHTML = value;
@@ -388,9 +413,12 @@
   }
 
   function set(lang) {
-    if (!DICT[lang]) return;
+    if (!DICT[lang] || lang === current) return;
     try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) { /* modo privado */ }
-    apply(lang);
+    // A troca em si é instantânea; o loader entra só para a mudança não
+    // acontecer num piscar de olhos, com o texto trocando debaixo do cursor.
+    document.dispatchEvent(new CustomEvent('i18n:changing'));
+    setTimeout(function () { apply(lang); }, 280);
   }
 
   function buildSwitcher() {
