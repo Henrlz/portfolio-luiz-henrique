@@ -245,7 +245,10 @@
   }
 
   /* ---------------- ficha → WhatsApp ---------------- */
-  var ZAP = '5519982449452';
+  // Estúdio fictício: sem número real aqui. Vazio faz a ficha mostrar a
+  // mensagem montada em vez de abrir uma conversa — basta pôr o número do
+  // estúdio para o envio passar a valer.
+  var ZAP = '';
   var ficha = document.getElementById('ficha');
   var nota = document.getElementById('nota');
 
@@ -263,6 +266,7 @@
     });
 
     if (faltando.length) {
+      nota.classList.remove('nota-ok');
       nota.textContent = 'Falta preencher o que está marcado em vermelho.';
       document.getElementById(faltando[0]).focus();
       return;
@@ -274,8 +278,21 @@
       'Onde: ' + document.getElementById('regiao').value.trim() + '\n' +
       'Tamanho: ' + document.getElementById('tamanho').value.trim();
 
-    nota.textContent = 'Abrindo o WhatsApp...';
-    window.open('https://wa.me/' + ZAP + '?text=' + encodeURIComponent(texto), '_blank', 'noopener');
+    if (ZAP) {
+      nota.textContent = 'Abrindo o WhatsApp...';
+      window.open('https://wa.me/' + ZAP + '?text=' + encodeURIComponent(texto), '_blank', 'noopener');
+      return;
+    }
+
+    nota.classList.add('nota-ok');
+    nota.textContent = '';
+    var titulo = document.createElement('strong');
+    titulo.textContent = 'Mensagem pronta — no estúdio real, isto abre o WhatsApp:';
+    var corpo = document.createElement('span');
+    corpo.className = 'nota-msg';
+    corpo.textContent = texto;
+    nota.appendChild(titulo);
+    nota.appendChild(corpo);
   });
 
   ficha.querySelectorAll('input, textarea').forEach(function (campo) {

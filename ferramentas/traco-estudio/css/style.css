@@ -214,7 +214,8 @@ h1, h2 { font-family: var(--slab); font-weight: 400; margin: 0; line-height: 0.9
 .hero {
   max-width: var(--shell);
   margin: 0 auto;
-  padding: clamp(38px, 7vw, 78px) var(--pad) clamp(30px, 5vw, 54px);
+  /* folga extra embaixo: é nela que a máquina entra, sem tapar os links */
+  padding: clamp(38px, 7vw, 78px) var(--pad) clamp(96px, 11vw, 150px);
   display: grid;
   grid-template-columns: 1.25fr 0.75fr;
   gap: clamp(26px, 5vw, 62px);
@@ -454,10 +455,20 @@ h1, h2 { font-family: var(--slab); font-weight: 400; margin: 0; line-height: 0.9
   display: grid;
   grid-template-columns: 128px 1fr;
   gap: clamp(20px, 4vw, 56px);
-  border-top: 2px solid var(--ink);
+  align-items: start;
+  position: relative;
+  z-index: 6;
 }
 
-.viva-rail { position: relative; }
+/* Só o trilho sobe pra dentro do hero — a máquina entra por cima da parte
+   de cima conforme a página desce. A coluna de texto fica no lugar, senão
+   o título colide com os links do hero. */
+.viva-rail {
+  position: relative;
+  margin-top: -230px;
+  align-self: stretch;
+  pointer-events: none;
+}
 
 .trilho {
   position: absolute;
@@ -471,6 +482,9 @@ h1, h2 { font-family: var(--slab); font-weight: 400; margin: 0; line-height: 0.9
     rgba(16, 15, 13, 0.22) 0 6px,
     transparent 6px 12px
   );
+  /* o trecho que cruza o hero some, pra linha não riscar o título */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 210px);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 210px);
 }
 
 .tinta {
@@ -616,9 +630,25 @@ h1, h2 { font-family: var(--slab); font-weight: 400; margin: 0; line-height: 0.9
 .direto {
   font-family: var(--slab);
   font-size: clamp(1.3rem, 3.4vw, 1.9rem);
-  margin: 20px 0 26px !important;
+  margin: 20px 0 10px !important;
 }
 .direto a { border-bottom-width: 3px; }
+
+.vago-linha { margin: 0 0 26px !important; }
+
+/* mesmo tratamento de "sua foto": marca onde entra o dado real */
+.vago {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink);
+  border: 2px dashed rgba(16, 15, 13, 0.45);
+  padding: 5px 11px;
+  background: rgba(255, 255, 255, 0.4);
+}
 
 .ficha {
   border: 2px solid var(--ink);
@@ -681,6 +711,18 @@ h1, h2 { font-family: var(--slab); font-weight: 400; margin: 0; line-height: 0.9
 .carimbo-sm { padding: 8px 14px; font-size: 0.72rem; }
 
 .nota { margin: 14px 0 0; font-size: 0.82rem; color: var(--red); min-height: 1.2em; }
+
+.nota.nota-ok { color: var(--ink); display: grid; gap: 8px; }
+.nota.nota-ok strong { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; }
+
+.nota-msg {
+  white-space: pre-line;
+  border: 2px dashed rgba(16, 15, 13, 0.4);
+  padding: 11px 13px;
+  background: rgba(255, 255, 255, 0.45);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
 
 /* ---------------- rodapé ---------------- */
 .rodape {
