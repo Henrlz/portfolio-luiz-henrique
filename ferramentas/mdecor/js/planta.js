@@ -106,6 +106,14 @@
   const pat = el('pattern', { id: 'grade', width: 50, height: 50, patternUnits: 'userSpaceOnUse' });
   pat.appendChild(el('path', { d: 'M50 0H0V50', fill: 'none', class: 'grade-linha' }));
   defs.appendChild(pat);
+
+  // Luz do teto: quando você entra na sala, ela acende.
+  const brilho = el('radialGradient', { id: 'luzTeto', cx: '50%', cy: '42%', r: '62%' });
+  const p1 = el('stop', { offset: '0%' });  p1.setAttribute('stop-color', 'rgba(240,168,72,0.34)');
+  const p2 = el('stop', { offset: '55%' }); p2.setAttribute('stop-color', 'rgba(240,168,72,0.12)');
+  const p3 = el('stop', { offset: '100%' }); p3.setAttribute('stop-color', 'rgba(240,168,72,0)');
+  brilho.appendChild(p1); brilho.appendChild(p2); brilho.appendChild(p3);
+  defs.appendChild(brilho);
   svg.appendChild(defs);
   svg.appendChild(el('rect', { x: 0, y: 0, width: 1300, height: 1260, fill: 'url(#grade)' }));
 
@@ -141,6 +149,12 @@
       x: c.x * M, y: c.y * M, width: c.l * M, height: c.p * M
     }));
 
+    g.appendChild(el('rect', {
+      class: 'luz-sala',
+      x: c.x * M, y: c.y * M, width: c.l * M, height: c.p * M,
+      fill: 'url(#luzTeto)'
+    }));
+
     const gm = el('g', { class: 'moveis' });
     arranjo(a.id).forEach((item) => desenharMovel(gm, item));
     g.appendChild(gm);
@@ -150,20 +164,22 @@
       x: c.x * M, y: c.y * M, width: c.l * M, height: c.p * M
     }));
 
-    // Fundo atrás do rótulo: sem ele o nome do cômodo some em cima do móvel.
+    // O rótulo sobe para o terço de cima: no centro ele cobriria o marcador
+    // de "onde você está", que fica no meio da sala.
     const texto = a.curto.toUpperCase();
     const larguraRot = Math.max(texto.length * 19 + 34, 190);
+    const yRot = (c.y + c.p * 0.3) * M;
     g.appendChild(el('rect', {
       class: 'rotulo-fundo',
-      x: c.cx * M - larguraRot / 2, y: c.cy * M - 38,
-      width: larguraRot, height: 70, rx: 4
+      x: c.cx * M - larguraRot / 2, y: yRot - 38,
+      width: larguraRot, height: 70, rx: 8
     }));
 
-    const t = el('text', { class: 'rotulo', x: c.cx * M, y: c.cy * M - 10 });
+    const t = el('text', { class: 'rotulo', x: c.cx * M, y: yRot - 10 });
     t.textContent = texto;
     g.appendChild(t);
 
-    const medida = el('text', { class: 'rotulo-peq', x: c.cx * M, y: c.cy * M + 22 });
+    const medida = el('text', { class: 'rotulo-peq', x: c.cx * M, y: yRot + 22 });
     medida.textContent = `${String(a.l).replace('.', ',')} × ${String(a.p).replace('.', ',')} m`;
     g.appendChild(medida);
 
@@ -255,7 +271,7 @@
     });
 
     const dica = document.getElementById('dicaPlanta');
-    if (dica) dica.innerHTML = `Você está na <strong>${a.nome.toLowerCase()}</strong>. Os móveis abaixo são os desta sala.`;
+    if (dica) dica.innerHTML = `Luz acesa na <strong>${a.nome.toLowerCase()}</strong>. Os móveis abaixo são os desta sala.`;
 
     andar({ x: c.cx, y: c.cy }, () => {
       if (ambienteAtual !== id) {

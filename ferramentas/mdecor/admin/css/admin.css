@@ -1,7 +1,5 @@
-/* Painel — mesma prancheta do site, só que em modo trabalho:
-   menos respiro, mais tabela. Herda as variáveis de ../css/style.css. */
-
-.adm { background-size: 28px 28px; }
+/* Painel — mesma loja à noite, só que em modo trabalho:
+   menos brilho, mais tabela. Herda as variáveis de ../css/style.css. */
 
 /* ---------------- login ---------------- */
 .entrar {
@@ -13,46 +11,50 @@
 
 .entrar-caixa {
   width: min(400px, 100%);
-  background: var(--branco);
-  border: 2px solid var(--tinta);
-  box-shadow: 7px 8px 0 rgba(22, 22, 15, .18);
-  padding: clamp(20px, 4vw, 32px);
+  background: linear-gradient(165deg, var(--noite-2), var(--noite));
+  border: 1px solid rgba(240, 168, 72, .22);
+  border-radius: 18px;
+  box-shadow: 0 34px 80px rgba(0, 0, 0, .6);
+  padding: clamp(22px, 4vw, 34px);
 }
-.entrar-caixa h1 { font-size: 1.9rem; margin-bottom: 20px; }
+.entrar-caixa h1 { font-size: 2rem; margin-bottom: 22px; }
 .entrar-caixa .btn { width: 100%; text-align: center; margin-top: 4px; }
 
 .demo-dica {
-  margin: 16px 0 0;
-  padding-top: 13px;
-  border-top: 1px dashed var(--linha);
+  margin: 18px 0 0;
+  padding-top: 15px;
+  border-top: 1px solid var(--linha);
   font-size: .78rem;
-  color: var(--tinta-2);
+  color: var(--creme-2);
 }
 .demo-dica code {
-  font-family: var(--mono);
-  background: var(--papel-2);
-  border: 1px solid var(--linha);
-  padding: 1px 5px;
+  background: rgba(240, 168, 72, .12);
+  border: 1px solid rgba(240, 168, 72, .3);
+  border-radius: 5px;
+  color: var(--luz);
+  padding: 2px 6px;
+  font-size: .95em;
 }
 
 /* ---------------- abas ---------------- */
-.abas { display: flex; gap: 6px; flex-wrap: wrap; }
+.abas { display: flex; gap: 4px; flex-wrap: wrap; }
 .aba {
-  font-family: var(--mono);
-  font-size: .78rem;
-  padding: 7px 13px;
-  border: 2px solid transparent;
+  font-size: .84rem;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 999px;
   background: none;
   cursor: pointer;
-  color: var(--tinta-2);
+  color: var(--creme-2);
+  transition: background .2s ease, color .2s ease;
 }
-.aba:hover { border-color: var(--linha); color: var(--tinta); }
-.aba.is-on { border-color: var(--tinta); background: var(--branco); color: var(--tinta); }
+.aba:hover { background: rgba(236, 227, 215, .07); color: var(--creme); }
+.aba.is-on { background: var(--luz); color: #241a0c; font-weight: 600; }
 
 .adm-corpo {
   max-width: var(--largura);
   margin: 0 auto;
-  padding: clamp(22px, 4vw, 44px) var(--gap);
+  padding: clamp(24px, 4vw, 48px) var(--gap);
 }
 
 .adm-cabeca {
@@ -61,71 +63,82 @@
   align-items: flex-end;
   gap: 20px;
   flex-wrap: wrap;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 2px solid var(--tinta);
+  margin-bottom: 26px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--linha);
 }
 .adm-cabeca h2 { margin-bottom: 6px; }
 
 /* ---------------- tabela ---------------- */
-.tabela-rolagem { overflow-x: auto; border: 2px solid var(--tinta); background: var(--branco); }
-.tabela { width: 100%; border-collapse: collapse; font-size: .88rem; }
-.tabela th, .tabela td { text-align: left; padding: 11px 13px; border-bottom: 1px solid var(--linha); vertical-align: top; }
+.tabela-rolagem {
+  overflow-x: auto;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  background: var(--noite-2);
+}
+.tabela { width: 100%; border-collapse: collapse; font-size: .89rem; }
+.tabela th, .tabela td { text-align: left; padding: 13px 15px; border-bottom: 1px solid var(--linha); vertical-align: top; }
 .tabela th {
-  font-family: var(--mono);
-  font-size: .66rem;
-  letter-spacing: .14em;
+  font-size: .64rem;
+  letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--tinta-2);
-  background: var(--papel-2);
-  border-bottom: 2px solid var(--tinta);
+  color: var(--creme-2);
+  background: rgba(236, 227, 215, .04);
   white-space: nowrap;
 }
 .tabela tr:last-child td { border-bottom: none; }
-.tabela .mono { font-family: var(--mono); font-size: .82rem; white-space: nowrap; }
-.tabela .alerta { color: var(--vermelho); font-weight: 700; }
-.celula-sub { display: block; font-size: .75rem; color: var(--tinta-2); }
+.tabela .mono { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tabela .alerta { color: var(--luz); font-weight: 700; }
+.celula-sub { display: block; font-size: .75rem; color: var(--creme-2); }
 
-.acoes { display: flex; gap: 6px; flex-wrap: wrap; }
+.acoes { display: flex; gap: 7px; flex-wrap: wrap; }
 .mini {
-  font-family: var(--mono);
-  font-size: .7rem;
-  border: 1px solid var(--tinta);
-  background: var(--papel);
-  padding: 4px 9px;
+  font-size: .73rem;
+  border: 1px solid var(--linha);
+  border-radius: 999px;
+  background: rgba(236, 227, 215, .04);
+  color: var(--creme);
+  padding: 5px 12px;
   cursor: pointer;
+  transition: border-color .2s ease, color .2s ease;
 }
-.mini:hover { background: var(--tinta); color: var(--papel); }
-.mini-perigo { border-color: var(--vermelho); color: var(--vermelho); }
-.mini-perigo:hover { background: var(--vermelho); color: #fff; }
+.mini:hover { border-color: var(--luz); color: var(--luz); }
+.mini-perigo:hover { border-color: #e0674a; color: #e0674a; }
 
 /* ---------------- cartões ---------------- */
 .cartoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-.cartao { background: var(--branco); border: 2px solid var(--tinta); padding: 15px; display: flex; flex-direction: column; gap: 9px; }
-.cartao-nota { color: var(--vermelho); letter-spacing: 2px; }
-.cartao p { margin: 0; color: var(--tinta-2); font-size: .9rem; }
-.cartao-pe { font-size: .8rem !important; color: var(--tinta) !important; }
+.cartao {
+  background: var(--noite-2);
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.cartao-nota { color: var(--luz); letter-spacing: 3px; }
+.cartao p { margin: 0; color: var(--creme-2); font-size: .9rem; }
+.cartao-pe { font-size: .81rem !important; color: var(--creme) !important; }
 .cartao .acoes { margin-top: auto; }
 
 /* ---------------- formulários ---------------- */
-.modal-estreito { max-width: 540px; }
-.form-adm { margin-top: 16px; }
+.modal-estreito { max-width: 560px; }
+.form-adm { margin-top: 18px; }
 .campo-tres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .form-adm textarea {
-  font: inherit; font-size: .92rem;
-  border: none; border-bottom: 2px solid var(--tinta);
-  background: none; padding: 7px 2px; border-radius: 0; resize: vertical; width: 100%;
+  font: inherit; font-size: .93rem; color: var(--creme);
+  border: 1px solid var(--linha); border-radius: 9px;
+  background: rgba(236, 227, 215, .04);
+  padding: 10px 12px; resize: vertical; width: 100%;
+  transition: border-color .2s ease, background .2s ease;
 }
-.form-adm textarea:focus { outline: none; background: rgba(200, 64, 42, .07); }
+.form-adm textarea:focus { outline: none; border-color: var(--luz); background: rgba(240, 168, 72, .07); }
 .form-adm .btn { margin-top: 8px; }
 
 .dica-form {
-  font-family: var(--mono);
-  font-size: .72rem;
-  color: var(--tinta-2);
-  border-left: 3px solid var(--vermelho);
-  padding-left: 10px;
-  margin: 4px 0 14px;
+  font-size: .76rem;
+  color: var(--creme-2);
+  border-left: 2px solid var(--luz);
+  padding-left: 12px;
+  margin: 6px 0 16px;
 }
 
 @media (max-width: 700px) {
