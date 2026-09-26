@@ -89,8 +89,8 @@
       'projects.fiscal.icon': 'Análise fiscal',
       'projects.fiscal.desc': 'Ferramenta interna de análise fiscal que começou como uma automação em VBA e precisou ser adaptada para rodar dentro do sistema da empresa. Processa notas de vendas e devoluções, concilia quantidades e valores de impostos (ICMS/DIFAL) agrupando por nota fiscal, filial, série e CFOP, com módulos de produtos, serviços e devoluções, log de auditoria de importação e exportação para Excel. <em>(demo com dados fictícios)</em>',
 
-      'projects.cedro.icon': 'Loja de móveis',
-      'projects.cedro.desc': 'Site de vitrine para uma loja de móveis fictícia: catálogo de produtos com filtros por cor e categoria, assistente virtual (chatbot) para agendar visita à loja, aviso automático de estoque baixo, e um painel administrativo separado para gerenciar produtos, depoimentos e agendamentos. <em>(login do admin: usuário <code>admin</code>, senha <code>cedrodecor2026</code>)</em>',
+      'projects.cedro.icon': 'Loja de móveis em planta',
+      'projects.cedro.desc': 'Loja de móveis navegada pela <strong>planta baixa do showroom</strong>: em vez de menu, você clica num ambiente e um marcador caminha pelo corredor até ele. Os móveis são desenhados em escala a partir das medidas cadastradas — a mesma fonte alimenta a planta, a ficha técnica com cotas e a calculadora “vai caber?”, que compara a peça com o cômodo da pessoa e diz quanta folga sobra. Tem filtro por cor, aviso de estoque baixo e painel para gerenciar peças, depoimentos e visitas. <em>(login do admin: usuário <code>admin</code>, senha <code>cedrodecor2026</code>)</em>',
 
       'projects.clinic.icon': 'Gestão clínica',
       'projects.clinic.title': 'Consultório',
@@ -195,8 +195,8 @@
       'projects.fiscal.icon': 'Tax analysis',
       'projects.fiscal.desc': 'Internal tax analysis tool that started as a VBA automation and had to be adapted to run inside the company’s system. It processes sales and return invoices, reconciles tax quantities and amounts (ICMS/DIFAL) grouped by invoice, branch, series and CFOP, with modules for products, services and returns, an import audit log and Excel export. <em>(demo with fictitious data)</em>',
 
-      'projects.cedro.icon': 'Furniture store',
-      'projects.cedro.desc': 'Showcase site for a fictitious furniture store: product catalogue with colour and category filters, a virtual assistant (chatbot) to book a store visit, automatic low-stock alerts, and a separate admin panel to manage products, testimonials and appointments. <em>(admin login: user <code>admin</code>, password <code>cedrodecor2026</code>)</em>',
+      'projects.cedro.icon': 'Furniture store in plan',
+      'projects.cedro.desc': 'A furniture store you browse through the <strong>showroom floor plan</strong>: instead of a menu, you click a room and a marker walks down the corridor to it. The furniture is drawn to scale from the recorded measurements — one source feeds the plan, the spec sheet with dimension lines, and a “will it fit?” calculator that compares a piece against the visitor’s own room and says how much clearance is left. It also has a colour filter, low-stock warnings and a panel to manage pieces, testimonials and visits. <em>(admin login: user <code>admin</code>, password <code>cedrodecor2026</code>)</em>',
 
       'projects.clinic.icon': 'Clinic management',
       'projects.clinic.title': 'Clinic Manager',
@@ -302,8 +302,8 @@
       'projects.fiscal.icon': 'Análisis fiscal',
       'projects.fiscal.desc': 'Herramienta interna de análisis fiscal que empezó como una automatización en VBA y tuvo que adaptarse para funcionar dentro del sistema de la empresa. Procesa facturas de ventas y devoluciones, concilia cantidades y valores de impuestos (ICMS/DIFAL) agrupando por factura, sucursal, serie y CFOP, con módulos de productos, servicios y devoluciones, registro de auditoría de importación y exportación a Excel. <em>(demo con datos ficticios)</em>',
 
-      'projects.cedro.icon': 'Tienda de muebles',
-      'projects.cedro.desc': 'Sitio escaparate para una tienda de muebles ficticia: catálogo de productos con filtros por color y categoría, asistente virtual (chatbot) para agendar una visita a la tienda, aviso automático de stock bajo, y un panel administrativo aparte para gestionar productos, testimonios y citas. <em>(acceso admin: usuario <code>admin</code>, contraseña <code>cedrodecor2026</code>)</em>',
+      'projects.cedro.icon': 'Tienda de muebles en plano',
+      'projects.cedro.desc': 'Tienda de muebles que se recorre por el <strong>plano del showroom</strong>: en lugar de un menú, haces clic en un ambiente y un marcador camina por el pasillo hasta él. Los muebles se dibujan a escala a partir de las medidas cargadas — la misma fuente alimenta el plano, la ficha técnica con cotas y la calculadora «¿va a caber?», que compara la pieza con la habitación de la persona y dice cuánta holgura queda. Incluye filtro por color, aviso de stock bajo y panel para gestionar piezas, testimonios y visitas. <em>(acceso admin: usuario <code>admin</code>, contraseña <code>cedrodecor2026</code>)</em>',
 
       'projects.clinic.icon': 'Gestión clínica',
       'projects.clinic.title': 'Consultorio',
