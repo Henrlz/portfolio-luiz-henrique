@@ -105,6 +105,11 @@
     img.addEventListener('error', () => { img.remove(); midia.classList.add('so-desenho'); });
     midia.appendChild(img);
 
+    const ref = document.createElement('span');
+    ref.className = 'peca-ref';
+    ref.textContent = 'REF. ' + (peca.ref || '—');
+    midia.appendChild(ref);
+
     if (peca.selo) {
       const selo = document.createElement('span');
       selo.className = 'selo';
@@ -118,10 +123,13 @@
     corpo.innerHTML = `
       <h3>${esc(peca.nome)}</h3>
       <p class="peca-sub">${esc(peca.sub || '')}</p>
-      <p class="peca-med">${metros(peca.l)} × ${metros(peca.p)} × ${metros(peca.a)} (a)</p>
+      <dl class="espec">
+        <div><dt>larg.</dt><span class="pontos"></span><dd>${metros(peca.l)}</dd></div>
+        <div><dt>prof.</dt><span class="pontos"></span><dd>${metros(peca.p)}</dd></div>
+        <div><dt>alt.</dt><span class="pontos"></span><dd>${metros(peca.a)}</dd></div>
+      </dl>
       <p class="peca-preco">
-        ${peca.de ? `<s>${reais(peca.de)}</s>` : ''}
-        <strong>${reais(peca.preco)}</strong>
+        ${peca.de ? `<s>${reais(peca.de)}</s>` : ''}${reais(peca.preco)}
       </p>`;
 
     const cores = document.createElement('div');
@@ -166,7 +174,7 @@
     const a = AMBIENTES.find((x) => x.id === peca.ambiente);
 
     modalCorpo.innerHTML = `
-      <p class="cota-label">${esc(a ? a.nome : '')} · ficha técnica</p>
+      <p class="cota-label">${esc(a ? a.nome : '')} · pág. ${esc(a ? a.pagina : '')} · ref. ${esc(peca.ref || '')}</p>
       <h3 id="mNome">${esc(peca.nome)}</h3>
       <p class="peca-sub">${esc(peca.sub || '')}</p>
       <div class="ficha-grade">
@@ -182,8 +190,7 @@
           <p class="cota-label">Cores</p>
           <div class="peca-cores" id="fichaCores"></div>
           <p class="peca-preco grande">
-            ${peca.de ? `<s>${reais(peca.de)}</s>` : ''}
-            <strong>${reais(peca.preco)}</strong>
+            ${peca.de ? `<s>${reais(peca.de)}</s>` : ''}${reais(peca.preco)}
           </p>
           ${peca.estoque <= ESTOQUE_BAIXO ? `<p class="estoque-baixo">Últimas ${peca.estoque} peças</p>` : ''}
           <a class="btn btn-solido" href="#visita" data-fechar>Agendar visita para ver</a>

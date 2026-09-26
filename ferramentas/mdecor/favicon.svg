@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Marca da Cedro Decor: um sofá visto de cima, como aparece na planta
+       do showroom. Chapado, sem degradê e sem canto arredondado, do jeito
+       que um carimbo de catálogo impresso seria. -->
+  <rect width="64" height="64" fill="#c8502a"/>
+  <rect x="11" y="17" width="42" height="30" fill="#f0e6d2"/>
+  <rect x="11" y="17" width="42" height="8" fill="#26201a"/>
+  <rect x="11" y="17" width="7" height="30" fill="#26201a"/>
+  <rect x="46" y="17" width="7" height="30" fill="#26201a"/>
+  <rect x="11" y="52" width="42" height="3" fill="#26201a"/>
+</svg>

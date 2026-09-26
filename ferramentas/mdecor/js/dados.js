@@ -13,6 +13,7 @@ const foto = (id) => `https://images.pexels.com/photos/${id}/pexels-photo-${id}.
 const AMBIENTES = [
   {
     id: 'sala',
+    cor: '#c8502a', pagina: '02',
     nome: 'Sala de estar',
     curto: 'Sala',
     desc: 'O ambiente que todo mundo vê primeiro. Sofás, poltronas e o painel da TV.',
@@ -21,6 +22,7 @@ const AMBIENTES = [
   },
   {
     id: 'jantar',
+    cor: '#6b7a3a', pagina: '08',
     nome: 'Sala de jantar',
     curto: 'Jantar',
     desc: 'Mesas que cabem na sua casa de verdade — confira a medida antes de se apaixonar.',
@@ -28,6 +30,7 @@ const AMBIENTES = [
   },
   {
     id: 'quarto',
+    cor: '#c9932c', pagina: '14',
     nome: 'Quarto',
     curto: 'Quarto',
     desc: 'Camas, guarda-roupa e o que mais faz você dormir bem.',
@@ -35,6 +38,7 @@ const AMBIENTES = [
   },
   {
     id: 'escritorio',
+    cor: '#2f6272', pagina: '20',
     nome: 'Home office',
     curto: 'Escritório',
     desc: 'Para quem trabalha em casa e cansou de improvisar na mesa da cozinha.',
@@ -45,7 +49,7 @@ const AMBIENTES = [
 const PECAS = [
   // ---------- sala ----------
   {
-    id: 'p01', ambiente: 'sala', nome: 'Sofá Retrátil Bellagio', sub: '3 lugares',
+    id: 'p01', ref: '3017-B', ambiente: 'sala', nome: 'Sofá Retrátil Bellagio', sub: '3 lugares',
     preco: 3299.90, de: 3899.90, estoque: 8, selo: 'mais vendido',
     l: 2.10, p: 0.95, a: 0.90, forma: 'sofa',
     img: foto(1239298),
@@ -57,7 +61,7 @@ const PECAS = [
     ]
   },
   {
-    id: 'p02', ambiente: 'sala', nome: 'Sofá Chaise Roma', sub: 'com chaise à direita',
+    id: 'p02', ref: '3034-C', ambiente: 'sala', nome: 'Sofá Chaise Roma', sub: 'com chaise à direita',
     preco: 4199.00, estoque: 6,
     l: 2.60, p: 1.70, a: 0.88, forma: 'chaise',
     img: foto(1866149),
@@ -68,10 +72,10 @@ const PECAS = [
     ]
   },
   {
-    id: 'p10', ambiente: 'sala', nome: 'Poltrona Reclinável Oslo', sub: 'com apoio de pés',
+    id: 'p10', ref: '3170-E', ambiente: 'sala', nome: 'Poltrona Reclinável Oslo', sub: 'com apoio de pés',
     preco: 1699.00, estoque: 3,
     l: 0.80, p: 0.95, a: 1.05, forma: 'poltrona',
-    img: foto(586798),
+    img: foto(3757055),
     desc: 'Reclina em três estágios e trava onde você parar. O lugar favorito da casa, sem discussão.',
     cores: [
       { nome: 'Caramelo', hex: '#9c6236' },
@@ -79,7 +83,7 @@ const PECAS = [
     ]
   },
   {
-    id: 'p11', ambiente: 'sala', nome: 'Poltrona Charlotte', sub: 'decorativa',
+    id: 'p11', ref: '3187-F', ambiente: 'sala', nome: 'Poltrona Charlotte', sub: 'decorativa',
     preco: 1099.00, estoque: 9,
     l: 0.68, p: 0.75, a: 0.85, forma: 'poltrona',
     img: foto(1918291),
@@ -90,7 +94,7 @@ const PECAS = [
     ]
   },
   {
-    id: 'p04', ambiente: 'sala', nome: 'Mesa de Centro Milano', sub: 'tampo em vidro',
+    id: 'p04', ref: '3068-E', ambiente: 'sala', nome: 'Mesa de Centro Milano', sub: 'tampo em vidro',
     preco: 899.00, estoque: 14,
     l: 1.10, p: 0.60, a: 0.40, forma: 'mesa',
     img: foto(1866149),
@@ -101,7 +105,7 @@ const PECAS = [
     ]
   },
   {
-    id: 'p08', ambiente: 'sala', nome: 'Painel para TV Oslo', sub: 'até 65 polegadas',
+    id: 'p08', ref: '3136-C', ambiente: 'sala', nome: 'Painel para TV Oslo', sub: 'até 65 polegadas',
     preco: 1349.00, estoque: 4, selo: 'novidade',
     l: 1.80, p: 0.35, a: 0.45, forma: 'rack',
     img: foto(1571460),
@@ -112,7 +116,7 @@ const PECAS = [
     ]
   },
   {
-    id: 'p09', ambiente: 'sala', nome: 'Rack Baixo Copenhague', sub: '2 gavetas',
+    id: 'p09', ref: '3153-D', ambiente: 'sala', nome: 'Rack Baixo Copenhague', sub: '2 gavetas',
     preco: 799.00, estoque: 11,
     l: 1.50, p: 0.38, a: 0.42, forma: 'rack',
     img: foto(276583),
@@ -125,7 +129,7 @@ const PECAS = [
 
   // ---------- jantar ----------
   {
-    id: 'p03', ambiente: 'jantar', nome: 'Mesa de Jantar Toscana', sub: '6 lugares',
+    id: 'p03', ref: '3051-D', ambiente: 'jantar', nome: 'Mesa de Jantar Toscana', sub: '6 lugares',
     preco: 2199.00, de: 2699.00, estoque: 3, selo: 'novidade',
     l: 1.80, p: 0.90, a: 0.76, forma: 'mesa',
     img: foto(1395967),
@@ -136,7 +140,7 @@ const PECAS = [
     ]
   },
   {
-    id: 'p12', ambiente: 'jantar', nome: 'Mesa Nordic Compacta', sub: '4 lugares',
+    id: 'p12', ref: '3204-A', ambiente: 'jantar', nome: 'Mesa Nordic Compacta', sub: '4 lugares',
     preco: 1399.00, estoque: 13,
     l: 1.20, p: 0.80, a: 0.75, forma: 'mesa',
     img: foto(1080721),
@@ -147,7 +151,7 @@ const PECAS = [
     ]
   },
   {
-    id: 'p13', ambiente: 'jantar', nome: 'Buffet Copenhague', sub: '4 portas',
+    id: 'p13', ref: '3221-B', ambiente: 'jantar', nome: 'Buffet Copenhague', sub: '4 portas',
     preco: 1899.00, estoque: 5,
     l: 1.60, p: 0.45, a: 0.80, forma: 'rack',
     img: foto(1350789),
@@ -158,7 +162,7 @@ const PECAS = [
     ]
   },
   {
-    id: 'p14', ambiente: 'jantar', nome: 'Cadeira Estofada Lisboa', sub: 'jogo com 2',
+    id: 'p14', ref: '3238-C', ambiente: 'jantar', nome: 'Cadeira Estofada Lisboa', sub: 'jogo com 2',
     preco: 749.00, estoque: 22,
     l: 0.45, p: 0.52, a: 0.92, forma: 'cadeira',
     img: foto(1395964),
@@ -171,7 +175,7 @@ const PECAS = [
 
   // ---------- quarto ----------
   {
-    id: 'p05', ambiente: 'quarto', nome: 'Cama Box Casal Verona', sub: 'com baú',
+    id: 'p05', ref: '3085-F', ambiente: 'quarto', nome: 'Cama Box Casal Verona', sub: 'com baú',
     preco: 2599.00, estoque: 2, selo: 'mais vendido',
     l: 1.58, p: 1.98, a: 1.20, forma: 'cama',
     img: foto(1743229),
@@ -182,7 +186,7 @@ const PECAS = [
     ]
   },
   {
-    id: 'p06', ambiente: 'quarto', nome: 'Cama Box Solteiro Bristol', sub: 'com auxiliar',
+    id: 'p06', ref: '3102-A', ambiente: 'quarto', nome: 'Cama Box Solteiro Bristol', sub: 'com auxiliar',
     preco: 1499.00, estoque: 16,
     l: 0.88, p: 1.88, a: 1.00, forma: 'cama',
     img: foto(164595),
@@ -193,7 +197,7 @@ const PECAS = [
     ]
   },
   {
-    id: 'p15', ambiente: 'quarto', nome: 'Guarda-Roupa Madrid', sub: '6 portas',
+    id: 'p15', ref: '3255-D', ambiente: 'quarto', nome: 'Guarda-Roupa Madrid', sub: '6 portas',
     preco: 3190.00, estoque: 4,
     l: 2.70, p: 0.60, a: 2.30, forma: 'armario',
     img: foto(1454806),
@@ -204,7 +208,7 @@ const PECAS = [
     ]
   },
   {
-    id: 'p16', ambiente: 'quarto', nome: 'Criado-Mudo Nórdico', sub: '2 gavetas',
+    id: 'p16', ref: '3272-E', ambiente: 'quarto', nome: 'Criado-Mudo Nórdico', sub: '2 gavetas',
     preco: 429.00, estoque: 18,
     l: 0.48, p: 0.40, a: 0.55, forma: 'rack',
     img: foto(1034584),
@@ -217,7 +221,7 @@ const PECAS = [
 
   // ---------- escritório ----------
   {
-    id: 'p07', ambiente: 'escritorio', nome: 'Estante Multiuso Berlim', sub: '5 prateleiras',
+    id: 'p07', ref: '3119-B', ambiente: 'escritorio', nome: 'Estante Multiuso Berlim', sub: '5 prateleiras',
     preco: 1099.00, estoque: 10,
     l: 0.90, p: 0.30, a: 1.80, forma: 'armario',
     img: foto(667838),
@@ -228,10 +232,10 @@ const PECAS = [
     ]
   },
   {
-    id: 'p17', ambiente: 'escritorio', nome: 'Escrivaninha Turim', sub: 'com gaveteiro',
+    id: 'p17', ref: '3289-F', ambiente: 'escritorio', nome: 'Escrivaninha Turim', sub: 'com gaveteiro',
     preco: 1249.00, estoque: 7, selo: 'novidade',
     l: 1.35, p: 0.60, a: 0.75, forma: 'mesa',
-    img: foto(667839),
+    img: foto(2079246),
     desc: 'Tampo de 1,35 m com passagem de fios e gaveteiro de três gavetas.',
     cores: [
       { nome: 'Carvalho', hex: '#b58b5a' },
@@ -239,7 +243,7 @@ const PECAS = [
     ]
   },
   {
-    id: 'p18', ambiente: 'escritorio', nome: 'Cadeira Ergonômica Porto', sub: 'encosto em tela',
+    id: 'p18', ref: '3306-A', ambiente: 'escritorio', nome: 'Cadeira Ergonômica Porto', sub: 'encosto em tela',
     preco: 1090.00, estoque: 6,
     l: 0.62, p: 0.62, a: 1.15, forma: 'cadeira',
     img: foto(1957478),

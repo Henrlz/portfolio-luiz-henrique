@@ -144,6 +144,7 @@
       'aria-label': `${a.nome}, ${a.l} por ${a.p} metros`
     });
 
+    g.style.setProperty('--sala-cor', a.cor);
     g.appendChild(el('rect', {
       class: 'piso',
       x: c.x * M, y: c.y * M, width: c.l * M, height: c.p * M
@@ -270,8 +271,11 @@
       link.classList.toggle('is-on', link.getAttribute('href') === '#' + id);
     });
 
+    // a tinta do capítulo passa a valer na página inteira
+    document.documentElement.style.setProperty('--cor', a.cor);
+
     const dica = document.getElementById('dicaPlanta');
-    if (dica) dica.innerHTML = `Luz acesa na <strong>${a.nome.toLowerCase()}</strong>. Os móveis abaixo são os desta sala.`;
+    if (dica) dica.innerHTML = `Capítulo aberto: <strong>${a.nome.toLowerCase()}</strong> · página ${a.pagina}`;
 
     andar({ x: c.cx, y: c.cy }, () => {
       if (ambienteAtual !== id) {
