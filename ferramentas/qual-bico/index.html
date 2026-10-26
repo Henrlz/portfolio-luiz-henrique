@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qual bico? | Álcool ou gasolina, na ponta do lápis</title>
+<meta name="description" content="Coloca o preço da placa do posto e o consumo do seu carro: a conta diz se vale etanol ou gasolina e quanto rende cada abastecida.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="marquise">
+  <div class="marquise__faixa">
+    <span class="marquise__nome">Qual bico<em>?</em></span>
+    <span class="marquise__sub">álcool ou gasolina, na ponta do lápis</span>
+  </div>
+  <div class="marquise__listra" aria-hidden="true"></div>
+</header>
+
+<main class="patio">
+
+  <!-- placa de preços + etiqueta do carro -->
+  <section class="entrada">
+
+    <div class="totem" aria-labelledby="totemTitulo">
+      <h2 class="totem__topo" id="totemTitulo">Preço por litro</h2>
+      <p class="totem__dica">Copia da placa do posto. Toca no número pra mudar.</p>
+
+      <div class="totem__linha" data-comb="etanol">
+        <span class="totem__nome">Etanol</span>
+        <label class="preco">
+          <span class="sr">Preço do etanol</span>
+          <span class="preco__rs">R$</span>
+          <span class="preco__vis" aria-hidden="true"></span>
+          <input class="preco__in" id="precoE" type="text" inputmode="decimal" autocomplete="off" maxlength="5">
+        </label>
+      </div>
+
+      <div class="totem__linha" data-comb="gasolina">
+        <span class="totem__nome">Gasolina <small>comum</small></span>
+        <label class="preco">
+          <span class="sr">Preço da gasolina</span>
+          <span class="preco__rs">R$</span>
+          <span class="preco__vis" aria-hidden="true"></span>
+          <input class="preco__in" id="precoG" type="text" inputmode="decimal" autocomplete="off" maxlength="5">
+        </label>
+      </div>
+
+      <div class="totem__pe" aria-hidden="true"></div>
+    </div>
+
+    <div class="etiqueta" aria-labelledby="carroTitulo">
+      <div class="etiqueta__cab">
+        <h2 id="carroTitulo">Seu carro</h2>
+        <span class="etiqueta__furo" aria-hidden="true"></span>
+      </div>
+
+      <label class="campo campo--modelo">
+        <span>Modelo</span>
+        <select id="modelo"></select>
+      </label>
+
+      <table class="consumo">
+        <caption>Quantos km faz com 1 litro</caption>
+        <thead>
+          <tr><th></th><th scope="col">Cidade</th><th scope="col">Estrada</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Etanol</th>
+            <td><input id="eCid" type="text" inputmode="decimal" aria-label="Etanol na cidade, km por litro"></td>
+            <td><input id="eEst" type="text" inputmode="decimal" aria-label="Etanol na estrada, km por litro"></td>
+          </tr>
+          <tr>
+            <th scope="row">Gasolina</th>
+            <td><input id="gCid" type="text" inputmode="decimal" aria-label="Gasolina na cidade, km por litro"></td>
+            <td><input id="gEst" type="text" inputmode="decimal" aria-label="Gasolina na estrada, km por litro"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="etiqueta__rodape">
+        <label class="campo campo--tanque">
+          <span>Tanque</span>
+          <input id="tanque" type="text" inputmode="numeric" aria-label="Capacidade do tanque em litros"><b>L</b>
+        </label>
+
+        <fieldset class="trajeto">
+          <legend>Rodando mais</legend>
+          <label><input type="radio" name="trajeto" value="cidade" checked><span>na cidade</span></label>
+          <label><input type="radio" name="trajeto" value="misto"><span>misturado</span></label>
+          <label><input type="radio" name="trajeto" value="estrada"><span>na estrada</span></label>
+        </fieldset>
+      </div>
+
+      <p class="etiqueta__nota" id="notaModelo"></p>
+    </div>
+  </section>
+
+  <!-- veredito -->
+  <section class="veredito" aria-live="polite">
+    <p class="veredito__chamada"><span id="vChamada">—</span></p>
+    <p class="veredito__conta" id="vConta"></p>
+
+    <div class="regua" aria-hidden="true">
+      <div class="regua__trilho">
+        <div class="regua__zona regua__zona--e" id="zonaE"></div>
+        <div class="regua__corte" id="rCorte"><span id="rCorteTxt"></span></div>
+        <div class="regua__hoje" id="rHoje"><span id="rHojeTxt"></span></div>
+      </div>
+      <div class="regua__escala" id="rEscala"></div>
+      <div class="regua__legenda"><span>etanol barato</span><span>etanol caro</span></div>
+    </div>
+
+    <p class="veredito__setenta" id="vSetenta"></p>
+    <p class="veredito__tanque" id="vTanque"></p>
+  </section>
+
+  <!-- bomba -->
+  <section class="bomba" aria-labelledby="bombaTitulo">
+    <h2 class="sr" id="bombaTitulo">Simular abastecimento</h2>
+
+    <div class="bomba__corpo">
+      <div class="bomba__testa">
+        <span class="bomba__marca">Qual bico</span>
+        <span class="bomba__lampada" id="lampada" aria-hidden="true"></span>
+      </div>
+
+      <div class="visor">
+        <div class="visor__linha visor__linha--total">
+          <span class="visor__rot">Total a pagar <i>R$</i></span>
+          <span class="tambores" id="tTotal" data-int="3" data-dec="2"></span>
+        </div>
+        <div class="visor__linha">
+          <span class="visor__rot">Litros</span>
+          <span class="tambores" id="tLitros" data-int="2" data-dec="3"></span>
+        </div>
+        <div class="visor__linha visor__linha--preco">
+          <span class="visor__rot">Preço por litro <i>R$</i></span>
+          <span class="tambores tambores--mini" id="tPreco" data-int="1" data-dec="3"></span>
+        </div>
+      </div>
+
+      <div class="bicos" role="radiogroup" aria-label="Qual bico">
+        <button type="button" class="bico" data-comb="etanol" role="radio" aria-checked="false">
+          <svg viewBox="0 0 60 90" aria-hidden="true"><path class="bico__cabo" d="M14 16h24c4 0 6 3 6 7v26c0 6-4 10-10 10H22c-5 0-8-3-8-8z"/><path class="bico__gat" d="M22 42h12v6H22z"/><path class="bico__cano" d="M38 22l16-8 3 5-15 9z"/><path class="bico__mang" d="M26 59v31"/></svg>
+          <span>Etanol</span>
+        </button>
+        <button type="button" class="bico" data-comb="gasolina" role="radio" aria-checked="false">
+          <svg viewBox="0 0 60 90" aria-hidden="true"><path class="bico__cabo" d="M14 16h24c4 0 6 3 6 7v26c0 6-4 10-10 10H22c-5 0-8-3-8-8z"/><path class="bico__gat" d="M22 42h12v6H22z"/><path class="bico__cano" d="M38 22l16-8 3 5-15 9z"/><path class="bico__mang" d="M26 59v31"/></svg>
+          <span>Gasolina</span>
+        </button>
+      </div>
+
+      <div class="teclado">
+        <span class="teclado__rot">Pré-determinação</span>
+        <div class="teclado__teclas">
+          <button type="button" class="tecla" data-valor="50">50</button>
+          <button type="button" class="tecla" data-valor="100">100</button>
+          <button type="button" class="tecla" data-valor="150">150</button>
+          <label class="tecla tecla--outro">
+            <span class="sr">Outro valor em reais</span>
+            <input id="outroValor" type="text" inputmode="numeric" placeholder="outro" maxlength="4">
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="painel">
+      <div class="marcador">
+        <svg viewBox="0 0 220 140" id="marcadorSvg" aria-hidden="true">
+          <path class="marcador__arco" d="M30 120 A80 80 0 0 1 190 120"/>
+          <path class="marcador__reserva" d="M30 120 A80 80 0 0 1 35.4 91.1"/>
+          <g id="tracos"></g>
+          <text x="22" y="134" class="marcador__txt">0</text>
+          <text x="110" y="28" class="marcador__txt" text-anchor="middle">½</text>
+          <text x="198" y="134" class="marcador__txt" text-anchor="end">1</text>
+          <g class="marcador__icone" transform="translate(98 78)">
+            <path d="M2 2h12v20H2z M14 7l5 3v9a2 2 0 0 1-4 0v-5h-1"/><path d="M5 6h6v5H5z"/>
+          </g>
+          <line id="agulhaAntes" class="agulha agulha--antes" x1="110" y1="120" x2="110" y2="52"/>
+          <line id="agulha" class="agulha" x1="110" y1="120" x2="110" y2="48"/>
+          <circle cx="110" cy="120" r="9" class="marcador__eixo"/>
+        </svg>
+        <label class="nivel">
+          <span>Ponteiro agora, antes de abastecer</span>
+          <input type="range" id="nivel" min="0" max="100" value="20" step="1">
+        </label>
+      </div>
+
+      <div class="leitura" id="leitura" aria-live="polite">
+        <p class="leitura__vazio">Escolhe um valor na bomba.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="rodape">
+  <p>Os consumos de fábrica são médias de referência. O seu carro, com o seu pé, manda mais que qualquer tabela: ajusta os números na etiqueta.</p>
+  <a href="../../index.html#projetos">← voltar ao portfólio</a>
+</footer>
+
+<script src="js/app.js"></script>
+</body>
+</html>
