@@ -101,6 +101,7 @@
 
       'projects.tattoo.icon': 'Estúdio de tatuagem',
       'projects.fuel.icon': 'Etanol ou gasolina',
+      'projects.abnt.icon': 'Trabalhos nas normas da ABNT',
 
       'projects.automations_title': 'Automações · Power Automate',
       'projects.automations_intro': 'Fluxos de automação desenvolvidos com o Power Automate, integrados a outras ferramentas do dia a dia. Sem interface própria, mas ainda assim desenvolvimento.',
@@ -208,6 +209,8 @@
 
       'projects.tattoo.icon': 'Tattoo studio',
       'projects.tattoo.desc': 'Site for a tattoo studio, in an editorial monochrome design: serif typography and a hierarchy built from space and 1px rules rather than cards. Mosaic gallery with a style filter and a lightbox you can navigate by keyboard, a step-by-step of how a booking works, an accordion FAQ, and a form that composes the message and opens WhatsApp. <em>(fictitious studio; the images are placeholders marked “sua foto”, ready for the real portfolio)</em>',
+      'projects.abnt.icon': 'Papers in ABNT format',
+      'projects.abnt.desc': 'Turns a college paper into the Brazilian ABNT academic format, designed with psychology students in mind. It reads Word (.docx), PDF or pasted text, detects headings, block quotes, list items and references on its own (and lets you fix each one, colour-coded like highlighter pen), reuses the cover page already in the file, and lays out the cover, title page, abstract, table of contents with the right page numbers and the body with 3 and 2 cm margins, on A4 sheets typeset on screen. It checks that every citation has a reference (including the Freud (1912/2010) style), warns when a patient’s name, ID number or phone slipped into the text and replaces it with “Patient A”, and includes an NBR 6023 reference builder. It downloads an editable .docx, written straight in XML, or saves to PDF. Everything runs in the browser: the text never leaves the computer. <em>(there’s a ready-made example to try)</em>',
       'projects.fuel.icon': 'Ethanol or petrol',
       'projects.fuel.desc': 'An ethanol-or-petrol calculator built like a Brazilian filling station forecourt: the price board (with the tiny ⁹ at the end), a windscreen sticker holding the car’s fuel economy, and a mechanical pump whose drums roll like an odometer. Instead of the generic 70% rule, it works out the real break-even point for each car’s consumption, shows the cost per km of both fuels and how much a full tank saves. The R$ 50, 100 and 150 keys simulate the fill-up: the fuel gauge rises, the readout says how many km it buys and, if it won’t fit, the nozzle clicks off with the tank full. <em>(defaults to a 2005 VW Gol G3 1.6 with its spec-sheet consumption; you can pick another car or type in your own)</em>',
 
@@ -317,6 +320,8 @@
 
       'projects.tattoo.icon': 'Estudio de tatuajes',
       'projects.tattoo.desc': 'Sitio para un estudio de tatuajes, con un diseño editorial y monocromático: tipografía con serifa y una jerarquía hecha de espacio y filetes de 1px en lugar de tarjetas. Galería en mosaico con filtro por estilo y lightbox navegable con el teclado, paso a paso de la atención, FAQ en acordeón y un formulario que arma el mensaje y abre WhatsApp. <em>(estudio ficticio; las imágenes son espacios reservados marcados «sua foto», listos para el acervo real)</em>',
+      'projects.abnt.icon': 'Trabajos con normas ABNT',
+      'projects.abnt.desc': 'Convierte un trabajo universitario al formato académico brasileño ABNT, pensado para estudiantes de psicología. Lee Word (.docx), PDF o texto pegado, identifica solo títulos, citas largas, incisos y referencias (y deja corregir cada marca, con colores de resaltador), aprovecha la portada que ya venga en el archivo y arma la portada, la hoja de título, el resumen, el índice con las páginas correctas y el cuerpo con márgenes de 3 y 2 cm, en hojas A4 diagramadas en pantalla. Verifica que toda cita tenga su referencia (incluso en el formato Freud (1912/2010)), avisa si se coló el nombre de un paciente, un documento o un teléfono y lo cambia por «Paciente A», y trae un armador de referencias de la NBR 6023. Descarga un .docx editable, escrito directo en XML, o guarda en PDF. Todo corre en el navegador: el texto nunca sale de la computadora. <em>(hay un ejemplo listo para probar)</em>',
       'projects.fuel.icon': 'Etanol o gasolina',
       'projects.fuel.desc': 'Calculadora de etanol o gasolina armada como el patio de una estación de servicio brasileña: el cartel de precios (con el ⁹ pequeñito), una etiqueta de parabrisas con el consumo del auto y un surtidor mecánico con tambores que giran como un odómetro. En lugar de la regla genérica del 70%, calcula el límite correcto para el consumo de cada auto, muestra el costo por km de los dos combustibles y cuánto se ahorra en un tanque lleno. Las teclas de R$ 50, 100 y 150 simulan la carga: el indicador de combustible sube, la lectura dice cuántos km rinde y, si no entra, la pistola corta con el tanque lleno. <em>(por defecto es un VW Gol G3 1.6 2005 con el consumo de la ficha técnica; se puede cambiar de auto o cargar el tuyo)</em>',
 

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Margem | Trabalho de faculdade nas normas da ABNT</title>
+<meta name="description" content="Manda o .docx, o PDF ou cola o texto: o Margem monta capa, folha de rosto, sumário e o corpo nas normas da ABNT, confere citações e avisa se escapou dado de paciente. Tudo no seu navegador.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Caveat:wght@500;700&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&family=Arimo:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topo">
+  <div class="topo__marca">
+    <span class="psi" aria-hidden="true">Ψ</span>
+    <div>
+      <h1>Margem</h1>
+      <p>Seu trabalho de faculdade nas normas da ABNT. Pensado pra quem estuda psicologia, serve pra qualquer curso.</p>
+    </div>
+  </div>
+  <p class="topo__sigilo">Nada do que você enviar sai deste computador.<br>O texto é lido e montado aqui mesmo, no navegador.</p>
+</header>
+
+<main class="oficina">
+
+  <!-- fichário -->
+  <aside class="fichario">
+    <nav class="abas" role="tablist" aria-label="Etapas">
+      <button role="tab" class="aba aba--texto" data-aba="texto" aria-selected="true">Texto</button>
+      <button role="tab" class="aba aba--capa" data-aba="capa" aria-selected="false">Capa</button>
+      <button role="tab" class="aba aba--marcas" data-aba="marcas" aria-selected="false">Marcações <b class="aba__n" id="nMarcas"></b></button>
+      <button role="tab" class="aba aba--confere" data-aba="confere" aria-selected="false">Conferência <b class="aba__n aba__n--alerta" id="nConfere"></b></button>
+      <button role="tab" class="aba aba--ref" data-aba="ref" aria-selected="false">Referência</button>
+    </nav>
+
+    <!-- 1. texto -->
+    <section class="divisoria divisoria--texto" data-painel="texto" role="tabpanel">
+      <h2>De onde vem o texto</h2>
+      <label class="bandeja" id="bandeja">
+        <input type="file" id="arquivo" accept=".docx,.pdf,.txt,.md,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+        <span class="bandeja__grande">Solta o arquivo aqui</span>
+        <span class="bandeja__peq">ou clica pra escolher · Word (.docx), PDF ou .txt<br>Google Docs: Arquivo → Fazer download → .docx</span>
+      </label>
+      <p class="ou"><span>ou cola o texto</span></p>
+      <textarea id="colado" class="pautado" rows="9" placeholder="Cola aqui o trabalho inteiro, do título às referências."></textarea>
+      <div class="linha-botoes">
+        <button type="button" class="btn btn--cheio" id="usarColado">Organizar texto colado</button>
+        <button type="button" class="btn btn--linha" id="exemplo">Ver com um exemplo</button>
+      </div>
+      <div class="aviso" id="avisoEntrada" hidden></div>
+      <div class="lembrete">
+        <h3>O que o Margem faz sozinho</h3>
+        <ul>
+          <li>Acha títulos, citações longas, listas e referências e marca cada um.</li>
+          <li>Joga fora o sumário velho e refaz com as páginas certas.</li>
+          <li>Numera as seções (1, 1.1, 1.1.1) e põe as referências em ordem alfabética.</li>
+          <li>Aplica fonte 12, espaçamento 1,5, recuo de 1,25 cm, margens 3 e 2 cm.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 2. capa -->
+    <section class="divisoria divisoria--capa" data-painel="capa" role="tabpanel" hidden>
+      <h2>Dados da capa e da folha de rosto</h2>
+      <div class="ficha">
+        <div class="ficha__furo" aria-hidden="true"></div>
+        <label class="ficha__l"><span>Instituição</span><input data-capa="instituicao" placeholder="Universidade Federal de ..."></label>
+        <label class="ficha__l"><span>Curso</span><input data-capa="curso" placeholder="Curso de Psicologia"></label>
+        <label class="ficha__l ficha__l--alto"><span>Autor(es)</span><textarea data-capa="autores" rows="2" placeholder="Um nome por linha"></textarea></label>
+        <label class="ficha__l"><span>Título</span><input data-capa="titulo" placeholder="Título do trabalho"></label>
+        <label class="ficha__l"><span>Subtítulo</span><input data-capa="subtitulo" placeholder="(se tiver)"></label>
+        <label class="ficha__l ficha__l--alto"><span>Natureza</span><textarea data-capa="natureza" rows="3" placeholder="Trabalho de Conclusão de Curso apresentado ao Curso de Psicologia da ..., como requisito parcial para obtenção do título de Bacharel em Psicologia."></textarea></label>
+        <label class="ficha__l"><span>Orientador(a)</span><input data-capa="orientador" placeholder="Prof.ª Dr.ª ..."></label>
+        <div class="ficha__dupla">
+          <label class="ficha__l"><span>Cidade</span><input data-capa="cidade" placeholder="Cidade"></label>
+          <label class="ficha__l"><span>Ano</span><input data-capa="ano" inputmode="numeric" maxlength="4"></label>
+        </div>
+      </div>
+
+      <h3 class="sub">Como montar</h3>
+      <div class="chaves">
+        <label class="chave"><input type="checkbox" data-op="capa"><span>Capa</span></label>
+        <label class="chave"><input type="checkbox" data-op="rosto"><span>Folha de rosto</span></label>
+        <label class="chave"><input type="checkbox" data-op="sumario"><span>Sumário</span></label>
+        <label class="chave"><input type="checkbox" data-op="novaPagina"><span>Seção primária abre folha nova</span></label>
+        <label class="chave"><input type="checkbox" data-op="ordenarRefs"><span>Referências em ordem alfabética</span></label>
+      </div>
+      <fieldset class="fonte">
+        <legend>Fonte</legend>
+        <label><input type="radio" name="fonte" value="times"><span class="f-times">Times New Roman</span></label>
+        <label><input type="radio" name="fonte" value="arial"><span class="f-arial">Arial</span></label>
+      </fieldset>
+    </section>
+
+    <!-- 3. marcações -->
+    <section class="divisoria divisoria--marcas" data-painel="marcas" role="tabpanel" hidden>
+      <h2>Marcações</h2>
+      <p class="explica">Cada trecho foi marcado com uma cor. Se alguma estiver errada, troca no seletor do lado. Clicar no texto leva até ele na folha.</p>
+      <ul class="legenda">
+        <li><mark class="mk mk--titulo">Título</mark></li>
+        <li><mark class="mk mk--secao">Seção sem número</mark></li>
+        <li><mark class="mk mk--cit">Citação longa</mark></li>
+        <li><mark class="mk mk--li">Alínea</mark></li>
+        <li><mark class="mk mk--ref">Referência</mark></li>
+        <li><mark class="mk mk--chave">Palavras-chave</mark></li>
+        <li><mark class="mk mk--capa">Vai pra capa</mark></li>
+        <li><s class="mk mk--fora">Fora do trabalho</s></li>
+      </ul>
+      <ol class="blocos" id="blocos"></ol>
+      <p class="vazio" id="semBlocos">Nenhum texto ainda. Começa pela aba <b>Texto</b>.</p>
+    </section>
+
+    <!-- 4. conferência -->
+    <section class="divisoria divisoria--confere" data-painel="confere" role="tabpanel" hidden>
+      <h2>Conferência</h2>
+      <div id="conferencia"><p class="vazio">Nenhum texto ainda.</p></div>
+    </section>
+
+    <!-- 5. referência -->
+    <section class="divisoria divisoria--ref" data-painel="ref" role="tabpanel" hidden>
+      <h2>Montar uma referência</h2>
+      <p class="explica">Preenche os campos e a referência sai no formato da NBR 6023:2018, com o destaque em negrito.</p>
+      <div class="tipos" id="tiposRef" role="radiogroup" aria-label="Tipo de obra"></div>
+      <div class="prontas">
+        <span>Atalhos:</span>
+        <button type="button" class="btn-mini" data-pronta="dsm">DSM-5-TR</button>
+        <button type="button" class="btn-mini" data-pronta="etica">Código de Ética do CFP</button>
+        <button type="button" class="btn-mini btn-mini--limpar" id="limparRef">Limpar</button>
+      </div>
+      <form class="campos-ref" id="camposRef" autocomplete="off"></form>
+      <div class="saida-ref">
+        <p class="saida-ref__txt" id="saidaRef"></p>
+        <div class="linha-botoes">
+          <button type="button" class="btn btn--cheio" id="porRef">Pôr nas referências</button>
+          <button type="button" class="btn btn--linha" id="copiarRef">Copiar</button>
+        </div>
+        <p class="nota-mao" id="notaRef"></p>
+      </div>
+    </section>
+  </aside>
+
+  <!-- mesa -->
+  <section class="mesa" aria-label="Prévia das folhas">
+    <div class="mesa__barra">
+      <p class="mesa__conta" id="conta">—</p>
+      <label class="chave chave--escura"><input type="checkbox" id="verMargens"><span>Mostrar margens</span></label>
+      <div class="mesa__acoes">
+        <button type="button" class="btn btn--cheio" id="baixarDocx" disabled>Baixar .docx</button>
+        <button type="button" class="btn btn--claro" id="imprimir" disabled>Salvar PDF</button>
+      </div>
+    </div>
+    <div class="mesa__base" id="base">
+      <div class="paginas" id="paginas"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape">
+  <p>As regras seguidas aqui são das normas NBR 14724 (trabalhos acadêmicos), 6024 (numeração de seções), 6027 (sumário), 10520 (citações) e 6023 (referências). Cada instituição pode ter o seu manual: na dúvida, o manual da sua faculdade vence.</p>
+  <a href="../../index.html#projetos">← voltar ao portfólio</a>
+</footer>
+
+<div class="carregando" id="carregando" hidden><span>Lendo o arquivo…</span></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+<script src="js/ler.js"></script>
+<script src="js/marcar.js"></script>
+<script src="js/folhas.js"></script>
+<script src="js/docx.js"></script>
+<script src="js/conferir.js"></script>
+<script src="js/referencia.js"></script>
+<script src="js/exemplo.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
