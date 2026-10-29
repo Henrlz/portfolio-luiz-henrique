@@ -189,22 +189,56 @@
     const img = g.getImageData(MARGEM, MARGEM, W, H);
     const d = img.data;
     const lum = new Uint8Array(W * H);
-    for (let i = 0; i < W * H; i++) lum[i] = (d[i * 4] * 299 + d[i * 4 + 1] * 587 + d[i * 4 + 2] * 114) / 1000;
-    const viz = Math.round(9 * escala);
-    let texto = 0;
+    // fundo da legenda: escuro e neutro (preto/cinza). Letra azul ou vermelha de slide não conta
+    const fundo = new Uint8Array(W * H);
+    for (let i = 0; i < W * H; i++) {
+      const r = d[i * 4], gg = d[i * 4 + 1], b = d[i * 4 + 2];
+      lum[i] = (r * 299 + gg * 587 + b * 114) / 1000;
+      fundo[i] = lum[i] < 90 && Math.max(r, gg, b) - Math.min(r, gg, b) < 40 ? 1 : 0;
+    }
+    // "perto do fundo" em 2D (somas acumuladas: linha e depois coluna). Olhar só para os lados
+    // apagava o meio das barras horizontais (do "t", do "e") e "acolhimento" virava "acolhimenio"
+    const rh = Math.round(9 * escala), rv = Math.round(6 * escala);
+    const perto = new Uint8Array(W * H);
+    const acc = new Int32Array(W + 1);
     for (let y = 0; y < H; y++) {
-      let escuros = 0;
-      // janela deslizante: quantos pixels escuros há a até "viz" pixels de distância na linha
-      for (let x = -viz; x < W; x++) {
-        const entra = x + viz < W && lum[y * W + x + viz] < 90 ? 1 : 0;
-        const sai = x - viz - 1 >= 0 && lum[y * W + x - viz - 1] < 90 ? 1 : 0;
-        escuros += entra - sai;
-        if (x < 0) continue;
-        const i = y * W + x;
-        const letra = lum[i] > 140 && escuros > 0;
-        if (letra) texto++;
-        d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = letra ? 0 : 255;
+      for (let x = 0; x < W; x++) acc[x + 1] = acc[x] + fundo[y * W + x];
+      for (let x = 0; x < W; x++) perto[y * W + x] = acc[Math.min(W, x + rh + 1)] - acc[Math.max(0, x - rh)] > 0 ? 1 : 0;
+    }
+    const col = new Int32Array(H + 1);
+    const perto2 = new Uint8Array(W * H);
+    for (let x = 0; x < W; x++) {
+      for (let y = 0; y < H; y++) col[y + 1] = col[y] + perto[y * W + x];
+      for (let y = 0; y < H; y++) perto2[y * W + x] = col[Math.min(H, y + rv + 1)] - col[Math.max(0, y - rv)] > 0 ? 1 : 0;
+    }
+    // Só "perto" não basta: a beira do slide claro encostada na caixa virava uma moldura preta.
+    // Cada mancha clara é seguida até o fim; letra é mancha baixa e fechada pela caixa. A que
+    // encosta na borda da imagem ou é alta demais (o slide, o cenário) fica de fora
+    const claro = new Uint8Array(W * H);
+    for (let i = 0; i < W * H; i++) claro[i] = lum[i] > 140 ? 1 : 0;
+    const fila = new Int32Array(W * H);
+    const maxAlt = R.h * escala * 0.1;
+    for (let i0 = 0; i0 < W * H; i0++) {
+      if (claro[i0] !== 1) continue;
+      let n = 0, topo = H, base = 0, borda = false;
+      fila[n++] = i0; claro[i0] = 2;
+      for (let k = 0; k < n; k++) {
+        const i = fila[k], x = i % W, y = (i - x) / W;
+        if (y < topo) topo = y;
+        if (y > base) base = y;
+        if (x === 0 || y === 0 || x === W - 1 || y === H - 1) borda = true;
+        if (x > 0 && claro[i - 1] === 1) { claro[i - 1] = 2; fila[n++] = i - 1; }
+        if (x < W - 1 && claro[i + 1] === 1) { claro[i + 1] = 2; fila[n++] = i + 1; }
+        if (y > 0 && claro[i - W] === 1) { claro[i - W] = 2; fila[n++] = i - W; }
+        if (y < H - 1 && claro[i + W] === 1) { claro[i + W] = 2; fila[n++] = i + W; }
       }
+      if (borda || base - topo > maxAlt) for (let k = 0; k < n; k++) claro[fila[k]] = 3;
+    }
+    let texto = 0;
+    for (let i = 0; i < W * H; i++) {
+      const letra = claro[i] === 2 && perto2[i];
+      if (letra) texto++;
+      d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = letra ? 0 : 255;
     }
     g.putImageData(img, MARGEM, MARGEM);
     // mostra o que está sendo lido, para quem quiser conferir
@@ -235,15 +269,16 @@
     urna = null;
   }
 
+  // A faixa limpa é quase toda branca: na média, uma palavra nova some. Conta os pontos que mudaram
   function mudou(canvas) {
     const p = document.createElement('canvas');
-    p.width = 48; p.height = 12;
+    p.width = 240; p.height = 60;
     const g = p.getContext('2d', { willReadFrequently: true });
-    g.drawImage(canvas, 0, 0, 48, 12);
-    const d = g.getImageData(0, 0, 48, 12).data;
+    g.drawImage(canvas, 0, 0, 240, 60);
+    const d = g.getImageData(0, 0, 240, 60).data;
     let dif = 0;
-    if (ultimaFaixa) for (let i = 0; i < d.length; i += 4) dif += Math.abs(d[i] - ultimaFaixa[i]);
-    const novo = !ultimaFaixa || dif / (48 * 12) > 2;
+    if (ultimaFaixa) for (let i = 0; i < d.length; i += 4) if (Math.abs(d[i] - ultimaFaixa[i]) > 40) dif++;
+    const novo = !ultimaFaixa || dif > 6;
     ultimaFaixa = d;
     return novo;
   }
@@ -285,12 +320,20 @@
         legenda.adicionar(t);
         const d = N.detectar(t);
         pendentes = [];
+        const limpa = (s) => N.normal(s).replace(/[^\p{L}\d]/gu, '');
         d.achados.forEach((a) => {
-          const w = (r.palavras || []).find((x) => N.normal(x.texto).replace(/[^\p{L}\d]/gu, '') === N.normal(a.palavra).replace(/[^\p{L}\d]/gu, ''));
+          const w = (r.palavras || []).find((x) => limpa(x.texto) === limpa(a.palavra));
           const conf = w ? w.conf : r.confianca;
           // palavra no fim da legenda pode estar pela metade: espera vir mais texto ou a legenda parar
           if (a.ultima) pendentes.push({ palavra: a.palavra, conf, trecho: t });
           else votar(a.palavra, conf, t);
+          // o palestrante costuma repetir ("…é acolhimento. Repetindo: acolhimento"): cada repetição
+          // na tela é mais uma leitura da mesma palavra, e conta como voto com a confiança dela
+          (r.palavras || []).forEach((x) => {
+            const p = x.texto.replace(/^[^\p{L}\d]+|[^\p{L}\d-]+$/gu, '');
+            if (x === w || (limpa(p) !== limpa(a.palavra) && !N.parecidas(p, a.palavra))) return;
+            votar(p.toUpperCase(), x.conf, t);
+          });
         });
         const jaSaiu = caderno.notas.some((n) => n.tipo === 'palavra' && Date.now() - n.quando < 180000);
         if ((d.aviso || d.mencao) && !d.achados.length && !jaSaiu && !urna) caderno.abrirJanela('legenda', t);
@@ -520,5 +563,8 @@
 
   pintarLuzes();
   pintarNotas();
-  window.Acompanhar = { estado, caderno, idDoLink, abrirEmbed };
+  // veio da capa com o link (acompanhar.html?link=…): já abre a live
+  const linkInicial = new URLSearchParams(location.search).get('link');
+  if (linkInicial) { $('#link').value = linkInicial; $('#formLink').requestSubmit(); }
+  window.Acompanhar = { estado, caderno, idDoLink, abrirEmbed, faixa };
 })();

@@ -19,6 +19,12 @@
     <p class="capa__etiqueta">bloco de taquigrafia · nº 1</p>
     <h1>Taquígrafo</h1>
     <p class="capa__sub">Você assiste à live. Quando o palestrante anunciar a palavra-chave, ele anota, apita e guarda — com o horário e o que foi dito em volta.</p>
+    <form class="capa__link" action="acompanhar.html" method="get">
+      <label for="capaLink" class="sr">Link da live no YouTube</label>
+      <input id="capaLink" name="link" type="url" inputmode="url" placeholder="Cole aqui o link da live do YouTube" required>
+      <button type="submit">Acompanhar</button>
+    </form>
+    <p class="capa__nota">Sem instalar nada · Chrome ou Edge no computador</p>
   </div>
 </header>
 
@@ -65,13 +71,13 @@
     <h2 id="tituloJeitos">Dois jeitos de usar</h2>
     <div class="jeitos">
       <div>
-        <h3>Pelo link <span class="selo">sem instalar nada</span></h3>
+        <h3>Pelo link <span class="selo">recomendado · sem instalar</span></h3>
         <p>Cole o link da live, ela abre numa página do Taquígrafo e você compartilha a aba. Ele lê a legenda e os slides na imagem e ouve a fala. Chrome ou Edge no computador.</p>
         <a class="botao botao--forte" href="acompanhar.html">Colar o link da live</a>
       </div>
       <div>
-        <h3>No YouTube <span class="selo selo--opc">Tampermonkey</span></h3>
-        <p>Instala uma vez e o bloquinho aparece em qualquer live que você abrir no próprio YouTube. Lê a legenda direto (sem compartilhar tela) e o chat sem precisar de chave.</p>
+        <h3>No YouTube <span class="selo selo--opc">opcional · Tampermonkey</span></h3>
+        <p>Para quem quer o máximo de precisão: com uma extensão instalada, o bloquinho lê o texto da legenda direto do YouTube (sem passar por imagem) e o chat sem precisar de chave.</p>
         <a class="botao" href="#tituloInstalar">Ver como instalar</a>
       </div>
     </div>

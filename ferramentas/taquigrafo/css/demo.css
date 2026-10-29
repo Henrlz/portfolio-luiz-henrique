@@ -43,6 +43,16 @@ a { color: inherit; }
 .capa__sub { margin: 14px 0 0; max-width: 46ch; font-size: 1.08rem; color: #c9d4bd; }
 
 main { max-width: 1080px; margin: 0 auto; padding: 0 16px 40px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* o caminho principal fica na capa: colar o link */
+.capa__link { display: flex; gap: 8px; margin-top: 22px; max-width: 640px; }
+.capa__link input { flex: 1; min-width: 0; padding: 13px 14px; font: 1rem var(--ui); border: 0; border-radius: 4px; background: #f4f7ea; color: var(--tinta); }
+.capa__link input:focus { outline: 3px solid #e8a317; outline-offset: 2px; }
+.capa__link button { padding: 0 22px; border: 0; border-radius: 4px; background: #e8a317; color: #1f2a1c; font: 700 1rem var(--ui); cursor: pointer; }
+.capa__link button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.capa__nota { margin: 8px 0 0; font: .8rem var(--mono); color: #a9b79c; }
+@media (max-width: 520px) { .capa__link { flex-wrap: wrap; } .capa__link button { padding: 12px; flex: 1; } }
 
 /* ---------- demonstração ---------- */
 .demo { margin-top: -18px; background: var(--papel); border-radius: 4px; padding: 22px 22px 18px; box-shadow: 0 20px 40px -24px rgba(0,0,0,.5); position: relative; }
