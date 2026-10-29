@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taquígrafo | anota a palavra-chave da live</title>
+<meta name="description" content="Script para o Tampermonkey que lê a legenda automática e o chat de uma live do YouTube e anota a palavra-chave quando o palestrante fala. Roda no seu navegador.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Instrument+Sans:wght@400;500;600;700&family=Kalam:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/demo.css">
+</head>
+<body>
+
+<header class="capa">
+  <div class="capa__espiral" aria-hidden="true"></div>
+  <div class="capa__miolo">
+    <p class="capa__etiqueta">bloco de taquigrafia · nº 1</p>
+    <h1>Taquígrafo</h1>
+    <p class="capa__sub">Você assiste à live. Quando o palestrante anunciar a palavra-chave, ele anota, apita e guarda — com o horário e o que foi dito em volta.</p>
+  </div>
+</header>
+
+<main>
+  <section class="demo" aria-labelledby="tituloDemo">
+    <div class="demo__cab">
+      <h2 id="tituloDemo">Veja funcionando</h2>
+      <p>Uma live de mentira, com legenda automática e chat. O bloquinho verde no canto é o Taquígrafo de verdade, o mesmo script que roda no YouTube.</p>
+    </div>
+
+    <div class="palco">
+      <div class="player" id="movie_player">
+        <video class="html5-main-video" id="video" playsinline muted></video>
+        <div class="ytp-caption-window-container" id="legendas" aria-live="off">
+          <div class="caption-window"><span class="captions-text" id="linhas"></span></div>
+        </div>
+        <div class="player__barra">
+          <span class="ao-vivo" id="aoVivo">● AO VIVO</span>
+          <span class="player__tempo" id="tempo">0:00</span>
+          <button type="button" class="ytp-subtitles-button" id="botaoCC" aria-pressed="false" data-title-no-tooltip="Legendas" title="Legendas">CC</button>
+        </div>
+        <button type="button" class="player__comecar" id="comecar">
+          <span class="player__play" aria-hidden="true">▶</span>
+          Começar a live de demonstração
+        </button>
+      </div>
+      <iframe id="chatframe" class="chat" title="Chat da live de demonstração"></iframe>
+    </div>
+
+    <div class="controles">
+      <div class="velocidade" role="radiogroup" aria-label="Velocidade">
+        <span>Velocidade</span>
+        <button type="button" role="radio" aria-checked="true" data-v="1">1×</button>
+        <button type="button" role="radio" aria-checked="false" data-v="2">2×</button>
+        <button type="button" role="radio" aria-checked="false" data-v="4">4×</button>
+      </div>
+      <button type="button" class="botao-linha" id="recomecar">Recomeçar</button>
+      <label class="som"><input type="checkbox" id="som"> ouvir a fala do final</label>
+    </div>
+    <p class="dica">Dica: no bloquinho, clique em <b>Tela</b> antes do fim para ver o Taquígrafo ler a palavra no slide, ou em <b>Voz</b> para ele reconhecer a fala sem legenda (baixa 32 MB na primeira vez).</p>
+  </section>
+
+  <section class="folha folha--escolha" aria-labelledby="tituloJeitos">
+    <h2 id="tituloJeitos">Dois jeitos de usar</h2>
+    <div class="jeitos">
+      <div>
+        <h3>Pelo link <span class="selo">sem instalar nada</span></h3>
+        <p>Cole o link da live, ela abre numa página do Taquígrafo e você compartilha a aba. Ele lê a legenda e os slides na imagem e ouve a fala. Chrome ou Edge no computador.</p>
+        <a class="botao botao--forte" href="acompanhar.html">Colar o link da live</a>
+      </div>
+      <div>
+        <h3>No YouTube <span class="selo selo--opc">Tampermonkey</span></h3>
+        <p>Instala uma vez e o bloquinho aparece em qualquer live que você abrir no próprio YouTube. Lê a legenda direto (sem compartilhar tela) e o chat sem precisar de chave.</p>
+        <a class="botao" href="#tituloInstalar">Ver como instalar</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="folha" aria-labelledby="tituloInstalar">
+    <h2 id="tituloInstalar">Como instalar no YouTube</h2>
+    <ol class="passos">
+      <li>
+        <b>Instale o Tampermonkey</b> no seu navegador (Chrome, Edge, Firefox ou Opera).
+        <a class="botao" href="https://www.tampermonkey.net/" target="_blank" rel="noopener">Abrir tampermonkey.net</a>
+      </li>
+      <li>
+        <b>Instale o Taquígrafo.</b> O Tampermonkey abre uma tela pedindo para confirmar.
+        <a class="botao botao--forte" href="taquigrafo.user.js">Instalar o Taquígrafo</a>
+      </li>
+      <li><b>Abra a live no YouTube.</b> O bloquinho aparece no canto, liga a legenda sozinho e começa a ouvir. Pode arrastar o bloco pra onde quiser.</li>
+      <li><b>Deixe a aba aberta.</b> Quando a palavra for dita, toca um aviso e aparece uma notificação. A lista fica salva mesmo se fechar a aba.</li>
+    </ol>
+    <p class="nota-mao">No Chrome, se o script não rodar, ative em Extensões → Tampermonkey → Detalhes → “Permitir scripts do usuário”.</p>
+  </section>
+
+  <section class="folha" aria-labelledby="tituloFontes">
+    <h2 id="tituloFontes">De onde ele tira a palavra</h2>
+    <dl class="fontes">
+      <div><dt>Legenda <span class="selo">principal</span></dt><dd>Lê a legenda automática que o próprio YouTube gera e procura frases como “a palavra-chave é…”, “anotem a palavra…”, “o código de presença é…”, inclusive soletrada (A-C-O-L-H-E-R). Também anota o aviso “no final eu passo a palavra” e guarda o que vem depois.</dd></div>
+      <div><dt>Chat</dt><dd>Mensagem de moderador ou do dono do canal vale na hora. De espectador comum, só quando três pessoas diferentes mandam a mesma palavra — e pergunta (“é empatia?”) não conta.</dd></div>
+      <div><dt>Tela <span class="selo selo--opc">opcional</span></dt><dd>Lê o texto que aparece no vídeo, como um slide com a palavra. Usa o Tesseract, que reconhece letras no seu computador.</dd></div>
+      <div><dt>Voz <span class="selo selo--opc">opcional</span></dt><dd>Para live sem legenda: o Vosk reconhece a fala direto do áudio do vídeo, no seu computador e sem internet depois de baixar o modelo (32 MB).</dd></div>
+    </dl>
+  </section>
+
+  <section class="folha folha--limites" aria-labelledby="tituloLimites">
+    <h2 id="tituloLimites">O que ele não faz</h2>
+    <ul>
+      <li>Não inventa: se a legenda do YouTube errar a palavra, ele anota errado. Por isso cada anotação mostra o trecho falado, e a mesma palavra vinda do chat ou repetida pelo palestrante vira “confiável”.</li>
+      <li>Nem toda live tem legenda: o canal pode desligar. Nesse caso o bloquinho mostra “sem legenda” e você pode ligar a Voz.</li>
+      <li>Precisa da aba aberta. Ele não assiste à live por você com o computador desligado.</li>
+      <li>Nada sai do seu navegador: não tem servidor, conta ou envio de dados.</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="rodape">
+  <p>Taquígrafo · feito por Luiz Henrique Pereira. Live, palestrante e chat desta página são fictícios.</p>
+  <a href="../../index.html#projetos">← voltar ao portfólio</a>
+</footer>
+
+<audio id="fala" src="fala-demo.wav" preload="auto"></audio>
+<script src="js/demo.js"></script>
+<script>window.__TAQUIGRAFO_DEMO = true;</script>
+<script src="taquigrafo.user.js"></script>
+</body>
+</html>

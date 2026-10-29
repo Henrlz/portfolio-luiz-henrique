@@ -408,12 +408,29 @@
             <span class="project-tag" data-i18n="projects.tag.personal">Pessoal</span>
           </div>
           <h3>Margem</h3>
-          <p data-i18n="projects.abnt.desc">Transforma um trabalho de faculdade nas normas da ABNT, pensado para estudantes de psicologia. Lê Word (.docx), PDF ou texto colado, identifica sozinho títulos, citações longas, alíneas e referências (e deixa corrigir cada marcação com cores de marca-texto), aproveita a capa que já vier no arquivo e monta capa, folha de rosto, resumo, sumário com as páginas certas e o corpo nas margens de 3 e 2 cm, em folhas A4 diagramadas na tela. Confere se toda citação tem referência (inclusive no formato Freud (1912/2010)), avisa quando escapou nome de paciente, CPF ou telefone e troca por "Paciente A", e tem um montador de referências da NBR 6023. Baixa um .docx editável, escrito direto em XML, ou salva em PDF. Tudo roda no navegador: o texto nunca sai do computador. <em>(tem um exemplo pronto pra testar)</em></p>
+          <p data-i18n="projects.abnt.desc">Transforma um trabalho de faculdade nas normas da ABNT ou da APA 7, pensado para estudantes de psicologia. Lê Word (.docx), PDF ou texto colado e reconhece sozinho títulos, citações longas, alíneas, referências, tabelas, imagens e notas de rodapé (cada marcação pode ser corrigida, com cores de marca-texto). Aproveita a capa que já vier no arquivo e monta capa, folha de rosto, aprovação, dedicatória, epígrafe, resumo, listas de ilustrações e de siglas, sumário com as páginas certas e o corpo, em folhas A4 diagramadas na tela: tabela longa continua na folha seguinte com o cabeçalho repetido e cada nota cai no pé da página onde é chamada. Antes de baixar, confere se toda citação tem referência, se a citação direta tem página, se o resumo e as palavras-chave estão na medida e se as referências estão no formato, com botão de corrigir; avisa quando escapou nome de paciente ou uma combinação de idade e profissão que identifica alguém. Converte referências de ABNT para APA, monta referências novas e não deixa sair capa com campo vazio. Baixa um .docx editável, escrito direto em XML (com notas, tabelas e imagens de verdade), ou salva em PDF. Tudo roda no navegador: o texto nunca sai do computador. <em>(tem um exemplo pronto pra testar)</em></p>
           <ul class="tech-stack">
             <li>HTML5</li><li>CSS3</li><li>JavaScript</li><li>pdf.js</li><li>mammoth.js</li><li>JSZip</li><li>Office Open XML</li><li>LocalStorage</li>
           </ul>
           <div class="project-links">
             <a href="ferramentas/margem/index.html" target="_blank" rel="noopener" data-i18n="projects.link_online">Ver online</a>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-head">
+            <span class="project-icon" data-i18n-title="projects.steno.icon" title="Anota a palavra-chave da live">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="17" rx="1.5"/><path d="M4 8h16"/><path d="M8 2.5v3M12 2.5v3M16 2.5v3"/><path d="M7 13c1.5-2 2.5 2 4 0M13 17c1.5-2 2.5 2 4 0"/></svg>
+            </span>
+            <span class="project-tag" data-i18n="projects.tag.personal">Pessoal</span>
+          </div>
+          <h3>Taquígrafo</h3>
+          <p data-i18n="projects.steno.desc">Script para o Tampermonkey que fica de olho numa live do YouTube e anota a palavra-chave quando o palestrante anuncia. Lê a legenda automática que o próprio YouTube gera, junta as linhas que rolam num texto corrido e procura frases como “a palavra-chave é…”, “anotem a palavra…” ou “o código de presença é…”, inclusive soletrada; avisa quando a palavra “vai ser dita” e guarda o que vem depois. No chat, vale mensagem de moderador ou de três pessoas diferentes. Para o que a legenda não cobre, liga-se a leitura da tela (Tesseract) ou o reconhecimento de voz (Vosk), que rodam numa página “motor” à parte, porque o YouTube bloqueia essas bibliotecas lá dentro. Toca um aviso, notifica e salva tudo com horário e trecho falado. Nada sai do navegador. <em>(a página tem uma live de demonstração rodando o mesmo script)</em></p>
+          <ul class="tech-stack">
+            <li>JavaScript</li><li>Tampermonkey</li><li>MutationObserver</li><li>Web Audio</li><li>postMessage</li><li>Tesseract.js</li><li>Vosk</li><li>Trusted Types</li>
+          </ul>
+          <div class="project-links">
+            <a href="ferramentas/taquigrafo/index.html" target="_blank" rel="noopener" data-i18n="projects.link_online">Ver online</a>
           </div>
         </article>
       </div>
