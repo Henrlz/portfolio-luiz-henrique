@@ -4,92 +4,93 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Taquígrafo · acompanhar uma live pelo link</title>
-<meta name="description" content="Cole o link de uma live do YouTube e o Taquígrafo acompanha a legenda, a voz e os slides e anota a palavra-chave. Roda no seu navegador.">
+<meta name="description" content="Cole o link de uma live do YouTube: o Taquígrafo transcreve tudo o que é dito, destaca o que tem a ver com a palavra-chave e anota a palavra. Roda no seu navegador.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Instrument+Sans:wght@400;500;600;700&family=Kalam:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/demo.css">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/fita.css">
 </head>
-<body class="pg-acompanhar">
+<body class="app">
 
-<header class="capa capa--fina">
-  <div class="capa__espiral" aria-hidden="true"></div>
-  <div class="capa__miolo">
-    <p class="capa__etiqueta"><a href="./">Taquígrafo</a> · pelo link</p>
-    <h1>Cole o link da live</h1>
-    <p class="capa__sub">A live abre aqui, com legenda. Você aceita compartilhar esta aba e o Taquígrafo acompanha a legenda, a voz e os slides até a palavra-chave aparecer.</p>
-  </div>
-</header>
-
-<main>
-  <section class="demo" aria-label="Acompanhar">
-    <form class="link" id="formLink" autocomplete="off">
-      <label for="link" class="link__rot">Link da live no YouTube</label>
-      <div class="link__linha">
-        <input id="link" type="url" inputmode="url" placeholder="https://www.youtube.com/watch?v=…" required>
-        <button type="submit" class="botao botao--forte">Abrir</button>
-      </div>
-      <p class="link__ou">ou <button type="button" class="botao-texto" id="usarDemo">experimente com a live de demonstração</button></p>
-      <details class="chave-api" id="chaveApi">
-        <summary>Ler o chat também (opcional, com a API gratuita do YouTube)</summary>
-        <div class="chave-api__corpo">
-          <label for="chave">Sua chave da API</label>
-          <input id="chave" type="password" placeholder="AIza…" spellcheck="false">
-          <p>A chave fica só neste navegador. Como criar (grátis, sem cartão): no <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener">Google Cloud</a>, ative a “YouTube Data API v3”, vá em Credenciais → Criar credenciais → Chave de API. A cota grátis (10.000 por dia) dá para várias horas de live.</p>
-        </div>
-      </details>
-      <p class="aviso-link" id="avisoLink" hidden></p>
-    </form>
-
-    <div class="palco palco--acompanhar" id="palco" hidden>
-      <div class="player player--embed" id="moldura"><iframe id="player" title="Live" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
-      <aside class="caderneta" aria-label="Anotações">
-        <div class="caderneta__espiral" aria-hidden="true"><span>TAQUÍGRAFO</span></div>
-        <div class="caderneta__folha">
-          <ul class="luzes" id="luzes"></ul>
-          <div class="caderneta__acoes">
-            <button type="button" class="botao botao--forte" id="comecar">Começar a acompanhar</button>
-            <button type="button" class="botao" id="parar" hidden>Parar</button>
-          </div>
-          <div class="opcoes">
-            <label><input type="checkbox" id="optVoz"> ouvir a fala (Vosk, baixa 32 MB)</label>
-            <label><input type="checkbox" id="optTela"> ler slides</label>
-          </div>
-          <p class="caderneta__agora" id="agora">O que for dito aparece aqui…</p>
-          <figure class="espiar" id="espiar" hidden>
-            <canvas id="espiarCanvas" width="400" height="80"></canvas>
-            <figcaption>o que o leitor está vendo na legenda</figcaption>
-          </figure>
-          <div id="notas" aria-live="polite"></div>
-          <div class="caderneta__rodape">
-            <button type="button" class="botao-linha" id="exportar">Exportar .txt</button>
-            <button type="button" class="botao-linha" id="limpar">Limpar</button>
-          </div>
-        </div>
-      </aside>
+<header class="topo topo--app">
+  <a class="marca" href="./"><span class="marca__ponto" aria-hidden="true"></span>Taquígrafo</a>
+  <form class="slot" id="formLink" autocomplete="off">
+    <label for="link" class="sr">Link da live no YouTube</label>
+    <input id="link" type="url" inputmode="url" placeholder="cole o link da live do YouTube" required>
+    <button type="submit">Abrir</button>
+  </form>
+  <button type="button" class="topo__demo" id="usarDemo">usar a live de demonstração</button>
+  <details class="chave" id="chaveApi">
+    <summary>ler o chat</summary>
+    <div class="chave__corpo">
+      <label for="chave">Sua chave da API do YouTube (grátis, opcional)</label>
+      <input id="chave" type="password" placeholder="AIza…" spellcheck="false">
+      <p>A chave fica só neste navegador. Como criar, sem cartão: no <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener">Google Cloud</a>, ative a “YouTube Data API v3” e vá em Credenciais → Criar credenciais → Chave de API. A cota grátis (10.000 por dia) dá para várias horas de live.</p>
     </div>
-  </section>
+  </details>
+</header>
+<p class="aviso" id="avisoLink" hidden></p>
 
-  <section class="folha" aria-labelledby="tituloComo">
-    <h2 id="tituloComo">Como funciona</h2>
-    <ol class="passos">
-      <li><b>Cole o link e abra.</b> A live aparece aqui com a legenda ligada. Dê play e, se quiser a voz, tire do mudo.</li>
-      <li><b>Clique em “Começar a acompanhar”</b> e, na janela do navegador, escolha <b>esta aba</b> e marque <b>“compartilhar áudio da guia”</b>.</li>
-      <li><b>Deixe a aba aberta.</b> Ele lê a legenda que aparece na imagem, ouve a fala se você ligou a voz e lê os slides se você pediu. Quando a palavra for anunciada, apita e anota.</li>
-    </ol>
-    <p class="nota-mao">Funciona no Chrome ou no Edge do computador. No celular o navegador não deixa compartilhar a aba — use no computador.</p>
-    <p>Prefere que ele leia a legenda direto, sem compartilhar tela? Use o <a href="./">script do Tampermonkey</a>, que também lê o chat sem precisar de chave.</p>
-  </section>
+<main class="boas-vindas" id="boasVindas">
+  <div>
+    <span class="etiqueta">pelo link · sem instalar nada</span>
+    <h1>Cole o link da live <em>lá em cima</em></h1>
+  </div>
+  <ol>
+    <li><b>A live abre aqui</b>, com a legenda em português ligada. Dê play e tire do mudo se quiser a voz.</li>
+    <li><b>Clique em “Começar”</b> e, na janela do navegador, escolha <b>esta aba</b>. Marque “compartilhar áudio” para ele também ouvir a fala.</li>
+    <li><b>Deixe a aba aberta.</b> A fita ao lado imprime tudo o que é dito e marca o que tem a ver com a palavra-chave. Quando a palavra sair, apita e carimba.</li>
+  </ol>
+  <p class="obs">Funciona no Chrome ou no Edge do computador. No celular o navegador não deixa compartilhar a aba — use no computador. Nada sai do seu navegador.</p>
 </main>
 
-<footer class="rodape">
-  <p>Nada sai do seu navegador: a imagem e o som da aba são lidos aqui mesmo. Com chave, o chat vem da API oficial do YouTube.</p>
-  <a href="./">← Taquígrafo</a>
-</footer>
+<div class="bancada" id="palco" hidden>
+  <div class="bancada__esq">
+    <div class="moldura" id="moldura"><iframe id="player" title="Live" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
+
+    <div class="painel">
+      <ul class="luzes" id="luzes" aria-live="polite"></ul>
+      <div class="painel__acoes">
+        <button type="button" class="botao-neon" id="comecar">Começar</button>
+        <button type="button" class="botao-fio" id="parar" hidden>Parar</button>
+      </div>
+      <div class="opcoes">
+        <label class="alavanca"><input type="checkbox" id="optVoz"> ouvir a fala (Vosk, baixa 32 MB)</label>
+        <label class="alavanca"><input type="checkbox" id="optTela"> ler os slides</label>
+      </div>
+      <figure class="espiar" id="espiar" hidden>
+        <canvas id="espiarCanvas" width="400" height="80"></canvas>
+        <figcaption>o que o leitor está vendo na legenda</figcaption>
+      </figure>
+    </div>
+
+    <section class="carimbos" aria-labelledby="tituloCarimbos">
+      <div class="carimbos__cab">
+        <h2 id="tituloCarimbos">Palavras-chave <span class="carimbos__qtas" id="qtasPalavras"></span></h2>
+        <button type="button" class="botao-fio" id="copiarTodas" hidden>copiar todas</button>
+      </div>
+      <div id="notas" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <aside class="bancada__dir" aria-label="Transcrição">
+    <div class="cabeca">
+      <div class="cabeca__nome"><span>transcrição</span><span id="contagem">0 palavras</span></div>
+      <div class="fenda"></div>
+    </div>
+    <div id="fita"></div>
+    <div class="fita-pe">
+      <label class="alavanca"><input type="checkbox" id="soDestaques"> só os destaques</label>
+      <button type="button" class="botao-fio" id="exportar">baixar .txt</button>
+      <button type="button" class="botao-fio" id="limpar">limpar</button>
+    </div>
+  </aside>
+</div>
 
 <script>window.__TAQUIGRAFO_NUCLEO = true;</script>
 <script src="taquigrafo.user.js"></script>
+<script src="js/fita.js"></script>
 <script src="js/acompanhar.js"></script>
 </body>
 </html>

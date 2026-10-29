@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taquígrafo · o script do Tampermonkey numa live de mentira</title>
+<meta name="description" content="Veja o script do Taquígrafo para o Tampermonkey rodando numa live de demonstração: ele lê a legenda e o chat direto da página do YouTube.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/player.css">
+<link rel="stylesheet" href="css/fita.css">
+</head>
+<body>
+
+<header class="topo">
+  <a class="marca" href="./"><span class="marca__ponto" aria-hidden="true"></span>Taquígrafo</a>
+  <nav class="topo__nav" aria-label="Taquígrafo">
+    <a href="./">início</a>
+    <a href="acompanhar.html">pelo link</a>
+  </nav>
+  <a class="topo__voltar" href="../../index.html#projetos">← portfólio</a>
+</header>
+
+<main>
+  <section class="trecho ensaio" aria-labelledby="tituloScript">
+    <span class="etiqueta">tampermonkey · o script de verdade</span>
+    <h2 id="tituloScript">O bloquinho dentro do YouTube</h2>
+    <p class="trecho__intro">Esta página imita o player e o chat do YouTube. O bloquinho no canto é o mesmo script que você instala no Tampermonkey: ele liga a legenda sozinho, lê o texto dela e o chat direto da página e anota a palavra-chave. Clique em <b>Tela</b> antes do fim para vê-lo ler o slide, ou em <b>Voz</b> para reconhecer a fala sem legenda (baixa 32 MB).</p>
+
+    <div class="ensaio__mesa">
+      <div class="ensaio__live">
+        <div class="player" id="movie_player">
+          <video class="html5-main-video" id="video" playsinline muted></video>
+          <div class="ytp-caption-window-container" id="legendas" aria-live="off">
+            <div class="caption-window"><span class="captions-text" id="linhas"></span></div>
+          </div>
+          <div class="player__barra">
+            <span class="ao-vivo" id="aoVivo">● AO VIVO</span>
+            <span class="player__tempo" id="tempo">0:00</span>
+            <button type="button" class="ytp-subtitles-button" id="botaoCC" aria-pressed="false" data-title-no-tooltip="Legendas" title="Legendas">CC</button>
+          </div>
+          <button type="button" class="player__comecar" id="comecar">
+            <span class="player__play" aria-hidden="true">▶</span>
+            Começar a live de demonstração
+          </button>
+        </div>
+        <div class="controles">
+          <div class="velocidade" role="radiogroup" aria-label="Velocidade">
+            <span>velocidade</span>
+            <button type="button" role="radio" aria-checked="true" data-v="1">1×</button>
+            <button type="button" role="radio" aria-checked="false" data-v="2">2×</button>
+            <button type="button" role="radio" aria-checked="false" data-v="4">4×</button>
+          </div>
+          <button type="button" class="botao-fio" id="recomecar">recomeçar</button>
+          <label class="som"><input type="checkbox" id="som"> ouvir a fala do final</label>
+        </div>
+      </div>
+      <div class="ensaio__lado">
+        <iframe id="chatframe" class="chat" title="Chat da live de demonstração"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <section class="trecho jeitos" aria-labelledby="tituloInstalar">
+    <span class="etiqueta">instalar</span>
+    <h2 id="tituloInstalar">Para usar no YouTube</h2>
+    <div class="jeitos__par">
+      <div class="canhoto">
+        <h3>Três passos</h3>
+        <ol>
+          <li>Instale a extensão <a href="https://www.tampermonkey.net/" target="_blank" rel="noopener">Tampermonkey</a> (Chrome, Edge, Firefox ou Opera).</li>
+          <li>Instale o script do Taquígrafo e confirme na tela que abrir.</li>
+          <li>Abra a live no YouTube. O bloquinho aparece no canto; pode arrastar para onde quiser.</li>
+        </ol>
+        <div class="acoes">
+          <a class="botao-noite" href="taquigrafo.user.js">Instalar o script</a>
+        </div>
+        <p class="obs">No Chrome, se o script não rodar: Extensões → Tampermonkey → Detalhes → “Permitir scripts do usuário”.</p>
+      </div>
+      <div class="canhoto">
+        <h3>Sem instalar <span class="selo">pelo link</span></h3>
+        <p>Não quer extensão? Cole o link da live e o Taquígrafo acompanha numa página dele, com a transcrição inteira na fita.</p>
+        <div class="acoes">
+          <a class="botao-noite" href="acompanhar.html">Abrir pelo link</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape">
+  <span>Taquígrafo · feito por Luiz Henrique Pereira. Live, palestrante e chat desta página são fictícios.</span>
+  <a href="./">← Taquígrafo</a>
+</footer>
+
+<audio id="fala" src="fala-demo.wav" preload="auto"></audio>
+<script src="js/demo.js"></script>
+<script>window.__TAQUIGRAFO_DEMO = true;</script>
+<script src="taquigrafo.user.js"></script>
+</body>
+</html>

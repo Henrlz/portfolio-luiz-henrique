@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Taquígrafo — anota a palavra-chave da live
+// @name         Taquígrafo — anota as palavras-chave da live
 // @namespace    https://henrlz.github.io/portfolio-luiz-henrique/
-// @version      1.0.0
-// @description  Lê a legenda automática, o chat e (se você ligar) a tela e o áudio de uma live do YouTube, e anota a palavra-chave quando o palestrante fala. Tudo no seu navegador.
+// @version      1.1.0
+// @description  Lê a legenda automática, o chat e (se você ligar) a tela e o áudio de uma live do YouTube, e anota as palavras-chave quando o palestrante anuncia. Tudo no seu navegador.
 // @author       Luiz Henrique Pereira
 // @match        https://www.youtube.com/*
 // @match        https://youtube.com/*
@@ -40,24 +40,33 @@
   // particípio logo depois de "vai ser" é aviso ("vai ser dita"), não a palavra
   const PARTICIPIOS = /^(dita|dito|falada|falado|passada|passado|revelada|revelado|anunciada|anunciado|divulgada|divulgado|mostrada|mostrado|liberada|liberado|informada|informado)$/;
 
-  // gatilhos: depois deles vem a palavra
+  // gatilhos: depois deles vem a palavra. Live pode ter várias ("a segunda palavra é…",
+  // "palavra-chave número 3:…", "1ª palavra: …"), por isso a ordem e o número entram no gatilho
   const VERBO = '\\s*(?:(?:e|eh|sera|vai ser|fica)\\s*[:=-]?|[:=-])\\s';
+  const ORDEM = '(?:primeira|segunda|terceira|quarta|quinta|sexta|setima|oitava|nona|decima|proxima|outra|ultima|nova|(?<![\\w])\\d{1,2}[aoª°º])';
+  const NUMERO = '(?:numero\\s*|n[o°º.]\\s*)?(?:\\d{1,2}|um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez)';
   const GATILHOS = [
-    new RegExp('palavra[\\s-]*chave(?:\\s+(?:de hoje|do dia|da aula|da live|do encontro|desta live|dessa live|para (?:o )?certificado|para (?:a )?presenca|de presenca)){0,3}' + VERBO, 'g'),
+    new RegExp('palavra[\\s-]*chave(?:\\s+(?:de hoje|do dia|da aula|da live|do encontro|desta live|dessa live|para (?:o )?certificado|para (?:a )?presenca|de presenca|' + NUMERO + ')){0,3}' + VERBO, 'g'),
     new RegExp('(?:o|a)?\\s*(?:codigo|senha|token|palavra)\\s+(?:de |da |do |para (?:a |o )?)(?:presenca|certificado|frequencia|confirmacao|validacao)' + VERBO, 'g'),
     /a palavra(?: de hoje| do dia)?\s+(?:e|sera|vai ser)\s/g,
+    new RegExp(ORDEM + '\\s*palavra(?:[\\s-]*chave)?(?:\\s+(?:de hoje|do dia))?' + VERBO, 'g'),
+    new RegExp('palavra\\s+' + NUMERO + '\\s*[:=-]\\s*', 'g'),
     /(?:anotem|anota|anote|guardem|guarda|escrevam|escreve|copiem|copia)\s+(?:ai\s+)?(?:a|essa|esta)?\s*palavra(?:[\s-]*chave)?\s*(?:que e|e|:|,)?\s/g,
-    /palavra[\s-]*chave\s*:\s*/g
+    new RegExp('palavra[\\s-]*chave\\s*(?:' + NUMERO + ')?\\s*:\\s*', 'g')
+  ];
+  // "as palavras-chave de hoje são acolhimento, vínculo e escuta": uma lista
+  const LISTAS = [
+    /palavras[\s-]*chaves?(?:\s+(?:de hoje|do dia|da aula|da live|do encontro|para (?:o )?certificado)){0,2}\s*(?:sao|serao|vao ser|:)\s*:?\s/g
   ];
   // avisos: a palavra ainda vai ser dita
   const AVISOS = [
-    /vou (?:falar|dizer|passar|dar|soltar|liberar|mostrar) (?:a|o) (?:palavra|codigo)/,
-    /daqui (?:a|ha) pouco (?:eu )?(?:vou )?(?:passo|falo|digo|libero|passar|falar|dizer)?\s*(?:a|o) (?:palavra|codigo)/,
-    /fiquem atentos? (?:a|para a|pra) palavra/,
-    /no final (?:da live |do encontro |da aula )?(?:eu )?(?:passo|falo|digo|vou passar|vou falar|vou dizer) (?:a|o) (?:palavra|codigo)/,
-    /(?:a|o) (?:palavra[\s-]*chave|codigo de presenca) (?:vai ser|sera) (?:dita|dito|falada|falado|passada|passado)/
+    /vou (?:falar|dizer|passar|dar|soltar|liberar|mostrar) (?:a|o|as|os|a proxima|a outra|mais uma) (?:palavras?|codigos?)/,
+    /daqui (?:a|ha) pouco (?:eu )?(?:vou )?(?:passo|falo|digo|libero|passar|falar|dizer)?\s*(?:a|o|as|os|a proxima|a outra|mais uma) (?:palavras?|codigos?)/,
+    /fiquem atentos? (?:a|as|para a|para as|pra|pras) (?:proxima |proximas |outra |outras )?palavras?/,
+    /no final (?:da live |do encontro |da aula )?(?:eu )?(?:passo|falo|digo|vou passar|vou falar|vou dizer) (?:a|o|as|os) (?:palavras?|codigos?)/,
+    /(?:a|o|as|os) (?:proxima |outra |segunda |terceira )?(?:palavras?[\s-]*chaves?|codigo de presenca) (?:vai ser|sera|vao ser|serao) (?:dita|dito|falada|falado|passada|passado|ditas|faladas|passadas)/
   ];
-  const MENCAO = /palavra[\s-]*chave|codigo de presenca|codigo do certificado|palavra do certificado/;
+  const MENCAO = /palavras?[\s-]*chaves?|codigo de presenca|codigo do certificado|palavra do certificado/;
 
   // lê a palavra depois do gatilho: pula enchimento ("a seguinte:") e junta letra soletrada (a c o l h e r)
   function lerPalavra(original, ini) {
@@ -82,6 +91,29 @@
     return { palavra: p.toUpperCase(), soletrada: false, ultima: k === tokens.length - 1 };
   }
 
+  // lista depois de "as palavras-chave são": vai até o ponto final, separada por vírgula ou "e".
+  // Cada item guarda a sua posição no texto (assim cada um vira uma anotação)
+  function lerLista(original, ini) {
+    const resto = original.slice(ini, ini + 260);
+    const fim = resto.search(/[.!?;\n]/);
+    const trecho = fim >= 0 ? resto.slice(0, fim) : resto;
+    const itens = [];
+    const re = /[^,]+/g;
+    let m;
+    while ((m = re.exec(trecho)) && itens.length < 12) {
+      const pedaco = m[0], comeco = m.index;
+      pedaco.split(/\s+e\s+/).forEach((parte, k, partes) => {
+        const off = comeco + pedaco.indexOf(parte);
+        const p = lerPalavra(original.slice(0, ini + off + parte.length), ini + off);
+        if (!p) return;
+        // sem ponto final, o último item pode estar pela metade na legenda ao vivo
+        const ultimoItem = fim < 0 && comeco + pedaco.length >= trecho.length && k === partes.length - 1;
+        itens.push({ ...p, ultima: ultimoItem, pos: ini + off });
+      });
+    }
+    return itens;
+  }
+
   // procura palavra-chave num pedaço de texto; devolve achados e avisos
   function detectar(texto) {
     const original = String(texto);
@@ -94,6 +126,11 @@
         const p = lerPalavra(original, m.index + m[0].length);
         if (p) achados.push({ ...p, pos: m.index, gatilho: original.slice(m.index, m.index + m[0].length).trim() });
       }
+    });
+    LISTAS.forEach((re) => {
+      re.lastIndex = 0;
+      let m;
+      while ((m = re.exec(n))) lerLista(original, m.index + m[0].length).forEach((p) => achados.push({ ...p, gatilho: original.slice(m.index, m.index + m[0].length).trim() }));
     });
     // o mesmo trecho pode bater em dois gatilhos: fica um achado por palavra
     const unicos = [];
@@ -157,18 +194,21 @@
       const d = detectar(texto);
       const oficial = papel === 'owner' || papel === 'moderator';
       if (oficial) {
-        if (d.achados.length) return { palavra: d.achados[0].palavra, confianca: 'alta', motivo: papel === 'owner' ? 'dono do canal' : 'moderador', texto };
+        // "palavras-chave: ACOLHIMENTO, VÍNCULO": "palavras" traz todas, "palavra" a primeira
+        if (d.achados.length) return { palavra: d.achados[0].palavra, palavras: d.achados.map((a) => a.palavra), confianca: 'alta', motivo: papel === 'owner' ? 'dono do canal' : 'moderador', texto };
         // moderador mandou só a palavra solta, em maiúsculas, logo depois de alguém perguntar
         const sozinha = /^\s*([A-ZÀ-Ý][A-ZÀ-Ý0-9-]{2,30})\s*$/.exec(texto);
         if (sozinha) return { palavra: sozinha[1], confianca: 'media', motivo: (papel === 'owner' ? 'dono do canal' : 'moderador') + ', palavra solta', texto };
         return null;
       }
       if (!d.achados.length || /\?\s*$/.test(texto)) return null;
-      const p = d.achados[0].palavra;
-      if (!this.votos.has(p)) this.votos.set(p, new Set());
-      const quem = this.votos.get(p);
-      quem.add(autor || Math.random());
-      if (quem.size === 3) return { palavra: p, confianca: 'media', motivo: '3 pessoas no chat', texto };
+      const valem = d.achados.map((a) => a.palavra).filter((p) => {
+        if (!this.votos.has(p)) this.votos.set(p, new Set());
+        const quem = this.votos.get(p);
+        quem.add(autor || Math.random());
+        return quem.size === 3;
+      });
+      if (valem.length) return { palavra: valem[0], palavras: valem, confianca: 'media', motivo: '3 pessoas no chat', texto };
       return null;
     }
   }
@@ -253,24 +293,33 @@
         this.aoMudar();
       }
       const d = base.procurar(70, final);
+      let novos = 0;
       d.achados.forEach((a) => {
         const marca = fonte + '@' + a.marca;
         if (this.marcas.has(marca)) return;
         this.marcas.add(marca);
+        novos++;
         // trecho em volta do anúncio: um pouco antes, a frase toda e um pouco depois
         const i = a.marca - base.cortadas;
         const trecho = base.palavras.slice(Math.max(0, i - 12), i + 16).join(' ');
         this.anotar({ palavra: a.palavra, fonte, trecho, soletrada: a.soletrada, confianca: a.soletrada ? 'media' : 'alta' });
       });
-      // aviso só faz sentido antes: se a palavra saiu há pouco, quem fala "palavra-chave" está repetindo
-      const jaSaiu = this.notas.some((n) => n.tipo === 'palavra' && this.agora() - n.quando < 180000);
-      if (!final && (d.aviso || d.mencao) && !d.achados.length && !jaSaiu) this.abrirJanela(fonte, base.ultimas(30));
+      // aviso só faz sentido antes: se uma palavra acabou de sair, quem fala "palavra-chave" está
+      // repetindo. Só por 45 s: live com várias palavras avisa da próxima logo depois
+      const jaSaiu = this.notas.some((n) => n.tipo === 'palavra' && this.agora() - n.quando < 45000);
+      // o aviso é procurado só no que acabou de chegar (com um pouco antes): a menção a
+      // "palavra-chave" de uma palavra já anotada não pode virar aviso de novo
+      const recente = detectar(base.palavras.slice(-(acrescimo.length + 8)).join(' '));
+      if (!final && (recente.aviso || recente.mencao) && !novos && !jaSaiu) this.abrirJanela(fonte, base.ultimas(30));
       return d;
     }
 
     // mensagem do chat já avaliada pelo Chat
     chat(r, autor, textoOriginal, papel) {
-      if (r) return this.anotar({ palavra: r.palavra, fonte: 'chat', trecho: autor + ': ' + r.texto, confianca: r.confianca, motivo: r.motivo });
+      if (r) {
+        const notas = (r.palavras || [r.palavra]).map((p) => this.anotar({ palavra: p, fonte: 'chat', trecho: autor + ': ' + r.texto, confianca: r.confianca, motivo: r.motivo }));
+        return notas[0];
+      }
       if ((papel === 'owner' || papel === 'moderator') && MENCAO.test(normal(textoOriginal))) this.abrirJanela('chat', autor + ': ' + textoOriginal);
       return null;
     }

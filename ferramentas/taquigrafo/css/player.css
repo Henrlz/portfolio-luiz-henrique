@@ -1,0 +1,36 @@
+/* O player da live de demonstração: imita o do YouTube (mesmas classes da legenda e do chat)
+   para o Taquígrafo ler igual. Usado pela vitrine, pela demonstração do script e pela
+   live que abre no modo link. */
+
+.player { position: relative; background: #111; overflow: hidden; aspect-ratio: 16 / 9; }
+.player video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #111; }
+.ytp-caption-window-container { position: absolute; left: 0; right: 0; bottom: 48px; display: flex; justify-content: center; pointer-events: none; }
+.ytp-caption-window-container[hidden] { display: none; }
+.caption-window { max-width: 82%; text-align: center; }
+.captions-text { display: inline-flex; flex-direction: column; align-items: center; }
+.caption-visual-line { display: block; }
+.ytp-caption-segment {
+  display: inline-block; padding: 1px 6px; margin: 1px 0;
+  background: rgba(8, 8, 8, .78); color: #fff;
+  font: 500 clamp(.8rem, 1.9vw, 1.2rem)/1.35 'Archivo', system-ui, sans-serif;
+}
+.player__barra {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 40px; padding: 0 12px;
+  display: flex; align-items: center; gap: 14px;
+  background: linear-gradient(transparent, rgba(0,0,0,.75)); color: #fff; font: 600 .82rem/1 'Archivo', system-ui, sans-serif;
+}
+.ao-vivo { color: #ff6b5e; letter-spacing: .04em; }
+.player__tempo { font-family: 'IBM Plex Mono', monospace; opacity: .85; }
+.ytp-subtitles-button { margin-left: auto; background: none; color: #fff; border: 1.5px solid rgba(255,255,255,.7); border-radius: 3px; font: 700 .72rem/1 'Archivo', system-ui, sans-serif; padding: 3px 5px; cursor: pointer; }
+.ytp-subtitles-button[aria-pressed="true"] { border-color: #ff6b5e; box-shadow: inset 0 -3px 0 #ff6b5e; }
+.player__comecar {
+  position: absolute; inset: 0; margin: auto; width: max-content; height: max-content;
+  display: flex; align-items: center; gap: 12px; padding: 14px 22px 14px 16px;
+  background: rgba(18, 23, 46, .94); color: #fff; border: 0; border-radius: 40px; cursor: pointer;
+  font: 600 1rem/1 'Archivo', system-ui, sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,.4);
+}
+.player__comecar[hidden] { display: none; }
+.player__comecar:focus-visible { outline: 3px solid #e6ff4f; outline-offset: 3px; }
+.player__play { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #d8352a; font-size: .95rem; padding-left: 3px; }
+
+.chat { display: block; width: 100%; height: 100%; min-height: 200px; border: 0; background: #fbfaf5; }

@@ -7,7 +7,16 @@
 
   const $ = (s, r = document) => r.querySelector(s);
 
-  const FALAS = [
+  // ?roteiro=varias: uma live com três palavras-chave (sem a fala gravada)
+  const VARIAS = new URLSearchParams(location.search).get('roteiro') === 'varias';
+  const FALAS = VARIAS ? [
+    [1, 'Boa noite, pessoal. Hoje são três palavras-chave para o certificado, fiquem atentos.'],
+    [10, 'A primeira palavra-chave é acolhimento. Repetindo: acolhimento.'],
+    [20, 'Acolher é escutar sem julgamento, no tempo do paciente.'],
+    [29, 'A segunda palavra-chave é vínculo. De novo: vínculo.'],
+    [39, 'Agora a última. A terceira palavra-chave é escuta. Escuta.'],
+    [49, 'Obrigada pela presença e até a próxima live.']
+  ] : [
     [1, 'Boa noite, pessoal, sejam bem-vindos à nossa live de hoje sobre acolhimento na clínica psicológica.'],
     [9, 'Antes de começar, um aviso: no final eu passo a palavra-chave para o certificado, então fiquem atentos.'],
     [18, 'Acolher não é só receber bem. É criar um espaço em que a pessoa se sinta escutada sem julgamento.'],
@@ -16,7 +25,14 @@
     [46, 'Bom, chegamos ao final. A palavra-chave de hoje é acolhimento. Repetindo: acolhimento.'],
     [56, 'Obrigada pela presença e até a próxima live.']
   ];
-  const CHAT = [
+  const CHAT = VARIAS ? [
+    [3, 'Ana Souza', '', 'boa noite!'],
+    [15, 'Moderação', 'moderator', '1ª palavra: ACOLHIMENTO'],
+    [24, 'Diego', '', 'a palavra chave é empatia'],
+    [34, 'Moderação', 'moderator', '2ª palavra: VÍNCULO'],
+    [45, 'Moderação', 'moderator', '3ª palavra: ESCUTA'],
+    [50, 'Hugo', '', 'obrigado pela live']
+  ] : [
     [2, 'Ana Souza', '', 'boa noite!'],
     [5, 'Bruno', '', 'boa noite professora 👋'],
     [12, 'Carla M.', '', 'qual vai ser a palavra?'],
@@ -27,14 +43,18 @@
     [52, 'Gabi', '', 'acolhimento!! anotado'],
     [55, 'Hugo', '', 'obrigado pela live']
   ];
-  const SLIDES = [
+  const SLIDES = VARIAS ? [
+    [0, 'Três palavras-chave', 'fiquem atentos', []],
+    [17, 'O que é acolher?', '', ['Receber sem julgamento', 'Escutar antes de interpretar']],
+    [52, 'Obrigada!', 'até a próxima live', []]
+  ] : [
     [0, 'Acolhimento na clínica', 'primeiros encontros', []],
     [17, 'O que é acolher?', '', ['Receber sem julgamento', 'Escutar antes de interpretar', 'Construir um espaço seguro']],
     [35, 'Três cuidados', '', ['Escuta atenta', 'Linguagem simples', 'Respeito ao tempo do paciente']],
     [45, 'Palavra-chave', 'ACOLHIMENTO', []],
     [57, 'Obrigada!', 'até a próxima live', []]
   ];
-  const FIM = 62;
+  const FIM = VARIAS ? 56 : 62;
   const PALAVRAS_POR_SEGUNDO = 2.7;
 
   // as palavras com o instante em que cada uma "chega" na legenda
@@ -145,7 +165,7 @@
     if (!d || d.getElementById('items')) return;
     const estilo = d.createElement('style');
     estilo.textContent = `
-      body{margin:0;font:13px/1.4 "Instrument Sans",system-ui,sans-serif;background:#fbfaf5;color:#1f2a1c}
+      body{margin:0;font:13px/1.4 "Archivo",system-ui,sans-serif;background:#fbfaf5;color:#17171f}
       header{padding:10px 12px;border-bottom:1px solid #e1ddd0;font-weight:600}
       #items{padding:6px 10px;display:flex;flex-direction:column;gap:6px}
       yt-live-chat-text-message-renderer{display:block;animation:entra .3s ease-out}
@@ -189,7 +209,7 @@
     t += dt * velocidade;
     while (iPalavra < palavras.length && palavras[iPalavra].t <= t) chegaPalavra(palavras[iPalavra++].p);
     while (iChat < CHAT.length && CHAT[iChat][0] <= t) { const [, a, p, m] = CHAT[iChat++]; mensagem(a, p, m); }
-    if (!falaTocou && t >= 46) {
+    if (!falaTocou && t >= 46 && !VARIAS) {
       falaTocou = true;
       audio.currentTime = 0;
       audio.play().catch(() => {});
