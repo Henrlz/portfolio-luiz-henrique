@@ -646,16 +646,156 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .cotas i { position: absolute; font-style: normal; background: #fff; padding: 0 3px; line-height: 1.2; }
 .cotas i::before { content: ''; position: absolute; background: rgba(192, 57, 43, .7); }
+.c-top::after, .c-esq::after { content: '3 cm'; }
+.c-dir::after, .c-base::after { content: '2 cm'; }
+.apa .cotas i::after { content: '2,54 cm'; }
+.apa .cotas::before { top: 25.4mm; left: 25.4mm; right: 25.4mm; bottom: 25.4mm; }
 .c-top { top: 13mm; left: 50%; transform: translateX(-50%); }
 .c-top::before { width: 1px; height: 30mm; top: -13mm; left: 50%; z-index: -1; }
 .c-base { bottom: 7mm; left: 50%; transform: translateX(-50%); }
 .c-esq { left: 9mm; top: 50%; }
 .c-dir { right: 3mm; top: 50%; }
+.apa .c-top { top: 9mm; }
+.apa .c-esq { left: 4mm; }
+.apa .c-dir { right: 2mm; }
+.apa .c-base { bottom: 10mm; }
 .folha--capa .cotas, .folha--rosto .cotas { opacity: .6; }
 
 .folha--vazia .folha__corpo { display: flex; flex-direction: column; justify-content: center; text-align: center; color: #9a9384; font-family: var(--serif); }
 .vazia__grande { font-size: 22pt; line-height: 1.2; }
 .vazia__peq { font-size: 11pt; margin-top: 8pt !important; font-family: var(--ui); }
+
+/* campo da capa que falta: aparece na folha marcado, nunca como texto de mentira */
+.falta {
+  color: #c0392b;
+  background: #fde8e4;
+  border-bottom: 1.5px dashed #c0392b;
+  font-weight: 400;
+  text-transform: none;
+  font-style: italic;
+  padding: 0 1mm;
+}
+
+/* notas de rodapé: no pé da folha, com o filete de 5 cm */
+.notas { font-size: 10pt; line-height: 1.15; text-align: justify; }
+.notas--pe { position: absolute; left: 0; right: 0; bottom: 0; }
+.notas:not(:empty)::before { content: ''; display: block; width: 50mm; border-top: .75pt solid #000; margin: 6pt 0 3pt; }
+.nota-rod { margin: 0 0 1pt !important; }
+.nota-rod sup, .nr { font-size: .68em; line-height: 0; vertical-align: super; }
+
+/* tabelas e figuras */
+.ilu { margin: 12pt 0; }
+.ilu__leg, .ilu__fonte { font-size: 10pt; line-height: 1.15; text-align: left; }
+.ilu__leg { margin-bottom: 3pt !important; }
+.ilu__fonte { margin-top: 3pt !important; }
+.ilu--figura .ilu__leg, .ilu--figura .ilu__fonte { text-align: center; }
+.ilu--figura img { display: block; margin: 0 auto; object-fit: contain; }
+.tb { width: 100%; border-collapse: collapse; font-size: 10pt; line-height: 1.15; border-top: 1pt solid #000; border-bottom: 1pt solid #000; }
+.tb th, .tb td { padding: 2pt 4pt; text-align: left; vertical-align: top; font-weight: 400; }
+.tb thead th { border-bottom: .75pt solid #000; }
+.tb--quadro, .tb--quadro th, .tb--quadro td { border: .75pt solid #000; }
+
+/* folha de aprovação, dedicatória, epígrafe */
+.ap__titulo { margin-top: 16mm; text-align: center; }
+.cp__natureza--ap { margin: 12mm 0 0 80mm; }
+.ap__data { margin-top: 12mm !important; text-align: left; }
+.ap__banca { margin-top: 10mm !important; text-align: center; font-weight: 700; }
+.ap__membro { margin-top: 13mm; text-align: center; line-height: 1.15; }
+.ap__linha { display: block; width: 110mm; margin: 0 auto 3pt; border-top: .75pt solid #000; }
+.cp--pe { justify-content: flex-end; }
+.ded { margin-left: 80mm; text-align: justify; line-height: 1.15; }
+.ded p + p { margin-top: 6pt !important; }
+.ded__autor { text-align: right; margin-top: 12pt !important; }
+
+/* listas pré-textuais */
+.sum--ilu .sum__num { display: none; }
+.sum--ilu .sum__txt { max-width: 132mm; }
+.sigla { display: flex; }
+.sigla__s { flex: none; width: 25mm; }
+
+/* ---------- APA 7 ---------- */
+.apa .folha__corpo { top: 25.4mm; left: 25.4mm; width: 159.2mm; height: 246.2mm; }
+.apa .folha__num { top: 12.7mm; right: 25.4mm; font-size: 12pt; }
+.apa .folha { line-height: 2.3; }
+.apa .par { text-align: left; text-indent: 12.7mm; }
+.apa .par.cont { text-indent: 0; }
+.apa .par.pre { text-indent: 0; line-height: 2.3; }
+.apa .partido { text-align-last: auto; }
+.apa .t { margin: 0 !important; line-height: 2.3; text-transform: none; }
+.apa .t1 { text-align: center; font-weight: 700; }
+.apa .t2 { font-weight: 700; }
+.apa .t3 { font-weight: 700; font-style: italic; }
+.apa .t4 { font-weight: 700; text-indent: 12.7mm; }
+.apa .t5 { font-weight: 700; font-style: italic; text-indent: 12.7mm; }
+.apa .ts { text-transform: none; font-weight: 700; text-align: center; }
+.apa .apa__titulo { text-align: center; font-weight: 700; }
+.apa .cit { margin: 0 0 0 12.7mm !important; font-size: 12pt; line-height: 2.3; text-align: left; }
+.apa .li { margin-left: 12.7mm !important; text-align: left; }
+.apa .ref { padding-left: 12.7mm; text-indent: -12.7mm; line-height: 2.3; margin: 0 !important; }
+.apa .chave { text-indent: 12.7mm; margin: 0 !important; line-height: 2.3; text-align: left; }
+.apa .chave .rb { font-weight: 400; font-style: italic; }
+.apa .ilu { margin: 0; }
+.apa .ilu__num { font-weight: 700; line-height: 2.3; font-size: 12pt; }
+.apa .ilu__tit { font-style: italic; line-height: 2.3; font-size: 12pt; }
+.apa .ilu__fonte { font-size: 12pt; line-height: 2.3; margin: 0 !important; text-align: left; }
+.apa .tb { font-size: 11pt; }
+.apa .tb thead th { font-weight: 700; }
+.apa .ilu--figura .ilu__num, .apa .ilu--figura .ilu__tit { text-align: left; }
+.cp--apa { text-align: center; }
+.apa__topo { margin-top: 110pt; }
+.apa__dados { margin-top: 27.6pt; }
+
+/* ---------- interface nova ---------- */
+
+/* ABNT | APA na barra da mesa */
+.norma { display: inline-flex; border: 1.5px solid #e9e4d8; border-radius: 5px; overflow: hidden; }
+.norma__b { border: 0; background: none; color: #e9e4d8; padding: 6px 12px; font-weight: 700; font-size: .82rem; cursor: pointer; font-family: var(--mono); letter-spacing: .04em; }
+.norma__b[aria-checked="true"] { background: #f3efe6; color: var(--base-esc); }
+.norma__b:focus-visible { outline: 2px solid var(--ambar, #f1a51c); outline-offset: -2px; }
+
+.fichario[data-norma="apa"] [data-so="abnt"], .fichario[data-norma="abnt"] [data-so="apa"] { display: none !important; }
+
+/* campos que faltam na ficha */
+.ficha__l--falta > span { color: #c0392b !important; font-weight: 600; }
+.ficha__l--falta input, .ficha__l--falta textarea { background: rgba(253, 232, 228, .9) !important; }
+
+.campo-opc { display: flex; flex-direction: column; gap: 3px; margin-top: 10px; }
+.campo-opc span { font-family: var(--mono); font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; color: var(--tinta-2); }
+.campo-opc textarea, .campo-opc input { border: 1px solid rgba(31,29,26,.3); border-radius: 3px; padding: 6px 8px; background: rgba(255,255,255,.75); font-size: .86rem; width: 100%; resize: vertical; }
+.campo-opc textarea:focus, .campo-opc input:focus { outline: 2px solid var(--azul-carimbo); outline-offset: -1px; }
+
+.padroes { margin-top: 6px; }
+.padroes__linha { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+.padroes__linha select, .padroes__linha input { flex: 1; min-width: 0; border: 1px solid rgba(31,29,26,.3); border-radius: 3px; padding: 4px 6px; background: rgba(255,255,255,.75); font-size: .82rem; }
+.btn-mini--arquivo { position: relative; overflow: hidden; }
+.btn-mini--arquivo input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+/* painel "falta na capa" */
+.falta-painel {
+  width: 100%;
+  background: #fff8f2;
+  color: var(--tinta);
+  border-left: 5px solid var(--caneta-vermelha);
+  padding: 10px 14px;
+  border-radius: 0 4px 4px 0;
+}
+.falta-painel__msg { margin: 0; font-family: var(--mao); font-size: 1.3rem; color: var(--caneta-vermelha); line-height: 1.2; }
+.falta-painel .btn--claro { border-color: var(--tinta); color: var(--tinta); }
+.falta-painel .btn--cheio { background: var(--tinta); color: var(--papel); border-color: var(--tinta); }
+
+/* linha de tabela/figura nas marcações */
+.mk--ilu { --c: #c9e6c0; }
+.bl--ilu { grid-template-columns: 1fr auto; }
+.bl__img { display: block; max-width: 100%; max-height: 90px; margin-top: 4px; border: 1px solid rgba(0,0,0,.15); }
+.bl__tab { font-family: var(--mono); font-size: .74rem; color: var(--tinta-2); }
+.bl__campo { grid-column: 1 / -1; display: grid; grid-template-columns: 52px 1fr; align-items: center; gap: 6px; font-size: .8rem; }
+.bl__campo span { font-family: var(--mono); font-size: .66rem; text-transform: uppercase; letter-spacing: .06em; color: var(--tinta-2); }
+.bl__campo input { border: 1px solid rgba(31,29,26,.3); border-radius: 3px; padding: 4px 6px; background: rgba(255,255,255,.75); font-size: .82rem; min-width: 0; }
+
+.sig--leve { border-left-color: var(--azul-carimbo); }
+.sig--leve .sig__rot { color: var(--azul-carimbo); }
+.sig__msg { margin: 4px 0 0; font-size: .84rem; }
+.saida-ref__txt::before { content: attr(data-norma); display: block; font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-2); margin-bottom: 4px; }
 
 /* ---------- rodapé e carregando ---------- */
 
@@ -726,6 +866,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   @page { size: A4; margin: 0; }
   body { background: #fff; }
   .topo, .fichario, .mesa__barra, .rodape, .carregando, .cotas { display: none !important; }
+  .falta { background: none; border: 0; color: inherit; }
   .oficina { display: block; }
   .mesa, .mesa__base { background: none !important; padding: 0 !important; min-height: 0; }
   .moldura { width: 210mm; height: 297mm; margin: 0; break-after: page; page-break-after: always; }

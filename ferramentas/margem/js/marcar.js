@@ -1,4 +1,4 @@
-/* Decide o que é cada parágrafo (título, citação, referência...) e monta o
+/* Decide o que é cada parágrafo (título, citação, referência, tabela...) e monta o
    trabalho na ordem da NBR 14724: pré-textuais, textuais, pós-textuais. */
 
 (function () {
@@ -10,8 +10,8 @@
     [/^resumo$/i, 'resumo'],
     [/^resumen$/i, 'resumo'],
     [/^abstract$/i, 'resumo'],
-    [/^agradecimentos?$/i, 'pre'],
-    [/^(dedicat[oó]ria|ep[ií]grafe)$/i, 'pre'],
+    [/^agradecimentos?$/i, 'agrad'],
+    [/^(dedicat[oó]ria|ep[ií]grafe)$/i, 'agrad'],
     [/^refer[eê]ncias(\s+bibliogr[aá]ficas)?$/i, 'refs'],
     [/^bibliografia$/i, 'refs'],
     [/^gloss[aá]rio$/i, 'pos'],
@@ -21,11 +21,18 @@
     [/^[ií]ndice$/i, 'sumario'],
     [/^lista\s+de\s+.+/i, 'sumario']
   ];
-  const PRE = new Set(['resumo', 'pre']);
+  // 'pre' é o nome antigo de agradecimentos, de trabalhos salvos antes
+  const PRE = new Set(['resumo', 'agrad', 'pre']);
 
   const NUMERO = /^(\d{1,2}(?:\.\d{1,2}){0,4})\.?\s+(\S.*)$/;
   const maiuscula = (s) => s === s.toLocaleUpperCase('pt-BR') && /[A-ZÀ-Ý]{3}/.test(s);
   const curto = (s, n = 120) => s.length <= n && !/[.;,]$/.test(s);
+
+  // "Tabela 2 – Título", "Figura 3: Título", "Gráfico 1 - Título"
+  const LEGENDA = /^(tabela|quadro|figura|gr[aá]fico|imagem|ilustra[cç][aã]o|fotografia|mapa|esquema|diagrama|fluxograma)\s*(\d+)?\s*[–—:.-]?\s*(.*)$/i;
+  const FONTE = /^fonte\s*:\s*(.+)$/i;
+  const ROTULOS = { tabela: 'Tabela', quadro: 'Quadro', figura: 'Figura', grafico: 'Gráfico', imagem: 'Figura', ilustracao: 'Figura', fotografia: 'Fotografia', mapa: 'Mapa', esquema: 'Esquema', diagrama: 'Diagrama', fluxograma: 'Fluxograma' };
+  const semAcento = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
 
   function papelDe(t) {
     const limpo = t.replace(NUMERO, '$2').replace(/[:.]$/, '').trim();
@@ -47,6 +54,7 @@
     let corta = t.length - m[2].length;
     const out = [];
     runs.forEach((r) => {
+      if (r.nota) { out.push(r); return; }
       if (corta >= r.t.length) { corta -= r.t.length; return; }
       out.push({ ...r, t: r.t.slice(corta) });
       corta = 0;
@@ -56,6 +64,7 @@
 
   // Tira as aspas de abertura e de fechamento de uma citação longa: na ABNT ela vai sem aspas.
   function semAspas(runs) {
+    if (runs.some((r) => r.nota)) return runs;
     const t = textoDe(runs);
     let s = t.replace(/^\s*["“«]/, '');
     s = s.replace(/["”»](\s*\([^()]*\d{4}[^()]*\)\s*\.?)\s*$/, '$1').replace(/["”»]\s*\.?\s*$/, (m) => m.includes('.') ? '.' : '');
@@ -67,6 +76,13 @@
     const t = textoDe(runs);
     const m = /^([^:]+:)\s*(.*)$/.exec(t);
     return m ? [{ t: m[1], b: true, i: false }, { t: ' ' + m[2], b: false, i: false }] : runs;
+  }
+
+  // Tabela com maioria de células numéricas é Tabela (IBGE); com texto é Quadro
+  function rotuloTabela(linhas) {
+    const corpo = linhas.slice(1).flat().filter(Boolean);
+    const num = corpo.filter((c) => /^[\d\s.,%R$()+-]+$/.test(c)).length;
+    return corpo.length && num / corpo.length >= 0.4 ? 'Tabela' : 'Quadro';
   }
 
   /* ---------- marcar ---------- */
@@ -137,6 +153,27 @@
     return { campos: c, tituloBlocos, temCapa: !!(c.instituicao || c.ano || c.natureza) };
   }
 
+  // legenda logo antes e "Fonte:" logo depois da tabela ou figura viram parte dela
+  function grudarLegendas(blocos) {
+    for (let i = 0; i < blocos.length; i++) {
+      const b = blocos[i];
+      if (b.tipo !== 'tabela' && b.tipo !== 'figura') continue;
+      const ant = blocos[i - 1];
+      const m = ant && ['p', 'fora'].includes(ant.tipo) && LEGENDA.exec(textoDe(ant.runs).trim());
+      if (m && textoDe(ant.runs).length < 220 && (m[2] || m[3])) {
+        const rot = ROTULOS[semAcento(m[1].toLowerCase())];
+        if (rot && (b.tipo === 'tabela') === ['Tabela', 'Quadro'].includes(rot)) b.rotulo = rot;
+        else if (rot && b.tipo === 'figura' && !['Tabela', 'Quadro'].includes(rot)) b.rotulo = rot;
+        b.legenda = m[3].trim();
+        blocos.splice(i - 1, 1);
+        i--;
+      }
+      const dep = blocos[i + 1];
+      const f = dep && ['p', 'fora'].includes(dep.tipo) && FONTE.exec(textoDe(dep.runs).trim());
+      if (f) { b.fonte = f[1].trim(); blocos.splice(i + 1, 1); }
+    }
+  }
+
   function marcar(paras) {
     const blocos = [];
     let modo = null;          // 'sumario' | 'refs' | 'pre'
@@ -144,6 +181,14 @@
     const antes = [];         // linhas antes da primeira seção: capa, folha de rosto, cabeçalho
 
     paras.forEach((p) => {
+      if (p.dica === 'tabela') {
+        blocos.push(bloco('tabela', [], { linhas: p.linhas, rotulo: rotuloTabela(p.linhas), legenda: '', fonte: '' }));
+        return;
+      }
+      if (p.dica === 'figura') {
+        blocos.push(bloco('figura', [], { src: p.src, w: p.w || 0, h: p.h || 0, rotulo: 'Figura', legenda: p.alt && !/^(imagem|image|picture)\s*\d*$/i.test(p.alt) ? p.alt : '', fonte: '' }));
+        return;
+      }
       const t = textoDe(p.runs).trim();
       if (!t) return;
 
@@ -156,7 +201,7 @@
       if (sec && curto(t, 60)) {
         viuSecao = true;
         if (sec.papel === 'sumario') {
-          blocos.push(bloco('fora', p.runs, { motivo: 'sumário antigo' }));
+          blocos.push(bloco('fora', p.runs, { motivo: 'sumário ou lista antiga' }));
           modo = 'sumario';
           return;
         }
@@ -172,7 +217,7 @@
         nivel = m ? m[1].split('.').length : +p.dica[1];
       } else if (m && curto(m[2]) && /^[A-ZÀ-Ý]/.test(m[2]) && m[2].split(' ').length <= 16) {
         nivel = m[1].split('.').length;
-      } else if (maiuscula(t) && curto(t, 90) && abre) {
+      } else if (maiuscula(t) && curto(t, 90) && abre && !LEGENDA.test(t)) {
         nivel = 1;
       } else if (p.dica === 'grande' && curto(t, 140) && abre) {
         nivel = maiuscula(t) ? 1 : 2;
@@ -215,7 +260,9 @@
       antes.splice(1);
     }
 
-    const capa = lerCapa(antes);
+    grudarLegendas(blocos);
+
+    const capa = lerCapa(antes.filter(({ bloco: b }) => blocos.includes(b)));
     capa.tituloBlocos.forEach((b, k) => {
       b.tipo = k === 0 ? 'capa' : 'fora';
       delete b.motivo;
@@ -226,20 +273,90 @@
     return { blocos, capa: capa.campos, temCapa: capa.temCapa };
   }
 
+  /* ---------- siglas ---------- */
+
+  const LIGA = /^(de|da|do|das|dos|e|em|para|a|o|na|no|com|à)$/i;
+  // "Conselho Federal de Psicologia (CFP)": as iniciais das palavras de peso batem com a sigla
+  function siglas(blocos) {
+    const achadas = new Map();
+    blocos.forEach((b) => {
+      if (!['p', 'li', 'cit'].includes(b.tipo)) return;
+      const t = textoDe(b.runs);
+      const re = /\(([A-ZÀ-Ý][A-ZÀ-Ý0-9-]{1,9})\)/g;
+      let m;
+      while ((m = re.exec(t))) {
+        const sigla = m[1];
+        const letras = sigla.replace(/[^A-ZÀ-Ý]/g, '');
+        if (letras.length < 2 || achadas.has(sigla)) continue;
+        const antes = t.slice(0, m.index).trim().split(/\s+/);
+        const nome = [];
+        let pesos = 0;
+        for (let k = antes.length - 1; k >= 0 && pesos < letras.length; k--) {
+          const w = antes[k].replace(/[,;:]$/, '');
+          nome.unshift(w);
+          if (!LIGA.test(w)) pesos++;
+        }
+        const iniciais = nome.filter((w) => !LIGA.test(w)).map((w) => semAcento(w[0]).toUpperCase()).join('');
+        if (iniciais === semAcento(letras)) achadas.set(sigla, nome.join(' ').replace(/^./, (c) => c.toUpperCase()));
+      }
+    });
+    return [...achadas].map(([sigla, nome]) => ({ sigla, nome })).sort((a, b) => a.sigla.localeCompare(b.sigla, 'pt-BR'));
+  }
+
+  /* ---------- citações no estilo APA ---------- */
+
+  const tituloCaso = (s) => s.toLocaleLowerCase('pt-BR').replace(/(^|[\s-])(\S)/g, (m, a, c) => a + c.toLocaleUpperCase('pt-BR'))
+    .replace(/\s(D[aeo]s?|E|Em|Para)(?=\s)/g, (m) => m.toLocaleLowerCase('pt-BR'));
+
+  // (SILVA; SOUZA, 2012, p. 3) → (Silva & Souza, 2012, p. 3); (FREUD apud LIMA, 2010) → (Freud, como citado em Lima, 2010)
+  function citacaoAPA(texto) {
+    return texto.replace(/\(([^()]*\b(1[5-9]\d{2}|20\d{2})[^()]*)\)/g, (todo, dentro) => {
+      if (!/[A-ZÀ-Ý]{2,}/.test(dentro)) return todo;
+      const obras = [];
+      let pend = [];
+      dentro.split(';').forEach((seg) => {
+        const s = seg.trim();
+        if (!/\d{4}/.test(s)) { pend.push(s); return; }
+        const [nome, ...resto] = s.split(',');
+        const autores = pend.concat(nome.trim()).map((a) => a.replace(/\b([A-ZÀ-Ý][A-ZÀ-Ý'-]+(?:\s+[A-ZÀ-Ý][A-ZÀ-Ý'-]+)*)\b/g, (n) => tituloCaso(n)));
+        let quem = autores.length > 2 ? autores[0] + ' et al.' : autores.join(' & ');
+        quem = quem.replace(/\s+apud\s+/i, ', como citado em ');
+        obras.push(quem + (resto.length ? ',' + resto.join(',') : ''));
+        pend = [];
+      });
+      if (pend.length) return todo;
+      return '(' + obras.join('; ') + ')';
+    });
+  }
+
   /* ---------- montar ---------- */
 
-  const chaveOrdem = (runs) => textoDe(runs).normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
+  const chaveOrdem = (runs) => semAcento(textoDe(runs)).toUpperCase();
 
   function montar(blocos, opcoes) {
-    const pre = [], texto = [];
+    const apa = opcoes.norma === 'apa';
+    const agrad = [], resumo = [], texto = [];
     const cont = [0, 0, 0, 0, 0];
+    const contIlu = {};
     let grupo = null;
+    let nNota = 0;
+
+    // numera as notas na ordem em que aparecem e, na APA, converte as citações
+    const preparar = (runs) => runs.map((r) => {
+      if (r.nota) return { ...r, n: ++nNota };
+      return apa ? { ...r, t: citacaoAPA(r.t) } : r;
+    });
 
     blocos.forEach((b) => {
       if (b.tipo === 'fora' || b.tipo === 'capa' || b.tipo === 'subtitulo') return;
       if (b.tipo === 'secao') {
         grupo = b.papel || 'pos';
-        (PRE.has(grupo) ? pre : texto).push({ kind: 'secao', runs: b.runs, papel: grupo, id: b.id });
+        let runs = b.runs;
+        if (apa) runs = [{ t: tituloCaso(textoDe(b.runs)), b: false, i: false }];
+        const item = { kind: 'secao', runs, papel: grupo, id: b.id };
+        if (grupo === 'resumo') resumo.push(item);
+        else if (PRE.has(grupo)) agrad.push(item);
+        else texto.push(item);
         return;
       }
       if (b.tipo === 'titulo') {
@@ -249,15 +366,27 @@
         for (let k = n; k < 5; k++) cont[k] = 0;
         // nível pulado (2 → 2.1.1) conta o intermediário como 1, e o próximo do mesmo nível segue dele
         for (let k = 0; k < n - 1; k++) if (!cont[k]) cont[k] = 1;
-        const num = cont.slice(0, n).join('.');
-        texto.push({ kind: 'titulo', nivel: n, num, runs: b.runs, id: b.id });
+        let runs = preparar(b.runs);
+        if (apa && maiuscula(textoDe(runs))) runs = runs.map((r) => (r.nota ? r : { ...r, t: tituloCaso(r.t) }));
+        texto.push({ kind: 'titulo', nivel: n, num: apa ? '' : cont.slice(0, n).join('.'), runs, id: b.id });
         return;
       }
-      const item = { kind: b.tipo, runs: b.runs, id: b.id };
-      if (PRE.has(grupo)) { item.pre = true; pre.push(item); } else texto.push(item);
+      if (b.tipo === 'tabela' || b.tipo === 'figura') {
+        const rot = b.rotulo || (b.tipo === 'tabela' ? 'Tabela' : 'Figura');
+        contIlu[rot] = (contIlu[rot] || 0) + 1;
+        texto.push({
+          kind: b.tipo, rotulo: rot, num: contIlu[rot], legenda: b.legenda || '', fonte: b.fonte || '', id: b.id,
+          linhas: b.linhas, src: b.src, w: b.w, h: b.h
+        });
+        return;
+      }
+      const item = { kind: b.tipo, runs: preparar(b.runs), id: b.id };
+      if (grupo === 'resumo') { item.pre = true; resumo.push(item); }
+      else if (PRE.has(grupo)) { item.pre = true; item.agrad = true; agrad.push(item); }
+      else texto.push(item);
     });
 
-    if (opcoes.ordenarRefs) {
+    if (opcoes.ordenarRefs || apa) {
       for (let i = 0; i < texto.length; i++) {
         if (texto[i].kind !== 'ref') continue;
         let j = i;
@@ -268,8 +397,24 @@
       }
     }
 
+    const ilustracoes = texto.filter((it) => it.kind === 'tabela' || it.kind === 'figura');
+    // uma lista para cada tipo, como recomenda a NBR 14724 (lista de figuras, de quadros, de tabelas…)
+    const listas = [];
+    if (!apa && opcoes.listas !== false) {
+      const ordem = ['Figura', 'Gráfico', 'Fotografia', 'Mapa', 'Esquema', 'Diagrama', 'Fluxograma', 'Quadro', 'Tabela'];
+      const plural = { Figura: 'FIGURAS', Gráfico: 'GRÁFICOS', Fotografia: 'FOTOGRAFIAS', Mapa: 'MAPAS', Esquema: 'ESQUEMAS', Diagrama: 'DIAGRAMAS', Fluxograma: 'FLUXOGRAMAS', Quadro: 'QUADROS', Tabela: 'TABELAS' };
+      ordem.forEach((rot) => {
+        const itens = ilustracoes.filter((it) => it.rotulo === rot);
+        if (itens.length) listas.push({ titulo: 'LISTA DE ' + plural[rot], itens });
+      });
+    }
+
     const sumario = texto.filter((it) => it.kind === 'titulo' || it.kind === 'secao');
-    return { pre, texto, sumario };
+    return {
+      pre: agrad.concat(resumo), agrad, resumo, texto, sumario, listas,
+      siglas: !apa && opcoes.siglas !== false ? siglas(blocos) : [],
+      notas: nNota
+    };
   }
 
   // Uma seção sem número escolhida à mão: descobre o papel pelo nome
@@ -278,5 +423,5 @@
     return s && s.papel !== 'sumario' ? s.papel : 'pos';
   }
 
-  window.Marcar = { marcar, montar, papelManual, novoId };
+  window.Marcar = { marcar, montar, papelManual, novoId, siglas, citacaoAPA, tituloCaso };
 })();

@@ -54,17 +54,19 @@
       <div class="lembrete">
         <h3>O que o Margem faz sozinho</h3>
         <ul>
-          <li>Acha títulos, citações longas, listas e referências e marca cada um.</li>
-          <li>Joga fora o sumário velho e refaz com as páginas certas.</li>
-          <li>Numera as seções (1, 1.1, 1.1.1) e põe as referências em ordem alfabética.</li>
-          <li>Aplica fonte 12, espaçamento 1,5, recuo de 1,25 cm, margens 3 e 2 cm.</li>
+          <li>Acha títulos, citações longas, listas, referências, tabelas, imagens e notas de rodapé.</li>
+          <li>Aproveita a capa que já vier no arquivo e preenche a ficha.</li>
+          <li>Joga fora o sumário velho e refaz com as páginas certas, mais as listas de ilustrações e de siglas.</li>
+          <li>Numera seções, tabelas e figuras e põe as referências em ordem alfabética.</li>
+          <li>Sai em ABNT (margens 3 e 2 cm, espaço 1,5) ou em APA 7 (2,54 cm, espaço duplo), com um clique.</li>
         </ul>
       </div>
     </section>
 
     <!-- 2. capa -->
     <section class="divisoria divisoria--capa" data-painel="capa" role="tabpanel" hidden>
-      <h2>Dados da capa e da folha de rosto</h2>
+      <h2 data-so="abnt">Dados da capa e da folha de rosto</h2>
+      <h2 data-so="apa">Dados da folha de rosto (APA)</h2>
       <div class="ficha">
         <div class="ficha__furo" aria-hidden="true"></div>
         <label class="ficha__l"><span>Instituição</span><input data-capa="instituicao" placeholder="Universidade Federal de ..."></label>
@@ -72,22 +74,57 @@
         <label class="ficha__l ficha__l--alto"><span>Autor(es)</span><textarea data-capa="autores" rows="2" placeholder="Um nome por linha"></textarea></label>
         <label class="ficha__l"><span>Título</span><input data-capa="titulo" placeholder="Título do trabalho"></label>
         <label class="ficha__l"><span>Subtítulo</span><input data-capa="subtitulo" placeholder="(se tiver)"></label>
-        <label class="ficha__l ficha__l--alto"><span>Natureza</span><textarea data-capa="natureza" rows="3" placeholder="Trabalho de Conclusão de Curso apresentado ao Curso de Psicologia da ..., como requisito parcial para obtenção do título de Bacharel em Psicologia."></textarea></label>
-        <label class="ficha__l"><span>Orientador(a)</span><input data-capa="orientador" placeholder="Prof.ª Dr.ª ..."></label>
-        <div class="ficha__dupla">
+        <label class="ficha__l ficha__l--alto" data-so="abnt"><span>Natureza</span><textarea data-capa="natureza" rows="3" placeholder="Trabalho de Conclusão de Curso apresentado ao Curso de Psicologia da ..., como requisito parcial para obtenção do título de Bacharel em Psicologia."></textarea></label>
+        <label class="ficha__l" data-so="apa"><span>Disciplina</span><input data-capa="disciplina" placeholder="PSI204: Psicologia Clínica"></label>
+        <label class="ficha__l"><span data-so="abnt">Orientador(a)</span><span data-so="apa">Professor(a)</span><input data-capa="orientador" placeholder="Prof.ª Dr.ª ..."></label>
+        <div class="ficha__dupla" data-so="abnt">
           <label class="ficha__l"><span>Cidade</span><input data-capa="cidade" placeholder="Cidade"></label>
           <label class="ficha__l"><span>Ano</span><input data-capa="ano" inputmode="numeric" maxlength="4"></label>
         </div>
+        <label class="ficha__l" data-so="apa"><span>Entrega</span><input data-capa="data" placeholder="26 de outubro de 2026"></label>
+      </div>
+
+      <div class="padroes">
+        <h3 class="sub">Padrões salvos</h3>
+        <p class="explica">Guarda instituição, curso, natureza, orientador, cidade e as opções abaixo pra usar no próximo trabalho. Dá pra exportar e mandar pros colegas da turma.</p>
+        <div class="padroes__linha">
+          <select id="padraoSel" aria-label="Padrão salvo"><option value="">— nenhum —</option></select>
+          <button type="button" class="btn-mini" id="padraoAplicar">Aplicar</button>
+          <button type="button" class="btn-mini" id="padraoApagar">Apagar</button>
+        </div>
+        <div class="padroes__linha">
+          <input id="padraoNome" placeholder="Nome, ex.: TCC Psicologia" aria-label="Nome do padrão">
+          <button type="button" class="btn-mini btn-mini--forte" id="padraoSalvar">Salvar atual</button>
+        </div>
+        <div class="padroes__linha">
+          <button type="button" class="btn-mini" id="padraoExportar">Exportar arquivo</button>
+          <label class="btn-mini btn-mini--arquivo">Importar arquivo<input type="file" id="padraoImportar" accept=".json,application/json"></label>
+        </div>
+        <p class="nota-mao" id="padraoNota"></p>
+      </div>
+
+      <div data-so="abnt">
+        <h3 class="sub">Elementos opcionais</h3>
+        <div class="chaves">
+          <label class="chave"><input type="checkbox" data-op="aprovacao"><span>Folha de aprovação</span></label>
+        </div>
+        <label class="campo-opc" id="campoBanca"><span>Banca (um por linha, “Nome – Instituição”)</span><textarea data-capa="banca" rows="3" placeholder="Prof.ª Dr.ª Helena Castro (orientadora) – Universidade Exemplo"></textarea></label>
+        <label class="campo-opc"><span>Dedicatória</span><textarea data-capa="dedicatoria" rows="2" placeholder="(deixa vazio pra não ter)"></textarea></label>
+        <label class="campo-opc"><span>Epígrafe</span><textarea data-capa="epigrafe" rows="2" placeholder="(deixa vazio pra não ter)"></textarea></label>
+        <label class="campo-opc"><span>Autor da epígrafe</span><input data-capa="epigrafeAutor" placeholder="(Sobrenome, ano)"></label>
       </div>
 
       <h3 class="sub">Como montar</h3>
       <div class="chaves">
-        <label class="chave"><input type="checkbox" data-op="capa"><span>Capa</span></label>
-        <label class="chave"><input type="checkbox" data-op="rosto"><span>Folha de rosto</span></label>
-        <label class="chave"><input type="checkbox" data-op="sumario"><span>Sumário</span></label>
-        <label class="chave"><input type="checkbox" data-op="novaPagina"><span>Seção primária abre folha nova</span></label>
-        <label class="chave"><input type="checkbox" data-op="ordenarRefs"><span>Referências em ordem alfabética</span></label>
+        <label class="chave" data-so="abnt"><input type="checkbox" data-op="capa"><span>Capa</span></label>
+        <label class="chave" data-so="abnt"><input type="checkbox" data-op="rosto"><span>Folha de rosto</span></label>
+        <label class="chave" data-so="abnt"><input type="checkbox" data-op="listas"><span>Listas de ilustrações e tabelas</span></label>
+        <label class="chave" data-so="abnt"><input type="checkbox" data-op="siglas"><span>Lista de siglas (achadas no texto)</span></label>
+        <label class="chave" data-so="abnt"><input type="checkbox" data-op="sumario"><span>Sumário</span></label>
+        <label class="chave" data-so="abnt"><input type="checkbox" data-op="novaPagina"><span>Seção primária abre folha nova</span></label>
+        <label class="chave" data-so="abnt"><input type="checkbox" data-op="ordenarRefs"><span>Referências em ordem alfabética</span></label>
       </div>
+      <p class="explica" data-so="apa">Na APA 7 não tem capa nem sumário: a folha de rosto do estudante abre o trabalho, o número vai em todas as folhas e as referências saem em ordem alfabética com recuo deslocado.</p>
       <fieldset class="fonte">
         <legend>Fonte</legend>
         <label><input type="radio" name="fonte" value="times"><span class="f-times">Times New Roman</span></label>
@@ -106,6 +143,7 @@
         <li><mark class="mk mk--li">Alínea</mark></li>
         <li><mark class="mk mk--ref">Referência</mark></li>
         <li><mark class="mk mk--chave">Palavras-chave</mark></li>
+        <li><mark class="mk mk--ilu">Tabela ou figura</mark></li>
         <li><mark class="mk mk--capa">Vai pra capa</mark></li>
         <li><s class="mk mk--fora">Fora do trabalho</s></li>
       </ul>
@@ -145,11 +183,23 @@
   <!-- mesa -->
   <section class="mesa" aria-label="Prévia das folhas">
     <div class="mesa__barra">
+      <div class="norma" role="radiogroup" aria-label="Norma">
+        <button type="button" role="radio" class="norma__b" data-norma="abnt">ABNT</button>
+        <button type="button" role="radio" class="norma__b" data-norma="apa">APA 7</button>
+      </div>
       <p class="mesa__conta" id="conta">—</p>
       <label class="chave chave--escura"><input type="checkbox" id="verMargens"><span>Mostrar margens</span></label>
       <div class="mesa__acoes">
         <button type="button" class="btn btn--cheio" id="baixarDocx" disabled>Baixar .docx</button>
         <button type="button" class="btn btn--claro" id="imprimir" disabled>Salvar PDF</button>
+      </div>
+      <div class="falta-painel" id="faltaPainel" hidden>
+        <p class="falta-painel__msg" id="faltaMsg"></p>
+        <div class="linha-botoes">
+          <button type="button" class="btn btn--cheio" id="faltaPreencher">Preencher agora</button>
+          <button type="button" class="btn btn--claro" id="faltaSemCapa">Sair sem capa e folha de rosto</button>
+          <button type="button" class="btn btn--claro" id="faltaCancelar">Cancelar</button>
+        </div>
       </div>
     </div>
     <div class="mesa__base" id="base">
@@ -159,7 +209,7 @@
 </main>
 
 <footer class="rodape">
-  <p>As regras seguidas aqui são das normas NBR 14724 (trabalhos acadêmicos), 6024 (numeração de seções), 6027 (sumário), 10520 (citações) e 6023 (referências). Cada instituição pode ter o seu manual: na dúvida, o manual da sua faculdade vence.</p>
+  <p>As regras seguidas aqui são das normas NBR 14724 (trabalhos acadêmicos), 6024 (numeração de seções), 6027 (sumário), 6028 (resumo), 10520 (citações) e 6023 (referências), e do manual da APA, 7ª edição, para trabalhos de estudante. Cada instituição pode ter o seu manual: na dúvida, o manual da sua faculdade vence.</p>
   <a href="../../index.html#projetos">← voltar ao portfólio</a>
 </footer>
 

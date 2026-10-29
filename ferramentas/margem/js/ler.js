@@ -1,6 +1,6 @@
 /* Lê .docx, .pdf, .txt/.md ou texto colado e devolve parágrafos crus:
-   [{ runs: [{ t, b, i }], dica }]. A dica diz o que o arquivo já sabia
-   (h1..h6, citacao, lista, titulodoc, grande) e ajuda a marcar depois. */
+   [{ runs: [{ t, b, i, nota? }], dica }]. Nota de rodapé é um run vazio com o texto em `nota`. A dica diz o que o arquivo já sabia
+   (h1..h6, citacao, lista, titulodoc, grande, tabela, figura) e ajuda a marcar depois. */
 
 (function () {
   'use strict';
@@ -8,31 +8,36 @@
   function juntarRuns(runs) {
     const out = [];
     runs.forEach((r) => {
+      if (r.nota) { out.push({ t: '', b: false, i: false, nota: r.nota }); return; }
       if (!r.t) return;
       const ult = out[out.length - 1];
-      if (ult && !!ult.b === !!r.b && !!ult.i === !!r.i) ult.t += r.t;
+      if (ult && !ult.nota && !!ult.b === !!r.b && !!ult.i === !!r.i) ult.t += r.t;
       else out.push({ t: r.t, b: !!r.b, i: !!r.i });
     });
-    if (out.length) {
-      out[0].t = out[0].t.replace(/^\s+/, '');
-      out[out.length - 1].t = out[out.length - 1].t.replace(/\s+$/, '');
+    const comTexto = out.filter((r) => !r.nota);
+    if (comTexto.length) {
+      comTexto[0].t = comTexto[0].t.replace(/^\s+/, '');
+      comTexto[comTexto.length - 1].t = comTexto[comTexto.length - 1].t.replace(/\s+$/, '');
     }
-    return out.map((r) => ({ ...r, t: r.t.replace(/[ \t ]+/g, ' ') })).filter((r) => r.t);
+    return out.map((r) => (r.nota ? r : { ...r, t: r.t.replace(/[ \t ]+/g, ' ') })).filter((r) => r.t || r.nota);
   }
 
   const textoDe = (runs) => runs.map((r) => r.t).join('');
 
   /* ---------- texto puro / markdown leve ---------- */
 
-  // **negrito** e *itálico*, porque muita gente cola texto que veio de chat ou de markdown
-  function inline(str) {
+  // **negrito**, *itálico* e nota [^1], porque muita gente cola texto que veio de chat ou de markdown
+  function inline(str, notas = {}) {
     const runs = [];
-    const re = /(\*\*[^*]+\*\*|__[^_]+__|\*[^*\s][^*]*\*|_[^_\s][^_]*_)/g;
+    const re = /(\*\*[^*]+\*\*|__[^_]+__|\*[^*\s][^*]*\*|_[^_\s][^_]*_|\[\^[^\]]+\])/g;
     let ult = 0, m;
     while ((m = re.exec(str))) {
       if (m.index > ult) runs.push({ t: str.slice(ult, m.index) });
       const s = m[0];
-      if (s.startsWith('**') || s.startsWith('__')) runs.push({ t: s.slice(2, -2), b: true });
+      if (s.startsWith('[^')) {
+        const n = notas[s.slice(2, -1)];
+        if (n) runs.push({ t: '', nota: n }); else runs.push({ t: s });
+      } else if (s.startsWith('**') || s.startsWith('__')) runs.push({ t: s.slice(2, -2), b: true });
       else runs.push({ t: s.slice(1, -1), i: true });
       ult = m.index + s.length;
     }
@@ -40,9 +45,43 @@
     return juntarRuns(runs);
   }
 
+  // linha de tabela: separada por tab (veio do Excel/Word) ou por barras (markdown)
+  const celulasTab = (s) => (s.includes('\t') ? s.split('\t').map((c) => c.trim()) : null);
+  const celulasMd = (s) => (/^\|.*\|$/.test(s.trim()) ? s.trim().slice(1, -1).split('|').map((c) => c.trim()) : null);
+  const separadorMd = (s) => /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?$/.test(s.trim());
+
   function texto(str) {
     // linhas em branco no começo e no fim não contam na hora de decidir o formato
-    const linhas = String(str).replace(/\r\n?/g, '\n').replace(/^\s*\n|\n\s*$/g, '').split('\n');
+    let linhas = String(str).replace(/\r\n?/g, '\n').replace(/^\s*\n|\n\s*$/g, '').split('\n');
+
+    // notas no fim, no formato markdown: [^1]: texto da nota
+    const notas = {};
+    linhas = linhas.filter((l) => {
+      const m = /^\s*\[\^([^\]]+)\]:\s*(.+)$/.exec(l);
+      if (m) { notas[m[1]] = m[2].trim(); return false; }
+      return true;
+    });
+
+    // tabelas viram um bloco só antes de qualquer outra coisa
+    const tabelas = [];
+    const marcadas = [];
+    for (let i = 0; i < linhas.length; i++) {
+      const tab = celulasTab(linhas[i]) || celulasMd(linhas[i]);
+      if (!tab || tab.length < 2) { marcadas.push(linhas[i]); continue; }
+      const fim = (k) => k < linhas.length && (separadorMd(linhas[k]) || (celulasTab(linhas[k]) || celulasMd(linhas[k]) || []).length >= 2);
+      let j = i;
+      const rows = [];
+      while (fim(j)) {
+        if (!separadorMd(linhas[j])) rows.push(celulasTab(linhas[j]) || celulasMd(linhas[j]));
+        j++;
+      }
+      if (rows.length >= 2) {
+        tabelas.push(rows);
+        marcadas.push('\u0000TABELA' + (tabelas.length - 1));
+        i = j - 1;
+      } else marcadas.push(linhas[i]);
+    }
+    linhas = marcadas;
     const brancas = linhas.filter((l) => !l.trim()).length;
     const cheias = linhas.length - brancas;
     // Texto copiado do Word vem com um parágrafo por linha; texto de .txt
@@ -58,7 +97,7 @@
     linhas.forEach((l) => {
       const s = l.trim();
       if (!s) { fechar(); return; }
-      const solta = /^(#{1,6}\s|>\s?|[-–•●▪◦*]\s|[a-z]\)\s|\d{1,2}[.)]\s)/.test(s);
+      const solta = /^(#{1,6}\s|>\s?|[-–•●▪◦*]\s|[a-z]\)\s|\d{1,2}[.)]\s|\u0000TABELA)/.test(s) || /^(tabela|quadro|figura|gr[aá]fico|fonte)\b/i.test(s);
       if (porLinha || solta) { fechar(); blocos.push(s); return; }
       if (acc.length && /-$/.test(acc[acc.length - 1]) && /^[a-zà-ÿ]/.test(s)) {
         acc[acc.length - 1] = acc[acc.length - 1].slice(0, -1) + s;
@@ -67,12 +106,14 @@
     fechar();
 
     return blocos.map((s) => {
+      const tb = /^\u0000TABELA(\d+)$/.exec(s);
+      if (tb) return { runs: [], dica: 'tabela', linhas: tabelas[+tb[1]] };
       let dica = null;
       const h = /^(#{1,6})\s+(.*)$/.exec(s);
       if (h) { dica = 'h' + h[1].length; s = h[2]; }
       else if (/^>\s?/.test(s)) { dica = 'citacao'; s = s.replace(/^>\s?/, ''); }
-      return { runs: inline(s), dica };
-    }).filter((p) => p.runs.length);
+      return { runs: inline(s, notas), dica };
+    }).filter((p) => p.runs.length || p.linhas);
   }
 
   /* ---------- .docx (mammoth) ---------- */
@@ -91,7 +132,8 @@
     "p[style-name='Block Text'] => blockquote:fresh"
   ];
 
-  function runsDoDom(el) {
+  // notas: o mammoth põe a chamada como <a href="#footnote-1"> e o texto num <ol> no fim
+  function runsDoDom(el, notas = {}) {
     const runs = [];
     (function andar(no, b, i) {
       if (no.nodeType === 3) { runs.push({ t: no.nodeValue, b, i }); return; }
@@ -99,6 +141,11 @@
       const tag = no.tagName;
       if (tag === 'IMG' || tag === 'TABLE') return;
       if (tag === 'BR') { runs.push({ t: ' ', b, i }); return; }
+      if (tag === 'A' && /^#(footnote|endnote)-/.test(no.getAttribute('href') || '')) {
+        const n = notas[no.getAttribute('href').slice(1)];
+        if (n) runs.push({ t: '', nota: n });
+        return;
+      }
       const nb = b || tag === 'STRONG' || tag === 'B';
       const ni = i || tag === 'EM' || tag === 'I';
       no.childNodes.forEach((f) => andar(f, nb, ni));
@@ -106,13 +153,28 @@
     return juntarRuns(runs);
   }
 
+  const medir = (src) => new Promise((ok) => {
+    const img = new Image();
+    img.onload = () => ok({ w: img.naturalWidth, h: img.naturalHeight });
+    img.onerror = () => ok({ w: 0, h: 0 });
+    img.src = src;
+  });
+
   async function docx(buffer) {
     if (!window.mammoth) throw new Error('O leitor de Word não carregou. Confere a internet e tenta de novo.');
     const res = await window.mammoth.convertToHtml({ arrayBuffer: buffer }, { styleMap: MAPA_ESTILOS });
     const doc = new DOMParser().parseFromString('<div>' + res.value + '</div>', 'text/html');
     const raiz = doc.body.firstChild;
     const paras = [];
-    let tabelas = 0, imagens = raiz.querySelectorAll('img').length;
+
+    const notas = {};
+    raiz.querySelectorAll('li[id^="footnote-"], li[id^="endnote-"]').forEach((li) => {
+      li.querySelectorAll('a[href^="#footnote-ref"], a[href^="#endnote-ref"]').forEach((a) => a.remove());
+      notas[li.id] = li.textContent.replace(/\s+/g, ' ').trim();
+      const ol = li.parentElement;
+      li.remove();
+      if (ol && !ol.children.length) ol.remove();
+    });
 
     function lista(el, nivel) {
       let n = 0;
@@ -120,9 +182,25 @@
         const copia = li.cloneNode(true);
         copia.querySelectorAll('ul, ol').forEach((x) => x.remove());
         const marca = el.tagName === 'OL' ? String.fromCharCode(97 + (n++ % 26)) + ') ' : '– ';
-        const runs = runsDoDom(copia);
+        const runs = runsDoDom(copia, notas);
         if (runs.length) paras.push({ runs: juntarRuns([{ t: marca }].concat(runs)), dica: 'lista' });
         li.querySelectorAll(':scope > ul, :scope > ol').forEach((sub) => lista(sub, nivel + 1));
+      });
+    }
+
+    function tabela(el) {
+      const linhas = [...el.querySelectorAll('tr')].map((tr) => [...tr.children].map((c) => c.textContent.replace(/\s+/g, ' ').trim()));
+      const largura = Math.max(0, ...linhas.map((l) => l.length));
+      const cheias = linhas.filter((l) => l.some(Boolean)).map((l) => l.concat(Array(largura - l.length).fill('')));
+      if (cheias.length) paras.push({ runs: [], dica: 'tabela', linhas: cheias });
+    }
+
+    // imagem dentro de um parágrafo sai como figura logo depois dele
+    function imagens(el) {
+      el.querySelectorAll('img').forEach((img) => {
+        if (/^data:image\/(png|jpe?g|gif)/.test(img.getAttribute('src') || '')) {
+          paras.push({ runs: [], dica: 'figura', src: img.getAttribute('src'), alt: img.getAttribute('alt') || '' });
+        }
       });
     }
 
@@ -130,27 +208,41 @@
       if (el.nodeType !== 1) return;
       const tag = el.tagName;
       if (/^H[1-6]$/.test(tag)) {
-        paras.push({ runs: runsDoDom(el), dica: el.classList.contains('titulodoc') ? 'titulodoc' : 'h' + tag[1] });
+        paras.push({ runs: runsDoDom(el, notas), dica: el.classList.contains('titulodoc') ? 'titulodoc' : 'h' + tag[1] });
       } else if (tag === 'BLOCKQUOTE') {
         const ps = el.querySelectorAll('p');
-        (ps.length ? ps : [el]).forEach((p) => paras.push({ runs: runsDoDom(p), dica: 'citacao' }));
+        (ps.length ? ps : [el]).forEach((p) => paras.push({ runs: runsDoDom(p, notas), dica: 'citacao' }));
       } else if (tag === 'UL' || tag === 'OL') {
         lista(el, 0);
       } else if (tag === 'TABLE') {
-        tabelas++;
+        tabela(el);
       } else {
-        paras.push({ runs: runsDoDom(el), dica: el.classList.contains('subtitulodoc') ? 'subtitulodoc' : null });
+        paras.push({ runs: runsDoDom(el, notas), dica: el.classList.contains('subtitulodoc') ? 'subtitulodoc' : null });
+        imagens(el);
       }
     });
 
-    return { paras: paras.filter((p) => p.runs.length), avisos: avisosDe(tabelas, imagens) };
-  }
+    // tamanho de exibição: o que o Word guarda em wp:extent (EMU), não o tamanho em pixels da imagem
+    const figuras = paras.filter((p) => p.dica === 'figura');
+    let extensoes = [];
+    try {
+      if (window.JSZip && figuras.length) {
+        const xml = await (await window.JSZip.loadAsync(buffer)).file('word/document.xml').async('string');
+        extensoes = [...xml.matchAll(/<wp:(?:inline|anchor)\b[\s\S]*?<wp:extent cx="(\d+)" cy="(\d+)"/g)].map((m) => ({ w: +m[1] / 9525, h: +m[2] / 9525 }));
+      }
+    } catch (e) { /* sem as medidas do Word, usa o tamanho da imagem */ }
+    await Promise.all(figuras.map(async (p, k) => Object.assign(p, extensoes.length === figuras.length ? extensoes[k] : await medir(p.src))));
 
-  function avisosDe(tabelas, imagens) {
-    const a = [];
-    if (tabelas) a.push(`${tabelas} tabela${tabelas > 1 ? 's ficaram' : ' ficou'} de fora: cola de volta no Word depois de baixar.`);
-    if (imagens) a.push(`${imagens} imagem${imagens > 1 ? 'ns ficaram' : ' ficou'} de fora: insere no Word depois de baixar.`);
-    return a;
+    const avisos = [];
+    const nt = paras.filter((p) => p.dica === 'tabela').length;
+    const nNotas = Object.keys(notas).length;
+    const partes = [];
+    if (figuras.length) partes.push(`${figuras.length} imagem${figuras.length > 1 ? 'ns' : ''}`);
+    if (nt) partes.push(`${nt} tabela${nt > 1 ? 's' : ''}`);
+    if (nNotas) partes.push(`${nNotas} nota${nNotas > 1 ? 's' : ''} de rodapé`);
+    if (partes.length) avisos.push(`Vieram junto: ${partes.join(', ')}. Confere título e fonte de cada ilustração nas Marcações.`);
+    avisos.push('Gráfico desenhado dentro do Word (e não colado como imagem) não vem: cola ele como imagem antes de enviar.');
+    return { paras: paras.filter((p) => p.runs.length || p.dica === 'tabela' || p.dica === 'figura'), avisos };
   }
 
   /* ---------- .pdf (pdf.js) ---------- */
