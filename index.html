@@ -5,8 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title data-i18n="meta.title">Luiz Henrique | Desenvolvedor</title>
 <meta name="description" content="Portfólio de Luiz Henrique: desenvolvimento back-end, front-end, automações, ferramentas e banco de dados.">
+<link rel="canonical" href="https://henrlz.github.io/portfolio-luiz-henrique/">
+<meta name="author" content="Luiz Henrique Pereira">
+<meta name="theme-color" content="#0a0a0a">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Luiz Henrique | Desenvolvedor">
+<meta property="og:title" content="Luiz Henrique | Desenvolvedor">
+<meta property="og:description" content="Desenvolvimento back-end, front-end, automações e banco de dados. Veja projetos reais, de sites a sistemas internos.">
+<meta property="og:url" content="https://henrlz.github.io/portfolio-luiz-henrique/">
+<meta property="og:image" content="https://henrlz.github.io/portfolio-luiz-henrique/assets/foto.jpg">
+<meta property="og:locale" content="pt_BR">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Luiz Henrique | Desenvolvedor">
+<meta name="twitter:description" content="Desenvolvimento back-end, front-end, automações e banco de dados.">
+<meta name="twitter:image" content="https://henrlz.github.io/portfolio-luiz-henrique/assets/foto.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230a0a0a'/%3E%3Ctext x='50' y='68' font-size='55' font-family='Arial, sans-serif' font-weight='700' fill='%23fff' text-anchor='middle'%3ELH%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/palco.css">
 </head>
 <body>
 
@@ -444,13 +459,32 @@
           </div>
           <h3>Taquígrafo</h3>
           <p class="project-resumo" data-i18n="projects.steno.short">Transcreve uma live do YouTube e anota as palavras-chave quando o palestrante anuncia, sem instalar nada.</p>
-          <p class="project-desc" data-i18n="projects.steno.desc" hidden>Acompanha uma live do YouTube, transcreve tudo o que é dito e anota as palavras-chave quando o palestrante anuncia, seja uma ou oito. Sem instalar nada: a pessoa cola o link, a live abre com a legenda ligada e, ao compartilhar a aba, o Taquígrafo lê a legenda e os slides na própria imagem (Tesseract, num Web Worker para não travar o vídeo), ouve a fala (Vosk) e, com a chave gratuita da API do YouTube, lê o chat. A transcrição sai numa “fita” de estenotipia: o que tem a ver com a palavra-chave ganha marca-texto e um recado na margem, cada vez que a palavra é dita ela fica circulada e, quando sai, a fita leva um carimbo numerado. Entende “a palavra-chave é…”, “a segunda palavra é…”, “palavra-chave número 3:…” e listas, até soletradas, e junta as leituras repetidas para corrigir letra trocada. Apita, notifica, copia todas de uma vez e baixa a transcrição em .txt; nada sai do navegador. Também tem um script para o Tampermonkey. <em>(tem uma live de demonstração para testar)</em></p>
+          <p class="project-desc" data-i18n="projects.steno.desc" hidden>Acompanha uma live do YouTube, transcreve tudo o que é dito e anota as palavras-chave quando o palestrante anuncia, seja uma ou oito. Sem instalar nada: a pessoa cola o link, a live abre com a legenda ligada e, ao compartilhar a aba, o Taquígrafo lê a legenda e os slides na própria imagem (Tesseract, num Web Worker para não travar o vídeo), ouve a fala (Whisper, rodando no próprio computador) e, com a chave gratuita da API do YouTube, lê o chat. A transcrição sai numa “fita” de estenotipia: o que tem a ver com a palavra-chave ganha marca-texto e um recado na margem, cada vez que a palavra é dita ela fica circulada e, quando sai, a fita leva um carimbo numerado. Entende “a palavra-chave é…”, “a segunda palavra é…”, “palavra-chave número 3:…” e listas, até soletradas, e junta as leituras repetidas para corrigir letra trocada. Apita, notifica, copia todas de uma vez e baixa a transcrição em .txt; nada sai do navegador. Também tem um script para o Tampermonkey. <em>(tem uma live de demonstração para testar)</em></p>
           <ul class="tech-stack">
-            <li>JavaScript</li><li>Screen Capture API</li><li>Web Workers</li><li>Tesseract.js</li><li>Vosk</li><li>Web Audio</li><li>YouTube Data API</li><li>Tampermonkey</li>
+            <li>JavaScript</li><li>Screen Capture API</li><li>Web Workers</li><li>Tesseract.js</li><li>Whisper (Transformers.js)</li><li>Web Audio</li><li>YouTube Data API</li><li>Tampermonkey</li>
           </ul>
           <div class="project-links">
             <button type="button" class="project-previa" data-i18n="projects.preview">Prévia</button>
             <a href="ferramentas/taquigrafo/index.html" target="_blank" rel="noopener" data-i18n="projects.link_online">Ver online</a>
+          </div>
+        </article>
+
+        <article class="project-card" data-previa="prato">
+          <div class="project-head">
+            <span class="project-icon" data-i18n-title="projects.prato.icon" title="Contador de calorias">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8c-1.6-1.6-5.5-1.1-5.5 3.2 0 4.3 2.7 9.3 5.5 9.3s5.5-5 5.5-9.3C17.5 6.9 13.6 6.4 12 8z"/><path d="M12 8c0-2.2 1.1-3.8 3.2-4.5"/></svg>
+            </span>
+            <span class="project-tag" data-i18n="projects.tag.personal">Pessoal</span>
+          </div>
+          <h3>Prato Certo</h3>
+          <p class="project-resumo" data-i18n="projects.prato.short">Contador de calorias e macros que serve o dia como um prato: meta pelo seu peso e altura, busca de alimentos e cadastro lendo a foto da tabela nutricional.</p>
+          <p class="project-desc" data-i18n="projects.prato.desc" hidden>Contador de calorias e macronutrientes com uma ideia própria: o dia é um prato. Cada alimento registrado vira um arco no aro, colorido pela macro que domina nele, com três aros finos por dentro para proteína, carboidrato e gordura; o vazio é o que ainda cabe, e a semana vira sete pratinhos. A pessoa informa sexo, idade, peso, altura, atividade e objetivo, e o app calcula o metabolismo basal pela equação de Mifflin-St Jeor, a meta diária de calorias, proteína, carboidrato, gordura, fibra e água, com piso de segurança e uma estimativa de semanas até o peso desejado. A busca de alimentos tem três caminhos: uma base local de mais de 100 itens (ovos, frutas, pratos do dia a dia, valores de referência da TACO e do USDA) e itens aproximados de redes como McDonald’s, Burger King e Pizza Hut; produtos de mercado pela Open Food Facts, descartando resultados cujas calorias não batem com os macros; e o cadastro de quem não achou, que lê a foto da tabela nutricional por OCR (Tesseract, direto no navegador, sem enviar a imagem a lugar nenhum), entende as colunas de 100 g e de porção, descarta o que não conseguiu ler com segurança e confere se as calorias fecham com os macros. Também aceita código de barras ou digitação, e guarda tudo em “Meus alimentos”. Claro e escuro automáticos, dados só no navegador. <em>(tem uma semana de exemplo pronta para testar)</em></p>
+          <ul class="tech-stack">
+            <li>HTML5</li><li>CSS3</li><li>JavaScript</li><li>SVG</li><li>Open Food Facts API</li><li>Tesseract.js (OCR)</li><li>Canvas</li><li>Fetch + AbortController</li><li>LocalStorage</li>
+          </ul>
+          <div class="project-links">
+            <button type="button" class="project-previa" data-i18n="projects.preview">Prévia</button>
+            <a href="ferramentas/prato-certo/index.html" target="_blank" rel="noopener" data-i18n="projects.link_online">Ver online</a>
           </div>
         </article>
       </div>
