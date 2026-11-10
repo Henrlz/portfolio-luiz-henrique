@@ -427,6 +427,61 @@ button.res:hover, button.res:focus-visible { background: #f6fafb; }
 .meus__editar { width: auto !important; padding: 0 10px !important; font-size: .82rem !important; color: var(--primaria) !important; }
 .meus__editar:hover { background: var(--primaria-clara) !important; color: var(--primaria-escura) !important; }
 
+/* ---------- refeição com as suas comidas; a busca abre dentro dela ---------- */
+.refeicao { border: 1px solid var(--borda); border-radius: 14px; padding: 14px 16px 12px; background: #fff; transition: border-color .2s, box-shadow .2s; }
+.refeicao--aberta { border-color: var(--primaria); box-shadow: 0 0 0 3px rgba(14, 124, 134, .1); }
+.refeicao header { border-bottom: 0; padding-bottom: 4px; }
+.refeicao h3 { font-size: 1rem; }
+.refeicao__add {
+  display: block; width: 100%; margin-top: 8px; padding: 10px; border: 1.5px dashed var(--borda-forte); border-radius: 10px;
+  background: #fbfcfd; color: var(--primaria); font-weight: 600; font-size: .9rem;
+}
+.refeicao__add:hover { border-color: var(--primaria); background: var(--primaria-clara); }
+.item:last-child { border-bottom: 0; }
+.adicao { margin-top: 10px; padding-top: 12px; border-top: 1px dashed var(--borda-forte); }
+.adicao__cab { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.adicao__onde { flex: 1; min-width: 160px; font-size: .86rem; color: var(--suave); }
+.adicao__onde b { color: var(--primaria-escura); }
+.adicao--solta { margin-top: 12px; border-top: 0; padding-top: 0; }
+.adicao--solta .adicao__cab, .adicao--solta .busca__campo, .adicao--solta .busca__status, .adicao--solta .resultados { display: none !important; }
+.sugestoes--centro { justify-content: center; margin-top: 14px; }
+
+/* quantidade: unidades ou gramas */
+.qtd { margin-bottom: 12px; }
+.seg { display: inline-flex; padding: 3px; background: #eef2f5; border-radius: 10px; margin-bottom: 10px; }
+.seg label { position: relative; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg span { display: block; padding: 6px 14px; border-radius: 8px; font-size: .86rem; font-weight: 500; color: var(--suave); cursor: pointer; }
+.seg input:checked + span { background: #fff; color: var(--texto); box-shadow: 0 1px 3px rgba(15, 30, 44, .12); }
+.seg input:focus-visible + span { outline: 3px solid rgba(14, 124, 134, .35); }
+.qtd__linha { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.qtd__linha input { width: 96px; min-height: 44px; padding: 8px 10px; text-align: center; font-size: 1.15rem; font-weight: 600; border: 1px solid var(--borda-forte); border-radius: 10px; }
+.qtd__linha input:focus { outline: 0; border-color: var(--primaria); box-shadow: 0 0 0 3px rgba(14, 124, 134, .15); }
+.qtd__btn { width: 44px; height: 44px; border: 1px solid var(--borda-forte); border-radius: 10px; background: #fff; font-size: 1.3rem; line-height: 1; color: var(--primaria-escura); }
+.qtd__btn:hover { border-color: var(--primaria); background: var(--primaria-clara); }
+.qtd__unid { font-size: .88rem; color: var(--suave); }
+
+/* água: quantidade livre */
+.agua__livre { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+.agua__campo input { width: 150px; min-height: 38px; padding: 6px 10px; border: 1px solid var(--borda-forte); border-radius: 10px; font-size: .92rem; }
+.agua__livre select { min-height: 38px; padding: 6px 8px; border: 1px solid var(--borda-forte); border-radius: 10px; background: #fff; font-size: .9rem; }
+.agua__livre .botao { min-height: 38px; padding: 6px 14px; font-size: .88rem; }
+.agua__campo input:focus, .agua__livre select:focus { outline: 0; border-color: var(--primaria); box-shadow: 0 0 0 3px rgba(14, 124, 134, .15); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* perfil */
+.avatar { overflow: hidden; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar--g { width: 84px; height: 84px; font-size: 1.6rem; }
+.dialogo--perfil { max-width: min(560px, calc(100% - 24px)); width: 100%; max-height: calc(100vh - 32px); overflow-y: auto; }
+.perfil-foto { display: flex; align-items: center; gap: 18px; margin-bottom: 18px; }
+.perfil-foto .acoes { align-items: center; }
+.perfil-secao { font-size: .78rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--primaria); margin: 6px 0 10px; }
+.quatro { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 10px; }
+@media (max-width: 520px) { .quatro { grid-template-columns: repeat(2, 1fr); } .dialogo--perfil .duo { grid-template-columns: 1fr; } }
+.campo input:disabled { background: #f3f6f8; color: var(--suave); }
+.acoes--fim { align-items: center; margin-top: 8px; }
+
 /* ---------- app instalado (iPhone com entalhe, tela cheia) ---------- */
 .barra { padding-top: env(safe-area-inset-top); }
 .tela--centro { padding-top: max(32px, env(safe-area-inset-top)); padding-bottom: max(32px, env(safe-area-inset-bottom)); }
@@ -436,7 +491,7 @@ button.res:hover, button.res:focus-visible { background: #f6fafb; }
 .barra__in { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
 @media (display-mode: standalone) { .volta { display: none; } }
 
-.dialogo { border: 0; border-radius: 18px; padding: 24px; max-width: min(420px, calc(100% - 32px)); box-shadow: 0 24px 60px rgba(15, 30, 44, .25); color: var(--texto); }
+.dialogo { margin: auto; border: 0; border-radius: 18px; padding: 24px; max-width: min(420px, calc(100% - 32px)); box-shadow: 0 24px 60px rgba(15, 30, 44, .25); color: var(--texto); }
 .dialogo::backdrop { background: rgba(15, 30, 44, .35); }
 .dialogo h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 14px; }
 .dialogo form { margin-top: 18px; }

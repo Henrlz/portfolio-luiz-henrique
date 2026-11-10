@@ -80,6 +80,7 @@
     return { id: txt(i.id, 40) || Math.random().toString(36).slice(2), nome: txt(i.nome, 80), marca: txt(i.marca, 60),
       gramas: faixa(i.gramas, 5000), refeicao: ID_REF.test(i.refeicao) ? i.refeicao : 'geral',
       kcal: faixa(i.kcal, 20000), prot: faixa(i.prot, 2000), carb: faixa(i.carb, 2000), gord: faixa(i.gord, 2000), fibra: faixa(i.fibra, 1000),
+      qtdUn: i.qtdUn ? faixa(i.qtdUn, 100) || null : null, un: i.qtdUn ? txt(i.un, 30) : '',
       img: imgSegura(i.img) };
   }
   function limpoPerfil(p) {
@@ -98,9 +99,23 @@
     if (q.sexo !== 'f') q.saude.condicoes = q.saude.condicoes.filter(function (c) { return c !== 'gestante'; });
     return Calculo.validar(q) ? null : q;
   }
+  /* foto do perfil: só imagem já reduzida pelo app (data URL JPEG/PNG/WebP, até ~300 KB) */
+  var FOTO_OK = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/;
   function limpaConta(c) {
     if (!c || typeof c !== 'object') return null;
-    return { nome: txt(c.nome, 40).trim(), criada: txt(c.criada, 30) };
+    var email = txt(c.email, 80).trim();
+    var nasc = txt(c.nascimento, 10);
+    return { nome: txt(c.nome, 40).trim(), criada: txt(c.criada, 30),
+      email: /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(email) ? email : '',
+      nascimento: DATA.test(nasc) && idadeDe(nasc) >= 0 && idadeDe(nasc) <= 120 ? nasc : '',
+      foto: typeof c.foto === 'string' && c.foto.length < 300000 && FOTO_OK.test(c.foto) ? c.foto : '' };
+  }
+  /* idade completa hoje a partir de AAAA-MM-DD */
+  function idadeDe(nasc) {
+    var p = nasc.split('-'), hoje = new Date();
+    var idade = hoje.getFullYear() - (+p[0]);
+    if (hoje.getMonth() + 1 < +p[1] || (hoje.getMonth() + 1 === +p[1] && hoje.getDate() < +p[2])) idade--;
+    return idade;
   }
   function limparEstado(v) {
     var s = { conta: null, perfil: null, diario: {}, meus: [], refeicoes: {}, agua: {} };
@@ -178,7 +193,9 @@
   function salvar() {
     try { localStorage.setItem(CHAVE, JSON.stringify(estado)); } catch (e) { /* modo privado */ }
     if (estado.perfil) {
-      gravarCookie(COOKIE_PERFIL, JSON.stringify({ conta: estado.conta, perfil: estado.perfil }), 400);
+      /* o cookie leva só o essencial (a foto não cabe num cookie; ela fica no armazenamento local) */
+      var c = estado.conta || {};
+      gravarCookie(COOKIE_PERFIL, JSON.stringify({ conta: { nome: c.nome, criada: c.criada, nascimento: c.nascimento }, perfil: estado.perfil }), 400);
     }
     if (!pediuPersistencia && navigator.storage && navigator.storage.persist) {
       pediuPersistencia = true;
@@ -326,7 +343,8 @@
 
     if (p.tipo === 'numero') {
       var v = valorDe(p.id);
-      corpo += '<label class="numero"><input id="qNum" type="number" inputmode="' + (p.decimal ? 'decimal' : 'numeric') + '" step="' + (p.decimal ? '0.1' : '1') +
+      /* decimais em campo de texto: o teclado do iPhone em português usa vírgula, e type=number a descartaria */
+      corpo += '<label class="numero"><input id="qNum" type="' + (p.decimal ? 'text' : 'number') + '" inputmode="' + (p.decimal ? 'decimal' : 'numeric') + '" step="' + (p.decimal ? '0.1' : '1') +
         '" min="' + p.min + '" max="' + p.max + '" value="' + (v != null ? esc(v) : '') + '" aria-label="' + esc(p.titulo) + '"><span>' + esc(p.unidade) + '</span></label>';
     } else if (p.tipo === 'opcoes' || p.tipo === 'multi') {
       var multi = p.tipo === 'multi';
@@ -484,11 +502,23 @@
     return (partes[0][0] + (partes.length > 1 ? partes[partes.length - 1][0] : '')).toUpperCase();
   }
 
+  /* avatar: a foto, se houver; senão as iniciais */
+  function pintarAvatar(el, conta) {
+    var foto = conta && conta.foto, nome = (conta && conta.nome) || '';
+    el.innerHTML = foto ? '<img src="' + esc(foto) + '" alt="">' : esc(iniciais(nome));
+    el.classList.toggle('avatar--foto', !!foto);
+  }
+
   function abrirPainel() {
+    /* com data de nascimento, a idade se atualiza sozinha no aniversário */
+    if (estado.conta && estado.conta.nascimento) {
+      var idade = idadeDe(estado.conta.nascimento);
+      if (idade >= 14 && idade <= 100 && idade !== estado.perfil.idade) { estado.perfil.idade = idade; salvar(); }
+    }
     metas = Calculo.metas(estado.perfil);
     regras = Saude.regras(estado.perfil);
     var nome = (estado.conta && estado.conta.nome) || '';
-    $('avatar').textContent = iniciais(nome);
+    pintarAvatar($('avatar'), estado.conta);
     $('menuNome').textContent = nome || 'Minha conta';
     var h = new Date().getHours();
     $('ola').textContent = (h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite') + (nome ? ', ' + nome.split(' ')[0] : '') + '.';
@@ -501,6 +531,96 @@
   }
 
   $('editarRespostas').addEventListener('click', function () { $('menu').open = false; iniciarQuest(true); });
+
+  /* ---------- meu perfil: foto, dados pessoais e corpo ---------- */
+  var fotoRascunho = '';
+  function abrirPerfilDlg() {
+    $('menu').open = false;
+    var c = estado.conta || {}, p = estado.perfil;
+    fotoRascunho = c.foto || '';
+    pintarAvatar($('perfilAvatar'), { nome: c.nome, foto: fotoRascunho });
+    $('perfilFotoRemover').hidden = !fotoRascunho;
+    $('pfNome').value = c.nome || '';
+    $('pfEmail').value = c.email || '';
+    $('pfNasc').value = c.nascimento || '';
+    $('pfNasc').max = HOJE;
+    $('pfSexo').value = p.sexo;
+    $('pfIdade').value = p.idade;
+    $('pfAltura').value = p.altura;
+    $('pfPeso').value = p.peso;
+    aplicarNasc();
+    $('erroPerfilDlg').hidden = true;
+    $('dlgPerfil').showModal();
+  }
+  function aplicarNasc() {
+    var n = $('pfNasc').value;
+    var tem = DATA.test(n);
+    $('pfIdade').disabled = tem;
+    $('pfIdadeNota').hidden = !tem;
+    if (tem) $('pfIdade').value = idadeDe(n);
+  }
+  $('pfNasc').addEventListener('change', aplicarNasc);
+  $('pfNasc').addEventListener('input', aplicarNasc);
+  $('abrirPerfil').addEventListener('click', abrirPerfilDlg);
+  $('pfCancelar').addEventListener('click', function () { $('dlgPerfil').close(); });
+  $('pfRefazer').addEventListener('click', function () { $('dlgPerfil').close(); iniciarQuest(true); });
+
+  /* foto: recorta o centro em quadrado e reduz para 256 px (fica leve no armazenamento) */
+  $('perfilFotoArq').addEventListener('change', function () {
+    var arq = this.files && this.files[0], campo = this;
+    if (!arq) return;
+    var url = URL.createObjectURL(arq);
+    var img = new Image();
+    img.onload = function () {
+      var lado = Math.min(img.naturalWidth, img.naturalHeight);
+      var c = document.createElement('canvas');
+      c.width = c.height = 256;
+      c.getContext('2d').drawImage(img, (img.naturalWidth - lado) / 2, (img.naturalHeight - lado) / 2, lado, lado, 0, 0, 256, 256);
+      URL.revokeObjectURL(url);
+      fotoRascunho = c.toDataURL('image/jpeg', 0.85);
+      pintarAvatar($('perfilAvatar'), { nome: $('pfNome').value, foto: fotoRascunho });
+      $('perfilFotoRemover').hidden = false;
+      campo.value = '';
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); toast('Não consegui abrir essa imagem.'); campo.value = ''; };
+    img.src = url;
+  });
+  $('perfilFotoRemover').addEventListener('click', function () {
+    fotoRascunho = '';
+    pintarAvatar($('perfilAvatar'), { nome: $('pfNome').value, foto: '' });
+    $('perfilFotoRemover').hidden = true;
+  });
+
+  $('formPerfil').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var erro = function (m) { $('erroPerfilDlg').textContent = m; $('erroPerfilDlg').hidden = false; };
+    var nome = $('pfNome').value.trim().replace(/\s+/g, ' ');
+    if (nome.length < 2) return erro('Digite seu nome.');
+    var email = $('pfEmail').value.trim();
+    if (email && !/^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(email)) return erro('Esse e-mail não parece válido (ou deixe em branco).');
+    var nasc = $('pfNasc').value;
+    if (nasc && (!DATA.test(nasc) || nasc > HOJE)) return erro('Data de nascimento inválida.');
+    var novo = JSON.parse(JSON.stringify(estado.perfil));
+    novo.sexo = $('pfSexo').value;
+    novo.idade = nasc ? idadeDe(nasc) : parseFloat($('pfIdade').value);
+    novo.altura = parseFloat($('pfAltura').value);
+    novo.peso = parseFloat(String($('pfPeso').value).replace(',', '.'));
+    var falha = Calculo.validar(novo);
+    if (falha) return erro(falha);
+    var limpo = limpoPerfil(novo);
+    if (!limpo) return erro('Confira os dados do corpo.');
+    var c = limpaConta({ nome: nome, criada: (estado.conta && estado.conta.criada) || new Date().toISOString(), email: email, nascimento: nasc, foto: fotoRascunho });
+    if (fotoRascunho && !c.foto) return erro('A foto ficou grande demais. Tente outra imagem.');
+    estado.conta = c;
+    estado.perfil = limpo;
+    salvar();
+    $('dlgPerfil').close();
+    var dia = diaAtual;
+    abrirPainel();
+    diaAtual = dia;
+    desenharDia();
+    toast('Perfil atualizado. A meta foi recalculada com os dados novos.');
+  });
   $('editarSaude').addEventListener('click', function () {
     iniciarQuest(true);
     var idx = passosAtivos().map(function (p) { return p.id; }).indexOf('condicoes');
@@ -617,47 +737,89 @@
     if (estado.refeicoes[k] && !estado.refeicoes[k].length) delete estado.refeicoes[k];
   }
 
+  /* texto da quantidade de um item: "2 ovos… " → "2 unidades · 100 g" */
+  function textoQtd(i) {
+    return (i.qtdUn ? n1(i.qtdUn) + ' ' + esc(plural(i.un || 'unidade', i.qtdUn)) + ' · ' : '') + n0(i.gramas) + ' g';
+  }
+
+  /* o painel de busca/adição mora "estacionado" e é levado para dentro da refeição aberta */
+  function estacionarPainel() {
+    var p = $('painelAdicao');
+    p.classList.remove('adicao--solta');
+    if (p.parentNode !== $('estacionamento')) $('estacionamento').appendChild(p);
+  }
+
   function desenharRefeicoes(itens) {
     var refs = refeicoesDo(diaAtual);
+    if (refeicaoAlvo && !refs.some(function (r) { return r.id === refeicaoAlvo; })) refeicaoAlvo = null;
+    if (!$('painelSolto').contains($('painelAdicao'))) estacionarPainel();
     if (!refs.length) {
       $('refeicoes').innerHTML = '<div class="vazio-dia"><p><b>Nenhuma refeição ainda.</b></p>' +
-        '<p>Monte o dia do seu jeito: uma, três ou sete refeições. Crie a primeira acima ou já adicione um alimento.</p></div>';
+        '<p>Crie as refeições do seu dia, quantas quiser, e coloque as comidas dentro de cada uma.</p>' +
+        '<div class="sugestoes sugestoes--centro">' + SUGESTOES_REF.slice(0, 6).map(function (s) {
+          return '<button type="button" class="chip-btn" data-sug="' + esc(s) + '">+ ' + esc(s) + '</button>';
+        }).join('') + '</div></div>';
       return;
     }
     $('refeicoes').innerHTML = refs.map(function (r) {
       var lista = itens.filter(function (i) { return i.refeicao === r.id; });
       var soma = Calculo.somar(lista);
+      var aberta = r.id === refeicaoAlvo;
       var corpo = lista.length ? lista.map(function (i) {
         return '<li class="item">' + ico(imgDe(i)) +
-          '<div class="item__nome"><strong>' + esc(i.nome) + '</strong><small>' + n0(i.gramas) + ' g' + (i.marca ? ' · ' + esc(i.marca) : '') +
+          '<div class="item__nome"><strong>' + esc(i.nome) + '</strong><small>' + textoQtd(i) + (i.marca ? ' · ' + esc(i.marca) : '') +
             ' · P ' + n0(i.prot) + ' · C ' + n0(i.carb) + ' · G ' + n0(i.gord) + '</small></div>' +
           '<b class="item__kcal">' + n0(i.kcal) + ' kcal</b>' +
           '<button type="button" class="item__x" data-id="' + esc(i.id) + '" aria-label="Remover ' + esc(i.nome) + '">×</button></li>';
-      }).join('') : '<li class="vazio">Nenhum alimento nesta refeição</li>';
-      return '<section class="refeicao"><header><h3>' + esc(r.nome) + '</h3>' +
-        '<span class="refeicao__kcal">' + (lista.length ? n0(soma.kcal) + ' kcal' : '') + '</span>' +
-        '<button type="button" class="link link--peq" data-add="' + esc(r.id) + '">+ alimento</button>' +
+      }).join('') : '<li class="vazio">Nenhuma comida ainda</li>';
+      return '<section class="refeicao' + (aberta ? ' refeicao--aberta' : '') + '" data-ref="' + esc(r.id) + '"><header><h3>' + esc(r.nome) + '</h3>' +
+        '<span class="refeicao__kcal">' + (lista.length ? lista.length + (lista.length === 1 ? ' comida · ' : ' comidas · ') + n0(soma.kcal) + ' kcal' : '') + '</span>' +
         '<button type="button" class="refeicao__x" data-del="' + esc(r.id) + '" aria-label="Remover a refeição ' + esc(r.nome) + '">×</button>' +
-        '</header><ul>' + corpo + '</ul></section>';
+        '</header><ul>' + corpo + '</ul>' +
+        (aberta ? '<div class="refeicao__slot"></div>' : '<button type="button" class="refeicao__add" data-add="' + esc(r.id) + '">+ Adicionar comida</button>') +
+        '</section>';
     }).join('');
+    if (refeicaoAlvo) {
+      var slot = $('refeicoes').querySelector('.refeicao--aberta .refeicao__slot');
+      var r = refs.filter(function (x) { return x.id === refeicaoAlvo; })[0];
+      $('adicaoRef').textContent = r ? r.nome : '';
+      $('painelAdicao').classList.remove('adicao--solta');
+      slot.appendChild($('painelAdicao'));
+    }
   }
 
+  /* abre a busca dentro da refeição; ela fica aberta para várias comidas seguidas */
+  function abrirAdicao(id) {
+    refeicaoAlvo = id;
+    fecharAdd();
+    $('busca').value = '';
+    $('resultados').hidden = true;
+    $('buscaStatus').textContent = '';
+    desenharRefeicoes(itensDo(diaAtual));
+    var p = $('painelAdicao');
+    p.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    $('busca').focus({ preventScroll: true });
+  }
+  function fecharAdicao() {
+    refeicaoAlvo = null;
+    fecharAdd();
+    $('busca').value = '';
+    $('resultados').hidden = true;
+    estacionarPainel();
+    desenharRefeicoes(itensDo(diaAtual));
+  }
+  $('concluirAdicao').addEventListener('click', fecharAdicao);
+
   $('refeicoes').addEventListener('click', function (e) {
-    var b = e.target.closest('.item__x, [data-add], [data-del]');
-    if (!b) return;
-    if (b.hasAttribute('data-add')) {
-      refeicaoAlvo = b.getAttribute('data-add');
-      fecharAdd();
-      $('busca').scrollIntoView({ behavior: 'smooth', block: 'center' });
-      $('busca').focus({ preventScroll: true });
-      var r = refeicoesDo(diaAtual).filter(function (x) { return x.id === refeicaoAlvo; })[0];
-      $('buscaStatus').textContent = r ? 'Adicionando em: ' + r.nome + '. Busque o alimento.' : '';
-      return;
-    }
+    var b = e.target.closest('.item__x, [data-add], [data-del], [data-sug]');
+    if (!b || $('painelAdicao').contains(b)) return;
+    if (b.hasAttribute('data-sug')) { concluirNovaRefeicao(b.getAttribute('data-sug')); return; }
+    if (b.hasAttribute('data-add')) { abrirAdicao(b.getAttribute('data-add')); return; }
     if (b.hasAttribute('data-del')) {
       var id = b.getAttribute('data-del');
       var qtd = itensDo(diaAtual).filter(function (i) { return i.refeicao === id; }).length;
-      if (qtd && !window.confirm('Remover esta refeição e os ' + qtd + ' alimento(s) dela?')) return;
+      if (qtd && !window.confirm('Remover esta refeição e as ' + qtd + ' comida(s) dela?')) return;
+      if (refeicaoAlvo === id) { refeicaoAlvo = null; fecharAdd(); estacionarPainel(); }
       estado.refeicoes[diaAtual] = refeicoesDo(diaAtual).filter(function (x) { return x.id !== id; });
       estado.diario[diaAtual] = itensDo(diaAtual).filter(function (i) { return i.refeicao !== id; });
       limparDiaVazio(diaAtual);
@@ -684,8 +846,14 @@
     if (!$('formRefeicao').hidden) { desenharSugestoes(); $('refNome').value = ''; $('refNome').focus(); }
   });
   $('refCancelar').addEventListener('click', function () { $('formRefeicao').hidden = true; });
+  /* criar a refeição já abre a busca dentro dela */
   function concluirNovaRefeicao(nome) {
-    if (criarRefeicao(diaAtual, nome)) { $('formRefeicao').hidden = true; desenharDia(); }
+    var id = criarRefeicao(diaAtual, nome);
+    if (!id) return;
+    $('formRefeicao').hidden = true;
+    refeicaoAlvo = id;
+    desenharDia();
+    abrirAdicao(id);
   }
   $('formRefeicao').addEventListener('submit', function (e) { e.preventDefault(); concluirNovaRefeicao($('refNome').value); });
   $('refSugestoes').addEventListener('click', function (e) {
@@ -706,13 +874,37 @@
     $('copoAgua').setAttribute('transform', 'translate(0 ' + (82 - frac * 76).toFixed(1) + ')');
     document.querySelector('.agua__menos').disabled = ml <= 0;
   }
-  document.querySelector('.acoes--agua').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-ml]');
-    if (!b) return;
-    var novo = Math.max(0, Math.min(10000, (estado.agua[diaAtual] || 0) + parseInt(b.getAttribute('data-ml'), 10)));
+  function gravarAgua(ml) {
+    var novo = Math.round(Math.max(0, Math.min(10000, ml)));
     if (novo) estado.agua[diaAtual] = novo; else delete estado.agua[diaAtual];
     salvar();
     desenharAgua();
+  }
+  document.querySelector('.acoes--agua').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-ml]');
+    if (b) gravarAgua((estado.agua[diaAtual] || 0) + parseInt(b.getAttribute('data-ml'), 10));
+  });
+  /* quantidade livre: em ml ou litros (aceita vírgula: "1,5") */
+  function lerAguaLivre() {
+    var v = parseFloat(String($('aguaQtd').value).replace(',', '.'));
+    if (!(v > 0)) { toast('Digite uma quantidade de água maior que zero.'); return null; }
+    var ml = $('aguaUnid').value === 'l' ? v * 1000 : v;
+    if (ml > 10000) { toast('Quantidade grande demais: o máximo é 10 litros por dia.'); return null; }
+    return ml;
+  }
+  $('formAgua').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var ml = lerAguaLivre();
+    if (ml == null) return;
+    gravarAgua((estado.agua[diaAtual] || 0) + ml);
+    $('aguaQtd').value = '';
+  });
+  $('aguaDefinir').addEventListener('click', function () {
+    var ml = lerAguaLivre();
+    if (ml == null) return;
+    gravarAgua(ml);
+    $('aguaQtd').value = '';
+    toast('Total de água do dia definido em ' + n1(ml / 1000) + ' L.');
   });
 
   /* ---------- semana: barras clicáveis ---------- */
@@ -838,48 +1030,86 @@
     if (b) abrirAdd(visiveis[+b.getAttribute('data-i')]);
   });
 
-  /* ---------- adicionar ---------- */
-  var escolhido = null;
+  /* ---------- adicionar: quantidade em unidades ou em gramas ---------- */
+  var escolhido = null, modoQtd = 'g';
+
+  /* nome da unidade de um alimento: "1 unidade" → unidade, "1 fatia" → fatia;
+     o que não é "1 alguma coisa" (ou vem da internet) vira "porção" */
+  function unidadeDe(a) {
+    var u = String(a.unidade || '');
+    if ((a.origem === 'base' || a.origem === 'rede') && /^1 /.test(u)) return u.slice(2).replace(/\s*\(.*$/, '').trim() || 'unidade';
+    return 'porção';
+  }
+  function plural(nome, q) {
+    if (q <= 1) return nome;
+    var p = String(nome).split(' '), w = p[0];
+    p[0] = /ão$/.test(w) ? w.replace(/ão$/, 'ões') : (/[rz]$/.test(w) ? w + 'es' : (/l$/.test(w) ? w.replace(/l$/, 'is') : w + 's'));
+    return p.join(' ');
+  }
+  /* comidas que se contam: ovo, pão, fruta, lanche… começam em unidades */
+  var CONTAVEL = /^(unidade|fatia|filé|posta|coxa|pote|copo|lata|espiga|bife|batata|ramo|xícara|clara|gema|tapioca|cacho|pegador)/;
+  function porUnidade(a) { return a.origem === 'rede' || CONTAVEL.test(unidadeDe(a)); }
+
+  function gramasAtuais() {
+    var q = parseFloat(String($('addQtd').value).replace(',', '.'));
+    if (!(q > 0) || !escolhido) return 0;
+    return modoQtd === 'un' ? q * escolhido.porcao : q;
+  }
+  function definirModo(modo, converter) {
+    if (converter && escolhido && modo !== modoQtd) {
+      var g = gramasAtuais();
+      $('addQtd').value = g ? (modo === 'un' ? Math.max(0.5, Math.round((g / escolhido.porcao) * 2) / 2) : Math.round(g)) : '';
+    }
+    modoQtd = modo;
+    document.querySelector('input[name="addModo"][value="' + modo + '"]').checked = true;
+    $('addQtd').step = modo === 'un' ? '0.5' : '1';
+    atualizarConta();
+  }
+  document.querySelectorAll('input[name="addModo"]').forEach(function (r) {
+    r.addEventListener('change', function () { definirModo(r.value, true); });
+  });
+  document.querySelectorAll('.qtd__btn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var q = parseFloat(String($('addQtd').value).replace(',', '.')) || 0;
+      var passo = modoQtd === 'un' ? 1 : 10;
+      var novo = q + passo * parseInt(b.getAttribute('data-passo'), 10);
+      $('addQtd').value = Math.max(modoQtd === 'un' ? 0.5 : 1, Math.round(novo * 2) / 2);
+      atualizarConta();
+    });
+  });
 
   function abrirAdd(a) {
     escolhido = a;
+    /* cancela a busca na internet que ainda estava a caminho: senão a lista reaparece por cima */
+    clearTimeout(buscaTimer);
+    if (buscaCtl) buscaCtl.abort();
+    ultimaBusca = '';
+    $('buscaStatus').textContent = '';
     $('formManual').hidden = true;
     $('addIco').src = imgDe(a);
     $('addNome').textContent = a.nome + (a.marca ? ' · ' + a.marca : '');
-    $('addInfo').textContent = 'Porção típica: ' + a.unidade + (a.unidade.indexOf(' g)') === -1 && a.unidade !== '100 g' ? ' (' + n0(a.porcao) + ' g)' : '');
+    var un = unidadeDe(a);
+    $('addInfo').textContent = '1 ' + un + ' = ' + (un === 'porção' && a.unidade && a.unidade !== '100 g' ? a.unidade.replace(/\s*\(.*$/, '') + ', ' : '') + n0(a.porcao) + ' g';
+    $('addModoUn').textContent = plural(un, 2);
     var av = Saude.avaliar(a, regras);
     $('addAtencao').hidden = !av.avisos.length;
     $('addAtencao').textContent = av.avisos.length ? 'Atenção: ' + av.avisos.join(' · ') + '. Consuma com moderação.' : '';
-    $('addGramas').value = Math.round(a.porcao);
-    preencherSeletorRefeicao();
+    if (porUnidade(a)) { $('addQtd').value = 1; definirModo('un'); }
+    else { $('addQtd').value = Math.round(a.porcao); definirModo('g'); }
     $('formAdicionar').hidden = false;
     $('resultados').hidden = true;
     atualizarConta();
-    $('addGramas').focus();
-    $('addGramas').select();
+    $('addQtd').focus();
+    $('addQtd').select();
   }
   function fecharAdd() {
     escolhido = null;
     editandoMeu = null;
     $('formAdicionar').hidden = true;
     $('formManual').hidden = true;
+    /* o painel solto (usado para editar "Meus alimentos" fora de uma refeição) volta a ser guardado */
+    if ($('painelSolto').contains($('painelAdicao')) && !refeicaoAlvo) estacionarPainel();
   }
-
-  /* refeições do dia + "nova refeição"; pré-seleciona a do "+ alimento" ou a última criada */
-  function preencherSeletorRefeicao() {
-    var refs = refeicoesDo(diaAtual);
-    $('addRefeicao').innerHTML = refs.map(function (r) { return '<option value="' + esc(r.id) + '">' + esc(r.nome) + '</option>'; }).join('') +
-      '<option value="__nova">+ Nova refeição…</option>';
-    var alvo = refs.some(function (r) { return r.id === refeicaoAlvo; }) ? refeicaoAlvo : (refs.length ? refs[refs.length - 1].id : '__nova');
-    $('addRefeicao').value = alvo;
-    aplicarSeletor();
-  }
-  function aplicarSeletor() {
-    var nova = $('addRefeicao').value === '__nova';
-    $('addNovaBox').hidden = !nova;
-    if (nova) $('addNovaRef').value = '';
-  }
-  $('addRefeicao').addEventListener('change', function () { aplicarSeletor(); if ($('addRefeicao').value === '__nova') $('addNovaRef').focus(); });
 
   /* duplicar e editar: abre o cadastro com os valores deste alimento (por 100 g) */
   $('addDuplicar').addEventListener('click', function () {
@@ -896,27 +1126,28 @@
   });
   function atualizarConta() {
     if (!escolhido) return;
-    var g = parseFloat($('addGramas').value);
+    var g = gramasAtuais();
+    var q = parseFloat(String($('addQtd').value).replace(',', '.')) || 0;
+    $('addUnidTxt').textContent = modoQtd === 'un'
+      ? plural(unidadeDe(escolhido), q) + (g ? ' · ' + n0(g) + ' g' : '')
+      : 'gramas' + (g && escolhido.porcao ? ' · ≈ ' + n1(g / escolhido.porcao) + ' ' + plural(unidadeDe(escolhido), g / escolhido.porcao) : '');
     if (!(g > 0)) { $('addConta').textContent = ''; return; }
     var v = Calculo.porcao(escolhido, g);
     $('addConta').textContent = n0(v.kcal) + ' kcal · proteína ' + n1(v.prot) + ' g · carbo ' + n1(v.carb) + ' g · gordura ' + n1(v.gord) + ' g';
   }
-  $('addGramas').addEventListener('input', atualizarConta);
+  $('addQtd').addEventListener('input', atualizarConta);
 
   $('formAdicionar').addEventListener('submit', function (e) {
     e.preventDefault();
-    var g = parseFloat($('addGramas').value);
-    if (!escolhido || !(g > 0) || g > 5000) { $('addConta').textContent = 'Informe uma quantidade entre 1 e 5000 g.'; return; }
-    var refId = $('addRefeicao').value;
-    if (refId === '__nova') {
-      refId = criarRefeicao(diaAtual, $('addNovaRef').value);
-      if (!refId) return;
-    }
-    refeicaoAlvo = refId;
+    var g = gramasAtuais();
+    if (!escolhido || !(g >= 1) || g > 5000) { $('addConta').textContent = 'Informe uma quantidade entre 1 g e 5 kg.'; return; }
+    if (!refeicaoAlvo) { toast('Escolha uma refeição para adicionar a comida.'); return; }
+    var q = parseFloat(String($('addQtd').value).replace(',', '.'));
     var v = Calculo.porcao(escolhido, g);
     var item = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      nome: escolhido.nome, marca: escolhido.marca || '', gramas: g, refeicao: refId,
+      nome: escolhido.nome, marca: escolhido.marca || '', gramas: Math.round(g), refeicao: refeicaoAlvo,
+      qtdUn: modoQtd === 'un' ? q : null, un: modoQtd === 'un' ? unidadeDe(escolhido) : '',
       kcal: v.kcal, prot: v.prot, carb: v.carb, gord: v.gord, fibra: v.fibra,
       img: imgSegura(escolhido.img) || (escolhido.origem === 'meu' ? Alimentos.ICONE_GENERICO : '')
     };
@@ -925,9 +1156,10 @@
     fecharAdd();
     $('busca').value = '';
     $('resultados').hidden = true;
-    $('buscaStatus').textContent = 'Adicionado: ' + item.nome + ' (' + n0(item.kcal) + ' kcal).';
     desenharDia();
-    $('busca').focus();
+    /* a busca continua aberta na mesma refeição para a próxima comida */
+    $('buscaStatus').textContent = '✓ ' + item.nome + ' adicionado (' + n0(item.kcal) + ' kcal). Busque a próxima comida ou toque em Concluir.';
+    $('busca').focus({ preventScroll: true });
   });
   $('addCancelar').addEventListener('click', fecharAdd);
 
@@ -1029,11 +1261,12 @@
     e.preventDefault();
     var nome = $('manNome').value.trim();
     var base = document.querySelector('input[name="manBase"]:checked').value;
-    var porc = parseFloat($('manPorcao').value);
+    var br = function (id) { return parseFloat(String($(id).value).trim().replace(',', '.')); };
+    var porc = br('manPorcao');
     var v = {
-      kcal: parseFloat($('manKcal').value), prot: parseFloat($('manProt').value) || 0,
-      carb: parseFloat($('manCarb').value) || 0, gord: parseFloat($('manGord').value) || 0,
-      fibra: parseFloat($('manFibra').value) || 0
+      kcal: br('manKcal'), prot: br('manProt') || 0,
+      carb: br('manCarb') || 0, gord: br('manGord') || 0,
+      fibra: br('manFibra') || 0
     };
     var caixa = $('erroManual');
     function erro(msg) { caixa.textContent = msg; caixa.hidden = false; }
@@ -1094,6 +1327,12 @@
       var a = estado.meus.filter(function (x) { return x.id === ed.getAttribute('data-editar'); })[0];
       if (!a) return;
       abrirManual();
+      /* fora de uma refeição, o formulário aparece logo abaixo da lista
+         (depois do abrirManual, que guarda o painel solto ao limpar) */
+      if (!refeicaoAlvo) {
+        $('painelAdicao').classList.add('adicao--solta');
+        $('painelSolto').appendChild($('painelAdicao'));
+      }
       editandoMeu = a.id;
       $('manTitulo').textContent = 'Editar “' + a.nome + '”';
       $('manNome').value = a.nome;

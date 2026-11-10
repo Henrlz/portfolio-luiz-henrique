@@ -112,6 +112,7 @@
       <details class="menu" id="menu">
         <summary><span class="avatar" id="avatar"></span><span class="menu__nome" id="menuNome"></span></summary>
         <div class="menu__lista">
+          <button type="button" id="abrirPerfil">Meu perfil</button>
           <button type="button" id="instalarApp">Instalar como app</button>
           <button type="button" id="editarRespostas">Editar minhas respostas</button>
           <button type="button" id="baixarBackup">Baixar backup dos dados</button>
@@ -165,15 +166,47 @@
                 <button type="button" class="botao botao--leve" data-ml="500">+ garrafa <small>500 ml</small></button>
                 <button type="button" class="botao botao--leve agua__menos" data-ml="-250" aria-label="Tirar 250 ml">−</button>
               </div>
+              <form class="agua__livre" id="formAgua">
+                <label class="agua__campo"><span class="sr">Quantidade de água</span>
+                  <input id="aguaQtd" type="text" inputmode="decimal" min="0" step="any" placeholder="Outra quantidade"></label>
+                <select id="aguaUnid" aria-label="Unidade"><option value="ml">ml</option><option value="l">litros</option></select>
+                <button type="submit" class="botao botao--leve">Adicionar</button>
+                <button type="button" class="link link--peq" id="aguaDefinir" title="Troca o total do dia por este valor">definir como total</button>
+              </form>
             </div>
           </div>
         </div>
 
-        <!-- adicionar -->
-        <div class="cartao" aria-labelledby="tAdd">
+        <!-- refeições (cada uma com as suas comidas; a busca abre dentro da refeição) -->
+        <div class="cartao" aria-labelledby="tRef">
           <div class="cartao__cab">
-            <h2 id="tAdd">Adicionar alimento</h2>
-            <button type="button" class="botao botao--leve botao--peq" id="abrirCadastro">+ Cadastrar alimento</button>
+            <h2 id="tRef">Refeições</h2>
+            <button type="button" class="botao botao--leve botao--peq" id="novaRefeicao">+ Nova refeição</button>
+          </div>
+          <form class="nova-ref" id="formRefeicao" hidden>
+            <div class="nova-ref__linha">
+              <input id="refNome" type="text" maxlength="40" list="sugestoesRef" placeholder="Nome da refeição (ex.: Pré-treino)" aria-label="Nome da refeição">
+              <button type="submit" class="botao botao--cheio">Criar</button>
+              <button type="button" class="botao botao--leve" id="refCancelar">Cancelar</button>
+            </div>
+            <div class="sugestoes" id="refSugestoes" aria-label="Sugestões"></div>
+          </form>
+          <datalist id="sugestoesRef"></datalist>
+          <div class="refeicoes" id="refeicoes"></div>
+
+          <details class="meus" id="meus" hidden>
+            <summary>Meus alimentos <span id="meusN"></span></summary>
+            <ul id="meusLista"></ul>
+          </details>
+          <div id="painelSolto"></div>
+
+          <!-- painel de adição: fica guardado aqui e é levado para dentro da refeição escolhida -->
+          <div id="estacionamento" hidden>
+          <div class="adicao" id="painelAdicao">
+          <div class="adicao__cab">
+            <span class="adicao__onde">Adicionando em <b id="adicaoRef"></b></span>
+            <button type="button" class="link link--peq" id="abrirCadastro">+ Cadastrar alimento</button>
+            <button type="button" class="botao botao--cheio botao--peq" id="concluirAdicao">Concluir</button>
           </div>
           <div class="busca">
             <div class="busca__campo">
@@ -186,14 +219,18 @@
             <form class="subpainel" id="formAdicionar" hidden>
               <div class="subpainel__nome"><img class="ico ico--g" id="addIco" alt="" width="48" height="48"><div><strong id="addNome"></strong><small id="addInfo"></small></div></div>
               <p class="atencao" id="addAtencao" hidden></p>
-              <div class="duo">
-                <label class="campo"><span>Quantidade (g)</span>
-                  <input id="addGramas" type="number" inputmode="decimal" min="1" max="5000" step="1"></label>
-                <label class="campo"><span>Refeição</span>
-                  <select id="addRefeicao"></select></label>
+              <div class="qtd">
+                <div class="seg" role="radiogroup" aria-label="Medir em">
+                  <label><input type="radio" name="addModo" value="un"><span id="addModoUn">unidades</span></label>
+                  <label><input type="radio" name="addModo" value="g"><span>gramas</span></label>
+                </div>
+                <div class="qtd__linha">
+                  <button type="button" class="qtd__btn" data-passo="-1" aria-label="Diminuir">−</button>
+                  <input id="addQtd" type="text" inputmode="decimal" min="0" step="any" aria-label="Quantidade">
+                  <button type="button" class="qtd__btn" data-passo="1" aria-label="Aumentar">+</button>
+                  <span class="qtd__unid" id="addUnidTxt"></span>
+                </div>
               </div>
-              <label class="campo" id="addNovaBox" hidden><span>Nome da nova refeição</span>
-                <input id="addNovaRef" type="text" maxlength="40" list="sugestoesRef" placeholder="Ex.: Café da manhã, Pré-treino, Ceia…"></label>
               <p class="subpainel__conta" id="addConta" aria-live="polite"></p>
               <div class="acoes">
                 <button class="botao botao--cheio" type="submit">Adicionar</button>
@@ -224,15 +261,15 @@
                 <label><input type="radio" name="manBase" value="100" checked><span>100 g</span></label>
                 <label><input type="radio" name="manBase" value="porcao"><span>porção</span></label>
                 <label class="campo campo--mini" id="manPorcaoBox" hidden><span>porção (g)</span>
-                  <input id="manPorcao" type="number" inputmode="decimal" min="1" max="2000" step="any"></label>
+                  <input id="manPorcao" type="text" inputmode="decimal" min="1" max="2000" step="any"></label>
               </fieldset>
 
               <div class="penta">
-                <label class="campo"><span>Calorias</span><input id="manKcal" type="number" inputmode="decimal" min="0" step="any"></label>
-                <label class="campo"><span>Proteína (g)</span><input id="manProt" type="number" inputmode="decimal" min="0" step="any"></label>
-                <label class="campo"><span>Carbo (g)</span><input id="manCarb" type="number" inputmode="decimal" min="0" step="any"></label>
-                <label class="campo"><span>Gordura (g)</span><input id="manGord" type="number" inputmode="decimal" min="0" step="any"></label>
-                <label class="campo"><span>Fibra (g)</span><input id="manFibra" type="number" inputmode="decimal" min="0" step="any"></label>
+                <label class="campo"><span>Calorias</span><input id="manKcal" type="text" inputmode="decimal" min="0" step="any"></label>
+                <label class="campo"><span>Proteína (g)</span><input id="manProt" type="text" inputmode="decimal" min="0" step="any"></label>
+                <label class="campo"><span>Carbo (g)</span><input id="manCarb" type="text" inputmode="decimal" min="0" step="any"></label>
+                <label class="campo"><span>Gordura (g)</span><input id="manGord" type="text" inputmode="decimal" min="0" step="any"></label>
+                <label class="campo"><span>Fibra (g)</span><input id="manFibra" type="text" inputmode="decimal" min="0" step="any"></label>
               </div>
 
               <fieldset class="chips" id="manMarcas">
@@ -247,30 +284,9 @@
               </div>
               <p class="nota-fina">A foto é lida neste aparelho e não é enviada a ninguém. Só o leitor de texto é baixado, uma vez.</p>
             </form>
-
-            <details class="meus" id="meus" hidden>
-              <summary>Meus alimentos <span id="meusN"></span></summary>
-              <ul id="meusLista"></ul>
-            </details>
           </div>
-        </div>
-
-        <!-- refeições -->
-        <div class="cartao" aria-labelledby="tRef">
-          <div class="cartao__cab">
-            <h2 id="tRef">Refeições</h2>
-            <button type="button" class="botao botao--leve botao--peq" id="novaRefeicao">+ Nova refeição</button>
           </div>
-          <form class="nova-ref" id="formRefeicao" hidden>
-            <div class="nova-ref__linha">
-              <input id="refNome" type="text" maxlength="40" list="sugestoesRef" placeholder="Nome da refeição (ex.: Pré-treino)" aria-label="Nome da refeição">
-              <button type="submit" class="botao botao--cheio">Criar</button>
-              <button type="button" class="botao botao--leve" id="refCancelar">Cancelar</button>
-            </div>
-            <div class="sugestoes" id="refSugestoes" aria-label="Sugestões"></div>
-          </form>
-          <datalist id="sugestoesRef"></datalist>
-          <div class="refeicoes" id="refeicoes"></div>
+          </div>
         </div>
       </section>
 
@@ -309,6 +325,46 @@
   <p>Para lembrar da sua conta, das respostas e do diário, este app guarda dados <strong>só neste navegador</strong> (armazenamento local e um cookie com o seu perfil). Nada é enviado a ninguém.</p>
   <button type="button" class="botao botao--cheio" id="avisoOk">Entendi</button>
 </div>
+
+<dialog class="dialogo dialogo--perfil" id="dlgPerfil" aria-labelledby="perfilTit">
+  <form id="formPerfil" novalidate>
+    <h2 id="perfilTit">Meu perfil</h2>
+
+    <div class="perfil-foto">
+      <span class="avatar avatar--g" id="perfilAvatar"></span>
+      <div class="acoes">
+        <label class="botao botao--leve botao--peq" for="perfilFotoArq">Trocar foto</label>
+        <input type="file" id="perfilFotoArq" accept="image/*" hidden>
+        <button type="button" class="link link--peq" id="perfilFotoRemover">Remover</button>
+      </div>
+    </div>
+
+    <p class="perfil-secao">Dados pessoais</p>
+    <label class="campo"><span>Nome</span><input id="pfNome" type="text" maxlength="40" autocomplete="name"></label>
+    <div class="duo">
+      <label class="campo"><span>E-mail <small>(opcional)</small></span><input id="pfEmail" type="email" maxlength="80" autocomplete="email"></label>
+      <label class="campo"><span>Data de nascimento <small>(opcional)</small></span><input id="pfNasc" type="date"></label>
+    </div>
+
+    <p class="perfil-secao">Corpo</p>
+    <div class="quatro">
+      <label class="campo"><span>Sexo</span><select id="pfSexo"><option value="f">Feminino</option><option value="m">Masculino</option></select></label>
+      <label class="campo"><span>Idade</span><input id="pfIdade" type="number" inputmode="numeric" min="14" max="100"></label>
+      <label class="campo"><span>Altura (cm)</span><input id="pfAltura" type="number" inputmode="numeric" min="120" max="230"></label>
+      <label class="campo"><span>Peso (kg)</span><input id="pfPeso" type="text" inputmode="decimal" min="30" max="300" step="0.1"></label>
+    </div>
+    <p class="nota-fina" id="pfIdadeNota" hidden>A idade é calculada pela data de nascimento.</p>
+
+    <p class="erro" id="erroPerfilDlg" role="alert" hidden></p>
+    <div class="acoes acoes--fim">
+      <button type="button" class="link link--peq" id="pfRefazer">Refazer o questionário (objetivo, ritmo, saúde)</button>
+      <span class="quest__espaco"></span>
+      <button type="button" class="botao botao--leve" id="pfCancelar">Cancelar</button>
+      <button type="submit" class="botao botao--cheio">Salvar</button>
+    </div>
+    <p class="nota-fina">Foto e dados ficam só neste aparelho; nada é enviado a ninguém.</p>
+  </form>
+</dialog>
 
 <dialog class="dialogo" id="dlgInstalar" aria-labelledby="dlgTit">
   <h2 id="dlgTit">Instalar o Prato Certo</h2>
