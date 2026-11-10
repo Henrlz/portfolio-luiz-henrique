@@ -5,12 +5,12 @@
   'use strict';
 
   var CHAVE = 'pratocerto:v1';
-  var REFEICOES = [
-    { id: 'cafe',   nome: 'Café da manhã' },
-    { id: 'almoco', nome: 'Almoço' },
-    { id: 'lanche', nome: 'Lanche' },
-    { id: 'jantar', nome: 'Jantar' }
-  ];
+  /* refeições são criadas pela pessoa, quantas quiser, por dia. Estes nomes só
+     servem para converter dados antigos (que tinham 4 refeições fixas) e como sugestão. */
+  var NOMES_ANTIGOS = { cafe: 'Café da manhã', almoco: 'Almoço', lanche: 'Lanche', jantar: 'Jantar' };
+  var SUGESTOES_REF = ['Café da manhã', 'Lanche da manhã', 'Almoço', 'Lanche da tarde', 'Pré-treino', 'Pós-treino', 'Jantar', 'Ceia'];
+  var ID_REF = /^[\w-]{1,30}$/;
+  var MAX_REF = 20;
   var MARCAS_CADASTRO = ['gluten', 'leite', 'ovo', 'amendoim', 'castanhas', 'peixe', 'crustaceo', 'soja', 'carne'];
 
   var $ = function (id) { return document.getElementById(id); };
@@ -32,7 +32,7 @@
   }
 
   /* =================== estado e armazenamento =================== */
-  var estado = { conta: null, perfil: null, diario: {}, meus: [] };
+  var estado = { conta: null, perfil: null, diario: {}, meus: [], refeicoes: {}, agua: {} };
 
   var COOKIE_PERFIL = 'pc_perfil', COOKIE_AVISO = 'pc_aviso';
   function caminhoCookie() { return location.pathname.replace(/[^/]*$/, '') || '/'; }
@@ -62,6 +62,15 @@
   var num = function (v) { v = Number(v); return isFinite(v) ? v : 0; };
   var faixa = function (v, max) { v = num(v); return v < 0 ? 0 : (v > max ? max : v); };
   var txt = function (v, max) { return String(v == null ? '' : v).slice(0, max || 80); };
+  /* miniaturas: só dos dois lugares conhecidos (ícones Fluent no jsDelivr e fotos da Open Food Facts) */
+  var IMG_OK = /^https:\/\/(cdn\.jsdelivr\.net\/gh\/microsoft\/fluentui-emoji@[0-9a-f]{40}\/assets\/[\w%.\-\/]+\.png|images\.openfoodfacts\.org\/[\w.\/-]+\.(jpg|jpeg|png|webp))$/i;
+  var imgSegura = function (u) { return typeof u === 'string' && IMG_OK.test(u) ? u : ''; };
+  function imgDe(a) {
+    return imgSegura(a.img) || (a.origem === 'meu' ? Alimentos.ICONE_GENERICO : Alimentos.icone(a.nome));
+  }
+  function ico(url, extra) {
+    return '<img class="ico' + (extra ? ' ' + extra : '') + '" src="' + esc(url) + '" alt="" width="40" height="40" loading="lazy" decoding="async">';
+  }
   var marcasValidas = function (m) {
     return Array.isArray(m) ? m.filter(function (x, i) { return Saude.MARCA_TEXTO[x] && m.indexOf(x) === i; }) : [];
   };
@@ -69,14 +78,21 @@
   function limpoItem(i) {
     if (!i || typeof i !== 'object') return null;
     return { id: txt(i.id, 40) || Math.random().toString(36).slice(2), nome: txt(i.nome, 80), marca: txt(i.marca, 60),
-      gramas: faixa(i.gramas, 5000), refeicao: REFEICOES.some(function (r) { return r.id === i.refeicao; }) ? i.refeicao : 'lanche',
-      kcal: faixa(i.kcal, 20000), prot: faixa(i.prot, 2000), carb: faixa(i.carb, 2000), gord: faixa(i.gord, 2000), fibra: faixa(i.fibra, 1000) };
+      gramas: faixa(i.gramas, 5000), refeicao: ID_REF.test(i.refeicao) ? i.refeicao : 'geral',
+      kcal: faixa(i.kcal, 20000), prot: faixa(i.prot, 2000), carb: faixa(i.carb, 2000), gord: faixa(i.gord, 2000), fibra: faixa(i.fibra, 1000),
+      img: imgSegura(i.img) };
   }
   function limpoPerfil(p) {
     if (!p || typeof p !== 'object') return null;
+    /* perfis antigos: "perderMais" virou perder + ritmo moderado; "perder" (−10%) virou ritmo leve */
+    var obj = p.objetivo, ritmo = p.ritmo;
+    if (obj === 'perderMais') { obj = 'perder'; if (!ritmo) ritmo = 'moderado'; }
+    else if (obj === 'perder' && !ritmo) ritmo = 'leve';
+    else if (obj === 'ganhar' && !ritmo) ritmo = 'moderado';
     var q = { sexo: p.sexo === 'f' ? 'f' : 'm', idade: num(p.idade), peso: num(p.peso), altura: num(p.altura),
       atividade: Calculo.FATORES[p.atividade] ? p.atividade : 'leve',
-      objetivo: Calculo.OBJETIVOS[p.objetivo] ? p.objetivo : 'manter',
+      objetivo: Calculo.OBJETIVOS[obj] ? obj : 'manter',
+      ritmo: Calculo.RITMOS[ritmo] ? ritmo : 'moderado',
       pesoAlvo: p.pesoAlvo == null || p.pesoAlvo === '' ? null : num(p.pesoAlvo),
       saude: Saude.limpar(p.saude) };
     if (q.sexo !== 'f') q.saude.condicoes = q.saude.condicoes.filter(function (c) { return c !== 'gestante'; });
@@ -87,8 +103,26 @@
     return { nome: txt(c.nome, 40).trim(), criada: txt(c.criada, 30) };
   }
   function limparEstado(v) {
-    var s = { conta: null, perfil: null, diario: {}, meus: [] };
+    var s = { conta: null, perfil: null, diario: {}, meus: [], refeicoes: {}, agua: {} };
     if (!v || typeof v !== 'object') return s;
+    if (v.agua && typeof v.agua === 'object') {
+      Object.keys(v.agua).slice(0, 800).forEach(function (k) {
+        var ml = Math.round(faixa(v.agua[k], 10000));
+        if (DATA.test(k) && ml > 0) s.agua[k] = ml;
+      });
+    }
+    if (v.refeicoes && typeof v.refeicoes === 'object') {
+      Object.keys(v.refeicoes).slice(0, 800).forEach(function (k) {
+        if (!DATA.test(k) || !Array.isArray(v.refeicoes[k])) return;
+        var vistos = {};
+        var lista = v.refeicoes[k].slice(0, MAX_REF).map(function (r) {
+          if (!r || !ID_REF.test(r.id) || vistos[r.id]) return null;
+          vistos[r.id] = 1;
+          return { id: r.id, nome: txt(r.nome, 40).trim() || 'Refeição' };
+        }).filter(Boolean);
+        if (lista.length) s.refeicoes[k] = lista;
+      });
+    }
     s.conta = limpaConta(v.conta);
     s.perfil = limpoPerfil(v.perfil);
     if (v.diario && typeof v.diario === 'object') {
@@ -107,6 +141,21 @@
           marcas: marcasValidas(a.marcas) };
       }).filter(function (a) { return a && a.nome && a.prot + a.carb + a.gord <= 100.5; });
     }
+    /* todo alimento precisa estar numa refeição que exista naquele dia: dados antigos
+       (cafe/almoco/lanche/jantar) viram refeições com esses nomes, na ordem do dia */
+    Object.keys(s.diario).forEach(function (k) {
+      var lista = s.refeicoes[k] || (s.refeicoes[k] = []);
+      var ids = lista.map(function (r) { return r.id; });
+      var faltam = [];
+      s.diario[k].forEach(function (i) { if (ids.indexOf(i.refeicao) === -1 && faltam.indexOf(i.refeicao) === -1) faltam.push(i.refeicao); });
+      var ordem = Object.keys(NOMES_ANTIGOS);
+      faltam.sort(function (a, b) {
+        var x = ordem.indexOf(a), y = ordem.indexOf(b);
+        return (x === -1 ? 99 : x) - (y === -1 ? 99 : y);
+      }).forEach(function (id) {
+        lista.push({ id: id, nome: NOMES_ANTIGOS[id] || 'Refeição' });
+      });
+    });
     /* perfil antigo sem conta: cria uma conta sem nome */
     if (s.perfil && !s.conta) s.conta = { nome: '', criada: '' };
     return s;
@@ -178,7 +227,15 @@
     return Object.keys(Calculo.FATORES).map(function (k) { return { v: k, t: Calculo.FATORES[k].nome, d: Calculo.FATORES[k].dica }; });
   }
   function opcoesObjetivo() {
-    return Object.keys(Calculo.OBJETIVOS).map(function (k) { return { v: k, t: Calculo.OBJETIVOS[k].nome }; });
+    return Object.keys(Calculo.OBJETIVOS).map(function (k) { return { v: k, t: Calculo.OBJETIVOS[k].nome, d: Calculo.OBJETIVOS[k].dica }; });
+  }
+  function opcoesRitmo(r) {
+    var perder = r.objetivo === 'perder';
+    return Object.keys(Calculo.RITMOS).map(function (k) {
+      var x = Calculo.RITMOS[k];
+      var pct = Math.round(Math.abs(perder ? x.perder : x.ganhar) * 100);
+      return { v: k, t: x.nome + ' · ' + (perder ? '−' : '+') + pct + '% de calorias', d: x.dica };
+    });
   }
 
   var PASSOS = [
@@ -189,6 +246,9 @@
     { id: 'peso', tipo: 'numero', titulo: 'E o seu peso atual?', unidade: 'kg', min: 30, max: 300, decimal: true },
     { id: 'atividade', tipo: 'opcoes', titulo: 'Como é a sua rotina de atividade física?', opcoes: opcoesAtividade },
     { id: 'objetivo', tipo: 'opcoes', titulo: 'Qual é o seu objetivo?', opcoes: opcoesObjetivo },
+    { id: 'ritmo', tipo: 'opcoes', titulo: 'Quão intenso você quer que seja o plano?',
+      ajuda: 'Quanto mais intenso, mais rápido o resultado, e mais exigente a alimentação. A meta nunca fica abaixo do seu metabolismo basal.',
+      opcoes: opcoesRitmo, se: function (r) { return r.objetivo && r.objetivo !== 'manter'; } },
     { id: 'pesoAlvo', tipo: 'numero', titulo: 'Tem um peso que quer atingir?', ajuda: 'Opcional: serve para estimar o prazo.',
       unidade: 'kg', min: 30, max: 300, decimal: true, opcional: true,
       se: function (r) { return r.objetivo !== 'manter'; } },
@@ -220,14 +280,34 @@
     editando = !!editar;
     rascunho = estado.perfil
       ? JSON.parse(JSON.stringify(estado.perfil))
-      : { sexo: null, idade: null, altura: null, peso: null, atividade: null, objetivo: null, pesoAlvo: null, saude: Saude.vazio() };
+      : { sexo: null, idade: null, altura: null, peso: null, atividade: null, objetivo: null, ritmo: null, pesoAlvo: null, saude: Saude.vazio() };
     passo = 0;
     $('questCancelar').hidden = !editando;
     mostrarTela('telaQuest');
     desenharPasso();
   }
 
-  function desenharPasso() {
+  /* ---- transição entre perguntas: a atual sai, a próxima entra com as opções em cascata ---- */
+  var calmo = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var SAIDA = calmo ? 0 : 280;          /* ms da saída */
+  var PAUSA_ESCOLHA = calmo ? 150 : 700; /* tempo para ver a opção marcada antes de seguir */
+  var trocando = false, esperaEscolha = null;
+
+  function irPara(novo, direcao) {
+    if (trocando) return;
+    trocando = true;
+    clearTimeout(esperaEscolha);
+    var c = $('questCorpo');
+    c.classList.remove('entra-frente', 'entra-volta');
+    c.classList.add('sai-' + direcao);
+    setTimeout(function () {
+      passo = novo;
+      desenharPasso(direcao);
+      trocando = false;
+    }, SAIDA);
+  }
+
+  function desenharPasso(direcao) {
     var lista = passosAtivos();
     if (passo >= lista.length) passo = lista.length - 1;
     var p = lista[passo];
@@ -252,18 +332,22 @@
       var multi = p.tipo === 'multi';
       var atual = valorDe(p.id);
       corpo += '<div class="opcoes" role="' + (multi ? 'group' : 'radiogroup') + '" aria-label="' + esc(p.titulo) + '">' +
-        p.opcoes(rascunho).map(function (o) {
+        p.opcoes(rascunho).map(function (o, n) {
           var marcado = multi ? (atual || []).indexOf(o.v) !== -1 : atual === o.v;
-          return '<label class="opcao' + (marcado ? ' opcao--sel' : '') + '"><input type="' + (multi ? 'checkbox' : 'radio') + '" name="qOpc" value="' + esc(o.v) + '"' + (marcado ? ' checked' : '') + '>' +
+          return '<label class="opcao' + (marcado ? ' opcao--sel' : '') + '" style="--i:' + n + '"><input type="' + (multi ? 'checkbox' : 'radio') + '" name="qOpc" value="' + esc(o.v) + '"' + (marcado ? ' checked' : '') + '>' +
             '<span class="opcao__marca" aria-hidden="true"></span><span class="opcao__txt"><b>' + esc(o.t) + '</b>' + (o.d ? '<small>' + esc(o.d) + '</small>' : '') + '</span></label>';
         }).join('') + '</div>';
       if (multi) corpo += '<p class="quest__ajuda quest__ajuda--fim">Nenhuma? É só continuar.</p>';
     } else if (p.tipo === 'resumo') {
       corpo += resumoQuest();
     }
-    $('questCorpo').innerHTML = corpo;
-    var foco = $('questCorpo').querySelector('#qNum, input[name="qOpc"]');
-    if (foco) foco.focus();
+    var c = $('questCorpo');
+    c.innerHTML = corpo;
+    c.classList.remove('sai-frente', 'sai-volta', 'entra-frente', 'entra-volta');
+    void c.offsetWidth;   /* reinicia a animação de entrada */
+    if (direcao && !calmo) c.classList.add('entra-' + direcao);
+    var foco = c.querySelector('#qNum, input[name="qOpc"]');
+    if (foco) foco.focus({ preventScroll: true });
   }
 
   function resumoQuest() {
@@ -282,6 +366,11 @@
     if (!r.esconde.length && !r.avisa.length) linhas += '<li>Nenhum filtro de saúde: todos os alimentos aparecem.</li>';
     if (m.semDeficit) linhas += '<li>Na gestação ou amamentação não aplicamos déficit calórico. Converse com seu médico.</li>';
     if (m.limitada) linhas += '<li>A meta ficou no piso de segurança (não abaixo do seu metabolismo basal nem de 1.200 kcal).</li>';
+    if (rascunho.objetivo !== 'manter' && Calculo.RITMOS[rascunho.ritmo]) {
+      linhas += '<li>Ritmo <b>' + esc(Calculo.RITMOS[rascunho.ritmo].nome.toLowerCase()) + '</b>: cerca de ' + n1(Math.abs(m.kgSemana)) + ' kg por semana.</li>';
+    }
+    if (m.exigente) linhas += '<li>Plano intenso: mais proteína (' + n1(m.protKg) + ' g/kg) e menos margem. Fome e cansaço são comuns no começo; o ideal é ter acompanhamento.</li>';
+    if (m.rapidoDemais && !m.limitada) linhas += '<li>Esse ritmo passa de 1% do seu peso por semana, o que costuma custar massa muscular. Considere o moderado.</li>';
     linhas += '</ul><p class="quest__ajuda">Você pode mudar essas respostas quando quiser, pelo menu.</p>';
     return linhas;
   }
@@ -328,8 +417,7 @@
         return;
       }
     }
-    passo++;
-    desenharPasso();
+    irPara(passo + 1, 'frente');
   }
 
   $('formQuest').addEventListener('submit', function (e) { e.preventDefault(); avancar(false); });
@@ -347,7 +435,7 @@
       lerPasso(false);
     }
   }
-  $('questVoltar').addEventListener('click', function () { if (passo > 0) { guardarSemValidar(); passo--; desenharPasso(); } });
+  $('questVoltar').addEventListener('click', function () { if (passo > 0 && !trocando) { guardarSemValidar(); irPara(passo - 1, 'volta'); } });
   $('questCancelar').addEventListener('click', function () { mostrarTela('telaApp'); });
   /* escolher uma opção única já avança: menos cliques */
   $('questCorpo').addEventListener('change', function (e) {
@@ -355,7 +443,10 @@
     document.querySelectorAll('#questCorpo .opcao').forEach(function (o) {
       o.classList.toggle('opcao--sel', o.querySelector('input').checked);
     });
-    if (e.target.type === 'radio') setTimeout(function () { avancar(false); }, 220);
+    if (e.target.type === 'radio') {
+      clearTimeout(esperaEscolha);
+      esperaEscolha = setTimeout(function () { avancar(false); }, PAUSA_ESCOLHA);
+    }
   });
 
   function concluirQuest() {
@@ -364,8 +455,24 @@
     estado.perfil = p;
     if (!estado.conta) estado.conta = { nome: '', criada: new Date().toISOString() };
     salvar();
-    abrirPainel();
-    if (editando) toast('Respostas atualizadas. A meta e os filtros já foram recalculados.');
+    var eraEdicao = editando;
+    carregando(eraEdicao ? 'Recalculando sua meta…' : 'Montando o seu plano…', 1300, function () {
+      abrirPainel();
+      if (eraEdicao) toast('Respostas atualizadas. A meta e os filtros já foram recalculados.');
+    });
+  }
+
+  /* loader: o bonequinho levantando peso; aparece na abertura e ao montar o plano */
+  function carregando(texto, ms, depois) {
+    var el = $('carregando');
+    $('carregandoTexto').textContent = texto;
+    el.classList.remove('carregando--sai');
+    el.hidden = false;
+    setTimeout(function () {
+      if (depois) depois();
+      el.classList.add('carregando--sai');
+      setTimeout(function () { el.hidden = true; }, 420);
+    }, calmo ? 150 : ms);
   }
 
   /* =================== 3. painel =================== */
@@ -421,6 +528,7 @@
     var notas = '';
     if (m.semDeficit) notas += '<p class="nota nota--alerta">Gestação ou amamentação: a meta não tem déficit calórico. Siga a orientação do seu médico.</p>';
     if (m.limitada) notas += '<p class="nota nota--alerta">A meta ficou no piso de segurança (não abaixo do metabolismo basal nem de 1.200 kcal).</p>';
+    if (m.exigente) notas += '<p class="nota nota--alerta">Plano intenso: resultado mais rápido, alimentação mais rígida. Se sentir fraqueza, tontura ou muita fome, volte para o moderado.</p>';
     if (m.prazo && !m.prazo.incoerente) {
       notas += '<p class="nota">Para ' + n1(m.prazo.kg) + ' kg nesse ritmo: cerca de <b>' + m.prazo.semanas + ' semanas</b>, por volta de ' + esc(dataEm(m.prazo.dias)) + '.</p>';
     }
@@ -433,7 +541,9 @@
       '</div>' +
       '<dl class="lista-dados">' + linhas.map(function (l) { return '<div><dt>' + l[0] + '</dt><dd>' + l[1] + '</dd></div>'; }).join('') + '</dl>' +
       notas +
-      '<p class="nota-fina">' + esc(Calculo.OBJETIVOS[p.objetivo].nome) + ' · proteína ' + Calculo.OBJETIVOS[p.objetivo].prot + ' g/kg · gordura 25% · carboidrato: o restante.</p>';
+      '<p class="nota-fina">' + esc(Calculo.OBJETIVOS[p.objetivo].nome) +
+        (p.objetivo !== 'manter' ? ' · ritmo ' + esc(Calculo.RITMOS[p.ritmo].nome.toLowerCase()) : '') +
+        ' · proteína ' + n1(m.protKg) + ' g/kg · gordura 25% · carboidrato: o restante.</p>';
   }
 
   function mostrarSaude() {
@@ -490,29 +600,119 @@
       '</div>';
   }
 
-  /* ---------- refeições ---------- */
+  /* ---------- refeições: o dia começa vazio e a pessoa cria as suas ---------- */
+  var refeicaoAlvo = null;   /* refeição escolhida pelo "+ alimento" de um bloco */
+
+  function refeicoesDo(k) { return estado.refeicoes[k] || []; }
+  function criarRefeicao(k, nome) {
+    var lista = estado.refeicoes[k] || (estado.refeicoes[k] = []);
+    if (lista.length >= MAX_REF) { toast('Limite de ' + MAX_REF + ' refeições por dia.'); return null; }
+    var r = { id: 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), nome: (nome || '').trim().slice(0, 40) || 'Refeição ' + (lista.length + 1) };
+    lista.push(r);
+    salvar();
+    return r.id;
+  }
+  function limparDiaVazio(k) {
+    if (estado.diario[k] && !estado.diario[k].length) delete estado.diario[k];
+    if (estado.refeicoes[k] && !estado.refeicoes[k].length) delete estado.refeicoes[k];
+  }
+
   function desenharRefeicoes(itens) {
-    $('refeicoes').innerHTML = REFEICOES.map(function (r) {
+    var refs = refeicoesDo(diaAtual);
+    if (!refs.length) {
+      $('refeicoes').innerHTML = '<div class="vazio-dia"><p><b>Nenhuma refeição ainda.</b></p>' +
+        '<p>Monte o dia do seu jeito: uma, três ou sete refeições. Crie a primeira acima ou já adicione um alimento.</p></div>';
+      return;
+    }
+    $('refeicoes').innerHTML = refs.map(function (r) {
       var lista = itens.filter(function (i) { return i.refeicao === r.id; });
       var soma = Calculo.somar(lista);
       var corpo = lista.length ? lista.map(function (i) {
-        return '<li class="item">' +
+        return '<li class="item">' + ico(imgDe(i)) +
           '<div class="item__nome"><strong>' + esc(i.nome) + '</strong><small>' + n0(i.gramas) + ' g' + (i.marca ? ' · ' + esc(i.marca) : '') +
             ' · P ' + n0(i.prot) + ' · C ' + n0(i.carb) + ' · G ' + n0(i.gord) + '</small></div>' +
           '<b class="item__kcal">' + n0(i.kcal) + ' kcal</b>' +
           '<button type="button" class="item__x" data-id="' + esc(i.id) + '" aria-label="Remover ' + esc(i.nome) + '">×</button></li>';
-      }).join('') : '<li class="vazio">Nada registrado</li>';
-      return '<section class="refeicao"><header><h3>' + r.nome + '</h3><span>' + (lista.length ? n0(soma.kcal) + ' kcal' : '') + '</span></header><ul>' + corpo + '</ul></section>';
+      }).join('') : '<li class="vazio">Nenhum alimento nesta refeição</li>';
+      return '<section class="refeicao"><header><h3>' + esc(r.nome) + '</h3>' +
+        '<span class="refeicao__kcal">' + (lista.length ? n0(soma.kcal) + ' kcal' : '') + '</span>' +
+        '<button type="button" class="link link--peq" data-add="' + esc(r.id) + '">+ alimento</button>' +
+        '<button type="button" class="refeicao__x" data-del="' + esc(r.id) + '" aria-label="Remover a refeição ' + esc(r.nome) + '">×</button>' +
+        '</header><ul>' + corpo + '</ul></section>';
     }).join('');
   }
+
   $('refeicoes').addEventListener('click', function (e) {
-    var b = e.target.closest('.item__x');
+    var b = e.target.closest('.item__x, [data-add], [data-del]');
     if (!b) return;
-    var id = b.getAttribute('data-id');
-    estado.diario[diaAtual] = itensDo(diaAtual).filter(function (i) { return i.id !== id; });
-    if (!estado.diario[diaAtual].length) delete estado.diario[diaAtual];
+    if (b.hasAttribute('data-add')) {
+      refeicaoAlvo = b.getAttribute('data-add');
+      fecharAdd();
+      $('busca').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      $('busca').focus({ preventScroll: true });
+      var r = refeicoesDo(diaAtual).filter(function (x) { return x.id === refeicaoAlvo; })[0];
+      $('buscaStatus').textContent = r ? 'Adicionando em: ' + r.nome + '. Busque o alimento.' : '';
+      return;
+    }
+    if (b.hasAttribute('data-del')) {
+      var id = b.getAttribute('data-del');
+      var qtd = itensDo(diaAtual).filter(function (i) { return i.refeicao === id; }).length;
+      if (qtd && !window.confirm('Remover esta refeição e os ' + qtd + ' alimento(s) dela?')) return;
+      estado.refeicoes[diaAtual] = refeicoesDo(diaAtual).filter(function (x) { return x.id !== id; });
+      estado.diario[diaAtual] = itensDo(diaAtual).filter(function (i) { return i.refeicao !== id; });
+      limparDiaVazio(diaAtual);
+      salvar();
+      desenharDia();
+      return;
+    }
+    var idItem = b.getAttribute('data-id');
+    estado.diario[diaAtual] = itensDo(diaAtual).filter(function (i) { return i.id !== idItem; });
+    limparDiaVazio(diaAtual);
     salvar();
     desenharDia();
+  });
+
+  /* nova refeição: nome livre ou uma sugestão rápida */
+  $('sugestoesRef').innerHTML = SUGESTOES_REF.map(function (s) { return '<option value="' + esc(s) + '">'; }).join('');
+  function desenharSugestoes() {
+    var usadas = refeicoesDo(diaAtual).map(function (r) { return r.nome.toLowerCase(); });
+    $('refSugestoes').innerHTML = SUGESTOES_REF.filter(function (s) { return usadas.indexOf(s.toLowerCase()) === -1; })
+      .map(function (s) { return '<button type="button" class="chip-btn" data-sug="' + esc(s) + '">' + esc(s) + '</button>'; }).join('');
+  }
+  $('novaRefeicao').addEventListener('click', function () {
+    $('formRefeicao').hidden = !$('formRefeicao').hidden;
+    if (!$('formRefeicao').hidden) { desenharSugestoes(); $('refNome').value = ''; $('refNome').focus(); }
+  });
+  $('refCancelar').addEventListener('click', function () { $('formRefeicao').hidden = true; });
+  function concluirNovaRefeicao(nome) {
+    if (criarRefeicao(diaAtual, nome)) { $('formRefeicao').hidden = true; desenharDia(); }
+  }
+  $('formRefeicao').addEventListener('submit', function (e) { e.preventDefault(); concluirNovaRefeicao($('refNome').value); });
+  $('refSugestoes').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-sug]');
+    if (b) concluirNovaRefeicao(b.getAttribute('data-sug'));
+  });
+
+  /* ---------- água ---------- */
+  function desenharAgua() {
+    var ml = estado.agua[diaAtual] || 0;
+    var metaMl = Math.round(metas.agua * 1000 / 50) * 50;
+    var frac = Math.min(ml / metaMl, 1);
+    $('aguaMeta').textContent = 'meta ' + n1(metaMl / 1000) + ' L';
+    $('aguaTotal').innerHTML = '<b>' + n1(ml / 1000) + ' L</b> de ' + n1(metaMl / 1000) + ' L' +
+      (ml >= metaMl ? ' <span class="agua__ok">meta batida</span>' : ' · faltam ' + n0(Math.max(metaMl - ml, 0)) + ' ml');
+    $('aguaBarra').style.width = (frac * 100).toFixed(1) + '%';
+    /* nível do copo: o copo vai de y=6 (cheio) a y=82 (vazio) */
+    $('copoAgua').setAttribute('transform', 'translate(0 ' + (82 - frac * 76).toFixed(1) + ')');
+    document.querySelector('.agua__menos').disabled = ml <= 0;
+  }
+  document.querySelector('.acoes--agua').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-ml]');
+    if (!b) return;
+    var novo = Math.max(0, Math.min(10000, (estado.agua[diaAtual] || 0) + parseInt(b.getAttribute('data-ml'), 10)));
+    if (novo) estado.agua[diaAtual] = novo; else delete estado.agua[diaAtual];
+    salvar();
+    desenharAgua();
   });
 
   /* ---------- semana: barras clicáveis ---------- */
@@ -554,19 +754,16 @@
     $('diaProx').disabled = diaAtual >= HOJE;
     var itens = itensDo(diaAtual);
     desenharResumo(Calculo.somar(itens));
+    desenharAgua();
     desenharRefeicoes(itens);
     desenharSemana();
+    $('formRefeicao').hidden = true;
   }
 
   /* =================== busca com filtro de saúde =================== */
   var buscaTimer = null, buscaCtl = null, ultimaBusca = '';
   var visiveis = [], mostrarEscondidos = false, ultimaLista = [];
   var ROTULO_ORIGEM = { off: 'produto', rede: 'rede · aprox.', meu: 'meu' };
-
-  function refeicaoPorHora() {
-    var h = new Date().getHours();
-    return h < 10 ? 'cafe' : h < 15 ? 'almoco' : h < 18 ? 'lanche' : 'jantar';
-  }
 
   function desenharResultados(lista) {
     ultimaLista = lista;
@@ -579,12 +776,12 @@
 
     var html = livres.map(function (x, i) {
       var a = x.a;
-      return '<li><button type="button" class="res" data-i="' + i + '">' +
+      return '<li><button type="button" class="res" data-i="' + i + '">' + ico(imgDe(a)) + '<span class="res__corpo">' +
         '<span class="res__nome">' + esc(a.nome) + (a.marca ? ' <small>' + esc(a.marca) + '</small>' : '') +
           (ROTULO_ORIGEM[a.origem] ? ' <em class="selo selo--' + a.origem + '">' + ROTULO_ORIGEM[a.origem] + '</em>' : '') + '</span>' +
         '<span class="res__num">' + n0(a.kcal) + ' kcal/100 g · P ' + n0(a.prot) + ' · C ' + n0(a.carb) + ' · G ' + n0(a.gord) + '</span>' +
         (x.av.avisos.length ? '<span class="res__aviso">⚠ ' + esc(x.av.avisos.join(' · ')) + '</span>' : '') +
-        '</button></li>';
+        '</span></button></li>';
     }).join('');
 
     if (presos.length) {
@@ -593,8 +790,8 @@
         (mostrarEscondidos ? 'ocultar' : 'ver quais') + '</button></li>';
       if (mostrarEscondidos) {
         html += presos.map(function (x) {
-          return '<li class="res res--preso"><span class="res__nome">' + esc(x.a.nome) + (x.a.marca ? ' <small>' + esc(x.a.marca) + '</small>' : '') + '</span>' +
-            '<span class="res__preso">' + esc(x.av.bloqueio) + '</span></li>';
+          return '<li class="res res--preso">' + ico(imgDe(x.a)) + '<span class="res__corpo"><span class="res__nome">' + esc(x.a.nome) + (x.a.marca ? ' <small>' + esc(x.a.marca) + '</small>' : '') + '</span>' +
+            '<span class="res__preso">' + esc(x.av.bloqueio) + '</span></span></li>';
         }).join('');
       }
     }
@@ -647,13 +844,14 @@
   function abrirAdd(a) {
     escolhido = a;
     $('formManual').hidden = true;
+    $('addIco').src = imgDe(a);
     $('addNome').textContent = a.nome + (a.marca ? ' · ' + a.marca : '');
     $('addInfo').textContent = 'Porção típica: ' + a.unidade + (a.unidade.indexOf(' g)') === -1 && a.unidade !== '100 g' ? ' (' + n0(a.porcao) + ' g)' : '');
     var av = Saude.avaliar(a, regras);
     $('addAtencao').hidden = !av.avisos.length;
     $('addAtencao').textContent = av.avisos.length ? 'Atenção: ' + av.avisos.join(' · ') + '. Consuma com moderação.' : '';
     $('addGramas').value = Math.round(a.porcao);
-    $('addRefeicao').value = refeicaoPorHora();
+    preencherSeletorRefeicao();
     $('formAdicionar').hidden = false;
     $('resultados').hidden = true;
     atualizarConta();
@@ -662,9 +860,40 @@
   }
   function fecharAdd() {
     escolhido = null;
+    editandoMeu = null;
     $('formAdicionar').hidden = true;
     $('formManual').hidden = true;
   }
+
+  /* refeições do dia + "nova refeição"; pré-seleciona a do "+ alimento" ou a última criada */
+  function preencherSeletorRefeicao() {
+    var refs = refeicoesDo(diaAtual);
+    $('addRefeicao').innerHTML = refs.map(function (r) { return '<option value="' + esc(r.id) + '">' + esc(r.nome) + '</option>'; }).join('') +
+      '<option value="__nova">+ Nova refeição…</option>';
+    var alvo = refs.some(function (r) { return r.id === refeicaoAlvo; }) ? refeicaoAlvo : (refs.length ? refs[refs.length - 1].id : '__nova');
+    $('addRefeicao').value = alvo;
+    aplicarSeletor();
+  }
+  function aplicarSeletor() {
+    var nova = $('addRefeicao').value === '__nova';
+    $('addNovaBox').hidden = !nova;
+    if (nova) $('addNovaRef').value = '';
+  }
+  $('addRefeicao').addEventListener('change', function () { aplicarSeletor(); if ($('addRefeicao').value === '__nova') $('addNovaRef').focus(); });
+
+  /* duplicar e editar: abre o cadastro com os valores deste alimento (por 100 g) */
+  $('addDuplicar').addEventListener('click', function () {
+    if (!escolhido) return;
+    var base = escolhido;
+    abrirManual();
+    $('manTitulo').textContent = 'Novo alimento a partir de “' + base.nome + '”';
+    $('manNome').value = (base.nome + (base.marca ? ' (' + base.marca + ')' : '') + ' (cópia)').slice(0, 60);
+    preencherManual({ base: '100', porcaoG: base.porcao !== 100 ? Math.round(base.porcao) : null,
+      kcal: base.kcal, prot: base.prot, carb: base.carb, gord: base.gord, fibra: base.fibra, marcas: base.marcas || [] });
+    status('Valores copiados por 100 g. Ajuste o que for diferente e salve.', 'ok');
+    $('manNome').focus();
+    $('manNome').select();
+  });
   function atualizarConta() {
     if (!escolhido) return;
     var g = parseFloat($('addGramas').value);
@@ -678,11 +907,18 @@
     e.preventDefault();
     var g = parseFloat($('addGramas').value);
     if (!escolhido || !(g > 0) || g > 5000) { $('addConta').textContent = 'Informe uma quantidade entre 1 e 5000 g.'; return; }
+    var refId = $('addRefeicao').value;
+    if (refId === '__nova') {
+      refId = criarRefeicao(diaAtual, $('addNovaRef').value);
+      if (!refId) return;
+    }
+    refeicaoAlvo = refId;
     var v = Calculo.porcao(escolhido, g);
     var item = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      nome: escolhido.nome, marca: escolhido.marca || '', gramas: g, refeicao: $('addRefeicao').value,
-      kcal: v.kcal, prot: v.prot, carb: v.carb, gord: v.gord, fibra: v.fibra
+      nome: escolhido.nome, marca: escolhido.marca || '', gramas: g, refeicao: refId,
+      kcal: v.kcal, prot: v.prot, carb: v.carb, gord: v.gord, fibra: v.fibra,
+      img: imgSegura(escolhido.img) || (escolhido.origem === 'meu' ? Alimentos.ICONE_GENERICO : '')
     };
     (estado.diario[diaAtual] = itensDo(diaAtual)).push(item);
     salvar();
@@ -695,8 +931,13 @@
   });
   $('addCancelar').addEventListener('click', fecharAdd);
 
-  /* ---------- cadastro: foto, código de barras ou digitar ---------- */
+  /* ---------- cadastro: foto, código de barras, digitar, duplicar ou editar ---------- */
   var avisouInconsistencia = false;
+  var editandoMeu = null;   /* id de "Meus alimentos" em edição */
+  $('abrirCadastro').addEventListener('click', function () {
+    abrirManual();
+    $('formManual').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
 
   $('manMarcas').insertAdjacentHTML('beforeend', MARCAS_CADASTRO.map(function (m) {
     return '<label class="chip"><input type="checkbox" name="manMarca" value="' + m + '"><span>' + esc(Saude.MARCA_TEXTO[m].replace('contém ', '')) + '</span></label>';
@@ -718,6 +959,8 @@
     document.querySelectorAll('input[name="manMarca"]').forEach(function (c) { c.checked = false; });
     aplicarBase();
     $('manSalvar').checked = true;
+    $('manSalvar').disabled = false;
+    $('manTitulo').textContent = 'Cadastrar alimento';
     $('erroManual').hidden = true;
     avisouInconsistencia = false;
     status('');
@@ -814,7 +1057,7 @@
     var marcas = Array.prototype.map.call(document.querySelectorAll('input[name="manMarca"]:checked'), function (c) { return c.value; });
     if (marcas.indexOf('carne') !== -1) marcas.push('animal');
     var a = {
-      id: 'meu-' + Date.now().toString(36), origem: 'meu', nome: nome, marca: '',
+      id: editandoMeu || 'meu-' + Date.now().toString(36), origem: 'meu', nome: nome, marca: '',
       kcal: v.kcal, prot: v.prot, carb: v.carb, gord: v.gord, fibra: v.fibra,
       porcao: base === 'porcao' ? porc : 100,
       unidade: base === 'porcao' ? '1 porção (' + n0(porc) + ' g)' : '100 g',
@@ -822,6 +1065,15 @@
     };
     var av = Saude.avaliar(a, regras);
     if (av.bloqueio && !window.confirm('Esse alimento não combina com o seu perfil de saúde (' + av.bloqueio + '). Usar mesmo assim?')) return;
+    if (editandoMeu) {
+      /* edição: substitui no lugar e volta para a lista */
+      estado.meus = estado.meus.map(function (x) { return x.id === editandoMeu ? a : x; });
+      salvar();
+      desenharMeus();
+      fecharAdd();
+      toast('Alimento atualizado: ' + a.nome + '.');
+      return;
+    }
     if ($('manSalvar').checked) { estado.meus.unshift(a); salvar(); desenharMeus(); }
     abrirAdd(a);
   });
@@ -831,11 +1083,27 @@
     $('meus').hidden = !estado.meus.length;
     $('meusN').textContent = estado.meus.length ? '(' + estado.meus.length + ')' : '';
     $('meusLista').innerHTML = estado.meus.map(function (a) {
-      return '<li><span>' + esc(a.nome) + ' <small>' + n0(a.kcal) + ' kcal/100 g</small></span>' +
+      return '<li>' + ico(Alimentos.ICONE_GENERICO, 'ico--p') + '<span>' + esc(a.nome) + ' <small>' + n0(a.kcal) + ' kcal/100 g</small></span>' +
+        '<button type="button" class="meus__editar" data-editar="' + esc(a.id) + '">Editar</button>' +
         '<button type="button" data-id="' + esc(a.id) + '" aria-label="Apagar ' + esc(a.nome) + '">×</button></li>';
     }).join('');
   }
   $('meusLista').addEventListener('click', function (e) {
+    var ed = e.target.closest('button[data-editar]');
+    if (ed) {
+      var a = estado.meus.filter(function (x) { return x.id === ed.getAttribute('data-editar'); })[0];
+      if (!a) return;
+      abrirManual();
+      editandoMeu = a.id;
+      $('manTitulo').textContent = 'Editar “' + a.nome + '”';
+      $('manNome').value = a.nome;
+      preencherManual({ base: '100', porcaoG: a.porcao !== 100 ? Math.round(a.porcao) : null,
+        kcal: a.kcal, prot: a.prot, carb: a.carb, gord: a.gord, fibra: a.fibra, marcas: a.marcas });
+      $('manSalvar').checked = true;
+      $('manSalvar').disabled = true;
+      $('formManual').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
     var b = e.target.closest('button[data-id]');
     if (!b) return;
     estado.meus = estado.meus.filter(function (a) { return a.id !== b.getAttribute('data-id'); });
@@ -844,7 +1112,7 @@
   });
 
   /* =================== exemplo (demonstração) =================== */
-  var EXEMPLO_PERFIL = { sexo: 'm', idade: 30, peso: 80, altura: 180, atividade: 'moderado', objetivo: 'perder', pesoAlvo: 75,
+  var EXEMPLO_PERFIL = { sexo: 'm', idade: 30, peso: 80, altura: 180, atividade: 'moderado', objetivo: 'perder', ritmo: 'leve', pesoAlvo: 75,
     saude: { condicoes: ['hipertensao'], alergias: ['crustaceo'], dieta: 'nenhuma' } };
   var EXEMPLO_DIAS = [
     [['Ovo cozido', 100, 'cafe'], ['Pão francês', 50, 'cafe'], ['Banana prata', 70, 'cafe'], ['Arroz branco cozido', 150, 'almoco'], ['Feijão carioca cozido', 120, 'almoco'], ['Peito de frango grelhado', 160, 'almoco'], ['Iogurte natural integral', 170, 'lanche'], ['Tilápia grelhada', 150, 'jantar'], ['Batata-doce cozida', 150, 'jantar'], ['Brócolis cozido', 80, 'jantar']],
@@ -867,7 +1135,10 @@
                  kcal: v.kcal, prot: v.prot, carb: v.carb, gord: v.gord, fibra: v.fibra };
       });
     });
-    estado = limparEstado({ conta: { nome: 'Visitante', criada: new Date().toISOString() }, perfil: EXEMPLO_PERFIL, diario: diario, meus: [] });
+    var AGUA = [2000, 2500, 1750, 2750, 2250, 3000, 1250], agua = {};
+    AGUA.forEach(function (ml, i) { agua[somarDias(HOJE, i - (AGUA.length - 1))] = ml; });
+    /* refeições do exemplo: os ids antigos (cafe, almoco…) viram refeições com nome na limpeza */
+    estado = limparEstado({ conta: { nome: 'Visitante', criada: new Date().toISOString() }, perfil: EXEMPLO_PERFIL, diario: diario, meus: [], agua: agua });
     salvar();
     abrirPainel();
     toast('Demonstração carregada: perfil com hipertensão e alergia a frutos do mar. Busque "camarão" ou "bacon" para ver o filtro.');
@@ -877,7 +1148,8 @@
   $('baixarBackup').addEventListener('click', function () {
     $('menu').open = false;
     var corpo = JSON.stringify({ app: 'prato-certo', versao: 2, exportado: new Date().toISOString(),
-      conta: estado.conta, perfil: estado.perfil, diario: estado.diario, meus: estado.meus }, null, 2);
+      conta: estado.conta, perfil: estado.perfil, diario: estado.diario, meus: estado.meus,
+      refeicoes: estado.refeicoes, agua: estado.agua }, null, 2);
     var url = URL.createObjectURL(new Blob([corpo], { type: 'application/json' }));
     var a = document.createElement('a');
     a.href = url;
@@ -932,11 +1204,65 @@
     window.location.reload();
   });
 
+  /* miniatura que não carregou (sem internet, foto removida): troca pelo prato genérico, e some se nem ele vier */
+  document.addEventListener('error', function (e) {
+    var img = e.target;
+    if (!img || img.tagName !== 'IMG' || !img.classList.contains('ico')) return;
+    if (img.src !== Alimentos.ICONE_GENERICO) img.src = Alimentos.ICONE_GENERICO;
+    else img.style.visibility = 'hidden';
+  }, true);
+
+  /* =================== instalar como app (PWA) =================== */
+  var pedidoInstalar = null;
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); pedidoInstalar = e; });
+  var jaInstalado = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+  if (jaInstalado) $('instalarApp').hidden = true;
+
+  $('instalarApp').addEventListener('click', function () {
+    $('menu').open = false;
+    /* Chrome/Edge/Android: o navegador tem o próprio botão de instalar */
+    if (pedidoInstalar) {
+      pedidoInstalar.prompt();
+      pedidoInstalar.userChoice.then(function () { pedidoInstalar = null; }, function () { pedidoInstalar = null; });
+      return;
+    }
+    var ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var compartilhar = '<svg class="ic-compartilhar" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11v9h12v-9"/></svg>';
+    $('dlgCorpo').innerHTML = ios
+      ? '<ol class="passos-inst">' +
+          '<li>Abra esta página no <b>Safari</b>.</li>' +
+          '<li>Toque em <b>Compartilhar</b> ' + compartilhar + ' na barra de baixo.</li>' +
+          '<li>Role e toque em <b>Adicionar à Tela de Início</b>.</li>' +
+          '<li>Toque em <b>Adicionar</b>. O ícone da maçã aparece junto dos seus apps.</li>' +
+        '</ol>' +
+        '<p class="nota">No iPhone, o app instalado guarda os dados separado do Safari. Se você já usava pelo navegador, use <b>Baixar backup</b> aqui e depois <b>Restaurar backup</b> dentro do app.</p>'
+      : '<ol class="passos-inst">' +
+          '<li>No Chrome ou Edge, abra o menu <b>⋮</b> do navegador.</li>' +
+          '<li>Toque em <b>Instalar app</b> (ou <b>Adicionar à tela inicial</b>).</li>' +
+          '<li>Confirme. O Prato Certo abre em tela cheia, como um app.</li>' +
+        '</ol>' +
+        '<p class="nota-fina">No iPhone, use o Safari: Compartilhar → Adicionar à Tela de Início.</p>';
+    var dlg = $('dlgInstalar');
+    if (dlg.showModal) dlg.showModal(); else toast('No Safari: Compartilhar → Adicionar à Tela de Início.');
+  });
+
+  /* service worker: guarda o app no aparelho (abre sem internet e mais rápido) */
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () { /* segue sem cache */ }); });
+  }
+
   /* =================== início =================== */
-  REFEICOES.forEach(function (x) { $('addRefeicao').insertAdjacentHTML('beforeend', '<option value="' + x.id + '">' + x.nome + '</option>'); });
   carregar();
   if (estado.perfil) abrirPainel();
   else if (estado.conta) iniciarQuest(false);
   else mostrarTela('telaConta');
-  mostrarAviso();
+  /* o loader já está na tela desde o HTML; sai depois de ~1,1 s da abertura */
+  (function () {
+    var el = $('carregando');
+    var falta = Math.max(0, (calmo ? 200 : 1100) - (window.performance ? performance.now() : 0));
+    setTimeout(function () {
+      el.classList.add('carregando--sai');
+      setTimeout(function () { el.hidden = true; mostrarAviso(); }, 420);
+    }, falta);
+  })();
 })();

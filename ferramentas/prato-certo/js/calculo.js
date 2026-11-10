@@ -18,12 +18,19 @@ var Calculo = (function () {
     atleta:     { fator: 1.9,   nome: 'Muito intenso', dica: 'treino pesado/braçal' }
   };
 
-  /* ajuste sobre o gasto; proteína em g por kg de peso */
+  /* objetivo dá a direção; proteína em g por kg de peso */
   var OBJETIVOS = {
-    perderMais: { ajuste: -0.20, prot: 2.0, nome: 'Perder peso (ritmo firme)' },
-    perder:     { ajuste: -0.10, prot: 1.8, nome: 'Perder peso (ritmo leve)' },
-    manter:     { ajuste:  0.00, prot: 1.6, nome: 'Manter o peso' },
-    ganhar:     { ajuste:  0.10, prot: 1.8, nome: 'Ganhar massa' }
+    perder: { sinal: -1, prot: 1.8, nome: 'Perder peso',            dica: 'Reduzir gordura corporal.' },
+    manter: { sinal:  0, prot: 1.6, nome: 'Manter o peso',          dica: 'Comer o quanto gasta.' },
+    ganhar: { sinal:  1, prot: 1.8, nome: 'Ganhar massa muscular',  dica: 'Comer um pouco acima do gasto, com treino.' }
+  };
+
+  /* ritmo dá a intensidade: quanto mais intenso, mais rápido o resultado e mais
+     exigente a alimentação. Percentuais sobre o gasto diário. */
+  var RITMOS = {
+    leve:     { perder: -0.10, ganhar: 0.05, protExtra: 0,   nome: 'Leve',     dica: 'Mais fácil de manter; resultado mais lento.' },
+    moderado: { perder: -0.20, ganhar: 0.10, protExtra: 0,   nome: 'Moderado', dica: 'Equilíbrio entre resultado e conforto.' },
+    intenso:  { perder: -0.25, ganhar: 0.15, protExtra: 0.2, nome: 'Intenso',  dica: 'Alimentação mais rígida para ganhos mais rápidos. Exige disciplina; o ideal é ter acompanhamento.' }
   };
 
   var KCAL_POR_KG = 7700;   /* aproximação clássica de 1 kg de gordura corporal */
@@ -46,13 +53,17 @@ var Calculo = (function () {
   function metas(p) {
     var f = FATORES[p.atividade] || FATORES.leve;
     var o = OBJETIVOS[p.objetivo] || OBJETIVOS.manter;
+    var r = RITMOS[p.ritmo] || RITMOS.moderado;
     var base = tmb(p);
     var gasto = base * f.fator;
+    var ajusteBase = o.sinal < 0 ? r.perder : (o.sinal > 0 ? r.ganhar : 0);
+    var protKg = o.prot + (o.sinal !== 0 ? r.protExtra : 0);
 
     /* gestação/amamentação: sem déficit calórico (só com acompanhamento profissional) */
     var gestante = !!(p.saude && Array.isArray(p.saude.condicoes) && p.saude.condicoes.indexOf('gestante') !== -1);
-    var ajuste = gestante ? Math.max(o.ajuste, 0) : o.ajuste;
-    var semDeficit = gestante && o.ajuste < 0;
+    var ajuste = gestante ? Math.max(ajusteBase, 0) : ajusteBase;
+    var semDeficit = gestante && ajusteBase < 0;
+    var exigente = o.sinal !== 0 && p.ritmo === 'intenso' && !semDeficit;
 
     var kcal = gasto * (1 + ajuste);
     /* piso de segurança: nunca abaixo da TMB nem de 1200 kcal */
@@ -61,7 +72,7 @@ var Calculo = (function () {
     if (limitada) kcal = piso;
     kcal = Math.round(kcal / 10) * 10;
 
-    var prot = Math.round(o.prot * p.peso);
+    var prot = Math.round(protKg * p.peso);
     var gord = Math.round((kcal * 0.25) / 9);
     var carb = Math.round((kcal - prot * 4 - gord * 9) / 4);
     if (carb < 0) carb = 0;
@@ -92,6 +103,10 @@ var Calculo = (function () {
       kgSemana: Math.round(kgSemana * 100) / 100,
       limitada: limitada,
       semDeficit: semDeficit,
+      exigente: exigente,
+      protKg: protKg,
+      /* perder mais de ~1% do peso por semana costuma custar massa magra */
+      rapidoDemais: kgSemana > p.peso * 0.01,
       prazo: prazo,
       imc: Math.round((p.peso / Math.pow(p.altura / 100, 2)) * 10) / 10
     };
@@ -119,7 +134,7 @@ var Calculo = (function () {
   }
 
   return {
-    FATORES: FATORES, OBJETIVOS: OBJETIVOS,
+    FATORES: FATORES, OBJETIVOS: OBJETIVOS, RITMOS: RITMOS,
     tmb: tmb, validar: validar, metas: metas, somar: somar, porcao: porcao
   };
 })();

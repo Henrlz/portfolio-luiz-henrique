@@ -188,6 +188,78 @@ var Alimentos = (function () {
   };
   LISTA.forEach(function (a) { a.marcas = MARCAS[a.nome] || []; });
 
+  /* miniaturas: Fluent Emoji 3D (Microsoft, licença MIT), num commit fixo do
+     repositório servido pelo jsDelivr. Sem ícone fiel, usa o prato genérico. */
+  var EMOJI_BASE = 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@1ffb34c752ecf5d402f04cfb4b392c77f57c54bc/assets/';
+  var GENERICO = 'Fork and knife with plate';
+  var ICONES = {
+    'Cooked rice': ['Arroz branco cozido', 'Arroz integral cozido'],
+    'Spaghetti': ['Macarrão cozido'],
+    'Bowl with spoon': ['Aveia em flocos', 'Açaí (polpa sem açúcar)', 'Iogurte natural integral', 'Iogurte grego natural'],
+    'Baguette bread': ['Pão francês'],
+    'Bread': ['Pão de forma integral', 'Pão de queijo'],
+    'Ear of corn': ['Cuscuz de milho cozido', 'Milho verde cozido'],
+    'Beans': ['Feijão carioca cozido', 'Feijão preto cozido', 'Lentilha cozida', 'Grão-de-bico cozido'],
+    'Poultry leg': ['Peito de frango grelhado', 'Coxa de frango cozida sem pele', 'McNuggets (10 unidades)'],
+    'Cut of meat': ['Patinho grelhado', 'Alcatra grelhada', 'Carne moída refogada'],
+    'Egg': ['Ovo cozido', 'Ovo cru (inteiro)', 'Clara de ovo cozida', 'Gema de ovo cozida', 'Ovo de codorna cozido'],
+    'Cooking': ['Ovo frito'],
+    'Fish': ['Tilápia grelhada', 'Salmão grelhado'],
+    'Canned food': ['Atum em lata (natural)', 'Sardinha em lata'],
+    'Bacon': ['Presunto fatiado', 'Bacon frito'],
+    'Potato': ['Batata inglesa cozida', 'Mandioca cozida'],
+    'Roasted sweet potato': ['Batata-doce cozida'],
+    'Banana': ['Banana prata', 'Banana nanica'],
+    'Red apple': ['Maçã'],
+    'Tangerine': ['Laranja', 'Tangerina (mexerica)'],
+    'Mango': ['Manga'],
+    'Grapes': ['Uva', 'Uva-passa'],
+    'Strawberry': ['Morango'],
+    'Watermelon': ['Melancia'],
+    'Pineapple': ['Abacaxi'],
+    'Avocado': ['Abacate'],
+    'Pear': ['Pera'],
+    'Kiwi fruit': ['Kiwi'],
+    'Melon': ['Melão'],
+    'Leafy green': ['Alface', 'Couve refogada', 'Espinafre cozido', 'Repolho cru'],
+    'Tomato': ['Tomate'],
+    'Carrot': ['Cenoura crua'],
+    'Cucumber': ['Pepino', 'Abobrinha cozida', 'Chuchu cozido'],
+    'Broccoli': ['Brócolis cozido', 'Couve-flor cozida'],
+    'Onion': ['Cebola crua'],
+    'Glass of milk': ['Leite integral', 'Leite desnatado'],
+    'Cheese wedge': ['Queijo mussarela', 'Queijo minas frescal', 'Requeijão cremoso', 'Queijo parmesão ralado', 'Ricota', 'Cream cheese'],
+    'Butter': ['Manteiga'],
+    'Olive': ['Azeite de oliva'],
+    'Peanuts': ['Pasta de amendoim', 'Amendoim torrado'],
+    'Chestnut': ['Castanha-do-pará', 'Amêndoa', 'Noz', 'Castanha de caju'],
+    'Seedling': ['Chia', 'Linhaça'],
+    'Honey pot': ['Mel'],
+    'Chocolate bar': ['Chocolate ao leite'],
+    'Hot beverage': ['Café sem açúcar'],
+    'Tropical drink': ['Suco de laranja natural'],
+    'Cup with straw': ['Refrigerante de cola'],
+    'Beer mug': ['Cerveja'],
+    'Coconut': ['Água de coco'],
+    'Flatbread': ['Tapioca (goma hidratada)'],
+    'Cookie': ['Biscoito cream cracker'],
+    'Fried shrimp': ['Camarão cozido'],
+    'French fries': ['Batata frita (tipo fast food)', 'Batata frita média'],
+    'Hamburger': ['Big Mac', 'Cheeseburger', 'Whopper'],
+    'Pizza': ['Pizza de brigadeiro (1 fatia)'],
+    'Sandwich': ['Sanduíche de peru 15 cm']
+  };
+  var ICONE_DE = {};
+  Object.keys(ICONES).forEach(function (emoji) { ICONES[emoji].forEach(function (nome) { ICONE_DE[nome] = emoji; }); });
+
+  function urlEmoji(emoji) {
+    return EMOJI_BASE + encodeURIComponent(emoji) + '/3D/' + emoji.toLowerCase().replace(/ /g, '_') + '_3d.png';
+  }
+  /* ícone de um alimento pelo nome (base local); o genérico para o resto */
+  function icone(nome) { return urlEmoji(ICONE_DE[nome] || GENERICO); }
+  var ICONE_GENERICO = urlEmoji(GENERICO);
+  LISTA.forEach(function (a) { a.img = icone(a.nome); });
+
   /* tira acento e caixa: "Pão" casa com "pao" */
   function norm(s) {
     return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
@@ -214,5 +286,5 @@ var Alimentos = (function () {
     return achados.slice(0, 10);
   }
 
-  return { LISTA: LISTA, buscar: buscar, norm: norm };
+  return { LISTA: LISTA, buscar: buscar, norm: norm, icone: icone, ICONE_GENERICO: ICONE_GENERICO };
 })();

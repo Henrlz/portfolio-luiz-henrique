@@ -2,11 +2,18 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Prato Certo | Calorias, nutrientes e saúde</title>
 <meta name="description" content="Responda um questionário rápido e receba sua meta diária de calorias e nutrientes, com os alimentos filtrados pelo seu perfil de saúde. Busca de alimentos, leitura da tabela nutricional por foto e diário.">
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<!-- instalável como app (iPhone: Compartilhar → Adicionar à Tela de Início) -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icones/app-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Prato Certo">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,11 +21,34 @@
 </head>
 <body>
 
+<!-- loader: uma pessoa fazendo desenvolvimento com barra (some sozinho quando o app abre) -->
+<div class="carregando" id="carregando" role="status" aria-live="polite">
+  <svg class="atleta" viewBox="0 0 120 120" aria-hidden="true">
+    <ellipse class="atleta__sombra" cx="60" cy="109" rx="24" ry="3.5"/>
+    <g class="atleta__corpo">
+      <path class="atleta__traco" d="M60 76 L51 92 L53 107 M60 76 L69 92 L67 107"/>
+      <path class="atleta__traco" d="M60 51 L60 77"/>
+      <circle class="atleta__cabeca" cx="60" cy="40" r="7.5"/>
+      <line class="atleta__braco" x1="56" y1="54" x2="42" y2="27"/>
+      <line class="atleta__braco" x1="64" y1="54" x2="78" y2="27"/>
+    </g>
+    <g class="atleta__barra">
+      <line class="atleta__haste" x1="20" y1="27" x2="100" y2="27"/>
+      <rect class="atleta__anilha" x="22" y="17" width="7" height="20" rx="2"/>
+      <rect class="atleta__anilha atleta__anilha--peq" x="30" y="20" width="4" height="14" rx="1.5"/>
+      <rect class="atleta__anilha" x="91" y="17" width="7" height="20" rx="2"/>
+      <rect class="atleta__anilha atleta__anilha--peq" x="86" y="20" width="4" height="14" rx="1.5"/>
+    </g>
+  </svg>
+  <p id="carregandoTexto">Preparando seu prato…</p>
+</div>
+<noscript><style>.carregando { display: none !important; }</style></noscript>
+
 <!-- =============== 1. conta =============== -->
 <main class="tela tela--centro" id="telaConta" hidden>
   <div class="cartao entrada">
     <div class="logo">
-      <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="var(--primaria)"/><circle cx="20" cy="20" r="10.5" fill="none" stroke="#fff" stroke-width="3"/><path d="M15.5 20.3l3.2 3.2 6-6.6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="var(--primaria)"/><path fill="#fff" d="M20 14.6c-1.7-1.4-3.8-2-5.9-1.6-3.8.8-6.2 4.7-5.6 9.6.6 5.7 4.5 11.4 8 11.7 1.4.1 2.4-.6 3.5-.6s2.1.7 3.5.6c3.5-.3 7.4-6 8-11.7.6-4.9-1.8-8.8-5.6-9.6-2.1-.4-4.2.2-5.9 1.6z"/><path fill="#bfe6e8" d="M20.6 13.4c.3-2.8 2.2-5.1 5-5.8-.3 2.8-2.2 5.1-5 5.8z"/><path d="M15.2 19.5c-1.2.9-1.8 2.4-1.6 4" fill="none" stroke="var(--primaria)" stroke-width="1.6" stroke-linecap="round" opacity=".55"/></svg>
       <span>Prato Certo</span>
     </div>
     <h1 class="entrada__tit">Crie sua conta</h1>
@@ -76,12 +106,13 @@
   <header class="barra">
     <div class="barra__in">
       <div class="logo logo--peq">
-        <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="var(--primaria)"/><circle cx="20" cy="20" r="10.5" fill="none" stroke="#fff" stroke-width="3"/><path d="M15.5 20.3l3.2 3.2 6-6.6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="var(--primaria)"/><path fill="#fff" d="M20 14.6c-1.7-1.4-3.8-2-5.9-1.6-3.8.8-6.2 4.7-5.6 9.6.6 5.7 4.5 11.4 8 11.7 1.4.1 2.4-.6 3.5-.6s2.1.7 3.5.6c3.5-.3 7.4-6 8-11.7.6-4.9-1.8-8.8-5.6-9.6-2.1-.4-4.2.2-5.9 1.6z"/><path fill="#bfe6e8" d="M20.6 13.4c.3-2.8 2.2-5.1 5-5.8-.3 2.8-2.2 5.1-5 5.8z"/><path d="M15.2 19.5c-1.2.9-1.8 2.4-1.6 4" fill="none" stroke="var(--primaria)" stroke-width="1.6" stroke-linecap="round" opacity=".55"/></svg>
         <span>Prato Certo</span>
       </div>
       <details class="menu" id="menu">
         <summary><span class="avatar" id="avatar"></span><span class="menu__nome" id="menuNome"></span></summary>
         <div class="menu__lista">
+          <button type="button" id="instalarApp">Instalar como app</button>
           <button type="button" id="editarRespostas">Editar minhas respostas</button>
           <button type="button" id="baixarBackup">Baixar backup dos dados</button>
           <label for="restaurarBackup">Restaurar backup</label>
@@ -112,9 +143,38 @@
           <div class="resumo" id="rotulo" aria-live="polite"></div>
         </div>
 
+        <!-- água -->
+        <div class="cartao" aria-labelledby="tAgua">
+          <div class="cartao__cab"><h2 id="tAgua">Água</h2><span class="cartao__extra" id="aguaMeta"></span></div>
+          <div class="agua">
+            <svg class="copo" viewBox="0 0 64 84" aria-hidden="true">
+              <defs><clipPath id="copoForma"><path d="M8 6 H56 L50 78 Q49.5 82 45.5 82 H18.5 Q14.5 82 14 78 Z"/></clipPath></defs>
+              <g clip-path="url(#copoForma)">
+                <rect class="copo__fundo" x="0" y="0" width="64" height="84"/>
+                <g class="copo__agua" id="copoAgua">
+                  <path class="copo__onda" d="M-64 0 Q-48 -5 -32 0 T0 0 T32 0 T64 0 T96 0 T128 0 V90 H-64 Z"/>
+                </g>
+              </g>
+              <path class="copo__borda" d="M8 6 H56 L50 78 Q49.5 82 45.5 82 H18.5 Q14.5 82 14 78 Z"/>
+            </svg>
+            <div class="agua__dados">
+              <p class="agua__total" id="aguaTotal" aria-live="polite"></p>
+              <div class="agua__trilho" aria-hidden="true"><i id="aguaBarra"></i></div>
+              <div class="acoes acoes--agua">
+                <button type="button" class="botao botao--leve" data-ml="250">+ copo <small>250 ml</small></button>
+                <button type="button" class="botao botao--leve" data-ml="500">+ garrafa <small>500 ml</small></button>
+                <button type="button" class="botao botao--leve agua__menos" data-ml="-250" aria-label="Tirar 250 ml">−</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- adicionar -->
         <div class="cartao" aria-labelledby="tAdd">
-          <div class="cartao__cab"><h2 id="tAdd">Adicionar alimento</h2></div>
+          <div class="cartao__cab">
+            <h2 id="tAdd">Adicionar alimento</h2>
+            <button type="button" class="botao botao--leve botao--peq" id="abrirCadastro">+ Cadastrar alimento</button>
+          </div>
           <div class="busca">
             <div class="busca__campo">
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
@@ -124,7 +184,7 @@
             <ul class="resultados" id="resultados" hidden></ul>
 
             <form class="subpainel" id="formAdicionar" hidden>
-              <div class="subpainel__nome"><strong id="addNome"></strong><small id="addInfo"></small></div>
+              <div class="subpainel__nome"><img class="ico ico--g" id="addIco" alt="" width="48" height="48"><div><strong id="addNome"></strong><small id="addInfo"></small></div></div>
               <p class="atencao" id="addAtencao" hidden></p>
               <div class="duo">
                 <label class="campo"><span>Quantidade (g)</span>
@@ -132,15 +192,18 @@
                 <label class="campo"><span>Refeição</span>
                   <select id="addRefeicao"></select></label>
               </div>
+              <label class="campo" id="addNovaBox" hidden><span>Nome da nova refeição</span>
+                <input id="addNovaRef" type="text" maxlength="40" list="sugestoesRef" placeholder="Ex.: Café da manhã, Pré-treino, Ceia…"></label>
               <p class="subpainel__conta" id="addConta" aria-live="polite"></p>
               <div class="acoes">
                 <button class="botao botao--cheio" type="submit">Adicionar</button>
+                <button class="botao botao--leve" type="button" id="addDuplicar" title="Abre o cadastro com estes valores para você ajustar">Duplicar e editar</button>
                 <button class="botao botao--leve" type="button" id="addCancelar">Cancelar</button>
               </div>
             </form>
 
             <form class="subpainel" id="formManual" hidden>
-              <p class="subpainel__tit">Cadastrar alimento</p>
+              <p class="subpainel__tit" id="manTitulo">Cadastrar alimento</p>
               <div class="atalhos">
                 <label class="botao botao--leve atalho" for="manFoto">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.2"/></svg>
@@ -194,7 +257,19 @@
 
         <!-- refeições -->
         <div class="cartao" aria-labelledby="tRef">
-          <div class="cartao__cab"><h2 id="tRef">Refeições</h2></div>
+          <div class="cartao__cab">
+            <h2 id="tRef">Refeições</h2>
+            <button type="button" class="botao botao--leve botao--peq" id="novaRefeicao">+ Nova refeição</button>
+          </div>
+          <form class="nova-ref" id="formRefeicao" hidden>
+            <div class="nova-ref__linha">
+              <input id="refNome" type="text" maxlength="40" list="sugestoesRef" placeholder="Nome da refeição (ex.: Pré-treino)" aria-label="Nome da refeição">
+              <button type="submit" class="botao botao--cheio">Criar</button>
+              <button type="button" class="botao botao--leve" id="refCancelar">Cancelar</button>
+            </div>
+            <div class="sugestoes" id="refSugestoes" aria-label="Sugestões"></div>
+          </form>
+          <datalist id="sugestoesRef"></datalist>
           <div class="refeicoes" id="refeicoes"></div>
         </div>
       </section>
@@ -225,6 +300,7 @@
   <footer class="rodape">
     <p>O Prato Certo é uma ferramenta de apoio e <strong>não substitui orientação médica ou nutricional</strong>. A meta usa a equação de Mifflin-St Jeor. Alimentos comuns vêm de uma base local de referência (TACO e USDA, arredondados); itens de redes de fast food são <strong>aproximados</strong>; produtos de mercado vêm da <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">Open Food Facts</a>, base colaborativa que pode ter erros. O filtro de saúde depende das informações de cada alimento: em caso de alergia grave, confira sempre o rótulo.</p>
     <p>Seus dados ficam só neste navegador (armazenamento local e um cookie com o seu perfil). Para trocar de aparelho, use “Baixar backup” no menu.</p>
+    <p>Ícones dos alimentos: <a href="https://github.com/microsoft/fluentui-emoji" target="_blank" rel="noopener">Fluent Emoji</a>, da Microsoft (licença MIT). Fotos de produtos: Open Food Facts (CC BY-SA). Meta de água: 35 ml por kg de peso, uma referência geral.</p>
     <a class="volta" href="../../index.html#projetos">← voltar ao portfólio</a>
   </footer>
 </div>
@@ -233,6 +309,12 @@
   <p>Para lembrar da sua conta, das respostas e do diário, este app guarda dados <strong>só neste navegador</strong> (armazenamento local e um cookie com o seu perfil). Nada é enviado a ninguém.</p>
   <button type="button" class="botao botao--cheio" id="avisoOk">Entendi</button>
 </div>
+
+<dialog class="dialogo" id="dlgInstalar" aria-labelledby="dlgTit">
+  <h2 id="dlgTit">Instalar o Prato Certo</h2>
+  <div id="dlgCorpo"></div>
+  <form method="dialog"><button class="botao botao--cheio botao--largo">Entendi</button></form>
+</dialog>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 

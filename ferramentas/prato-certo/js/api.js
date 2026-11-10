@@ -6,7 +6,13 @@ var Api = (function () {
   'use strict';
 
   var BASE = 'https://world.openfoodfacts.org/cgi/search.pl';
-  var CAMPOS = 'code,product_name,brands,nutriments,serving_size,serving_quantity,quantity,allergens_tags,traces_tags,ingredients_analysis_tags,categories_tags';
+  var CAMPOS = 'code,product_name,brands,nutriments,serving_size,serving_quantity,quantity,allergens_tags,traces_tags,ingredients_analysis_tags,categories_tags,image_front_thumb_url';
+
+  /* miniatura do produto: só aceita o servidor de imagens da própria base */
+  function miniatura(p) {
+    var u = p.image_front_thumb_url;
+    return typeof u === 'string' && /^https:\/\/images\.openfoodfacts\.org\/[\w./-]+\.(jpg|jpeg|png|webp)$/i.test(u) ? u : '';
+  }
 
   /* marcas para o filtro de saúde a partir do que a própria base informa */
   var ALERGENO = {
@@ -64,7 +70,8 @@ var Api = (function () {
       fibra: num(n.fiber_100g) || 0,
       porcao: serv && serv > 0 && serv < 1000 ? serv : 100,
       unidade: serv && serv > 0 && serv < 1000 ? (p.serving_size || serv + ' g') : '100 g',
-      marcas: marcasDe(p, n)
+      marcas: marcasDe(p, n),
+      img: miniatura(p)
     };
   }
 
