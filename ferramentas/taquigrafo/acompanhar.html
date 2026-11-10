@@ -21,6 +21,7 @@
     <button type="submit">Abrir</button>
   </form>
   <button type="button" class="topo__demo" id="usarDemo">usar a live de demonstração</button>
+  <button type="button" class="topo__demo" id="irGravado">já foi gravado?</button>
   <details class="chave" id="chaveApi">
     <summary>ler o chat</summary>
     <div class="chave__corpo">
@@ -43,21 +44,54 @@
     <li><b>Deixe a aba aberta.</b> A fita ao lado imprime tudo o que é dito e marca o que tem a ver com a palavra-chave. Quando a palavra sair, apita e carimba.</li>
   </ol>
   <p class="obs">Funciona no Chrome ou no Edge do computador. No celular o navegador não deixa compartilhar a aba — use no computador. Nada sai do seu navegador.</p>
+
+  <section class="gravado" id="gravado" aria-labelledby="tituloGravado">
+    <div class="gravado__texto">
+      <span class="etiqueta">vídeo gravado ou live que já acabou</span>
+      <h2 id="tituloGravado">Já foi gravado? <em>Leia tudo de uma vez</em>, sem tocar nada</h2>
+      <ol class="gravado__passos">
+        <li>No YouTube, abaixo do vídeo, clique em <b>…mais</b> e depois em <b>Mostrar transcrição</b>.</li>
+        <li>No painel que abre, selecione o texto (clique no começo, role até o fim e <b>Shift+clique</b> no último trecho) e copie com <b>Ctrl+C</b>.</li>
+        <li>Cole aqui. Em segundos a fita sai inteira, com os horários do vídeo e as palavras-chave anotadas.</li>
+      </ol>
+      <p class="obs">Também lê arquivo de legenda (.srt, .vtt) ou texto (.txt). Live em andamento não dá: ela ainda está acontecendo. Para essa, use o link lá em cima (dá para deixar em silêncio).</p>
+    </div>
+    <div class="gravado__caixa" id="soltarAqui">
+      <label for="transcricaoColada" class="sr">Transcrição do vídeo</label>
+      <textarea id="transcricaoColada" rows="9" spellcheck="false" placeholder="0:00&#10;boa noite pessoal, sejam bem-vindos&#10;0:04&#10;hoje vamos falar de acolhimento…"></textarea>
+      <div class="gravado__acoes">
+        <button type="button" class="botao-neon" id="lerTranscricao">Ler a transcrição</button>
+        <label class="botao-fio arquivo">abrir arquivo<input type="file" id="arquivoTranscricao" accept=".srt,.vtt,.txt,text/plain,text/vtt"></label>
+        <span class="gravado__dica">ou solte o arquivo aqui</span>
+      </div>
+      <p class="aviso-gravado" id="avisoGravado" hidden role="alert"></p>
+    </div>
+  </section>
 </main>
 
 <div class="bancada" id="palco" hidden>
   <div class="bancada__esq">
     <div class="moldura" id="moldura"><iframe id="player" title="Live" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
+    <div class="resumo-gravado" id="resumoGravado" hidden tabindex="-1" role="status" aria-live="polite"></div>
 
-    <div class="painel">
+    <div class="painel" id="painel">
       <ul class="luzes" id="luzes" aria-live="polite"></ul>
       <div class="painel__acoes">
         <button type="button" class="botao-neon" id="comecar">Começar</button>
         <button type="button" class="botao-fio" id="parar" hidden>Parar</button>
       </div>
       <div class="opcoes">
-        <label class="alavanca"><input type="checkbox" id="optVoz"> ouvir a fala (Vosk, baixa 32 MB)</label>
+        <label class="alavanca"><input type="checkbox" id="optVoz"> ouvir a fala (Whisper, baixa uns 80 MB na 1ª vez)</label>
         <label class="alavanca"><input type="checkbox" id="optTela"> ler os slides</label>
+        <label class="alavanca" title="O som da live não sai no alto-falante, mas o Taquígrafo continua lendo a legenda e ouvindo a fala"><input type="checkbox" id="optSilencio"> em silêncio (não toca o som; continua lendo e ouvindo; o apito também cala, a palavra aparece no título da aba)</label>
+        <label class="assunto">
+          <span>assunto da live <small>ajuda o ouvido a acertar nomes e termos</small></span>
+          <input id="assunto" type="text" spellcheck="false" autocomplete="off" placeholder="ex.: psicologia, TCC, Freud">
+        </label>
+      </div>
+      <div class="carrega" id="carregaVoz" hidden role="status">
+        <div class="carrega__fita" aria-hidden="true"><span id="carregaVozBarra"></span></div>
+        <p>baixando o Whisper, o ouvido do Taquígrafo (uns 80 MB, só na primeira vez) <b id="carregaVozPct">0%</b></p>
       </div>
       <figure class="espiar" id="espiar" hidden>
         <canvas id="espiarCanvas" width="400" height="80"></canvas>

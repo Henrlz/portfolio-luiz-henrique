@@ -121,6 +121,8 @@ button { font: inherit; }
   position: relative; display: grid; grid-template-columns: 64px minmax(0, 1fr); column-gap: 8px;
   padding: 3px 16px 3px 12px; font: .9rem/1.6 var(--mono); color: var(--tinta);
 }
+/* fita com milhares de linhas (gravação inteira): o navegador não mede as que estão fora da vista */
+.fita__linha { content-visibility: auto; contain-intrinsic-size: auto 30px; }
 .fita__hora { font-size: .68rem; color: var(--tinta-2); padding-top: 3px; letter-spacing: .02em; }
 .fita__texto { margin: 0; }
 .fita__nova .fita__tinta { animation: imprime .45s steps(12, end); }
@@ -170,6 +172,28 @@ button { font: inherit; }
 
 .fita__parcial { margin: 0; padding: 2px 16px 0 84px; font: italic .82rem/1.5 var(--mono); color: var(--tinta-2); }
 .fita__parcial:empty { display: none; }
+/* reticências que andam: mostra que está trabalhando, não que travou */
+.fita__parcial::after { content: ''; display: inline-block; width: 1.4em; text-align: left; animation: reticencias 1.2s steps(4, end) infinite; }
+@keyframes reticencias { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+
+.assunto { flex: 1 1 100%; display: grid; gap: 4px; }
+.assunto small { color: #8189bf; margin-left: 6px; }
+.assunto input { width: 100%; padding: 7px 10px; border: 1px solid var(--noite-3); border-radius: 5px; background: #0a0d1c; color: #fff; font: .8rem var(--mono); }
+.assunto input:focus { outline: none; border-color: var(--neon); }
+
+/* o carregador: uma tira de papel sendo alimentada na máquina */
+.carrega { grid-column: 1 / -1; display: grid; gap: 6px; }
+.carrega[hidden] { display: none; }
+.carrega__fita { position: relative; height: 14px; border-radius: 3px; background: #0a0d1c; box-shadow: inset 0 2px 3px rgba(0,0,0,.6); overflow: hidden; }
+.carrega__fita span {
+  position: absolute; inset: 0 auto 0 0; width: 0; transition: width .4s ease;
+  background: repeating-linear-gradient(90deg, var(--papel) 0 10px, var(--papel-dobra) 10px 11px);
+  background-size: 22px 100%; animation: alimenta .6s linear infinite;
+}
+.carrega__fita span::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 3px; background: var(--carimbo); }
+@keyframes alimenta { from { background-position: 0 0; } to { background-position: 22px 0; } }
+.carrega p { margin: 0; font: .74rem/1.4 var(--mono); color: #aab1e0; }
+.carrega b { color: var(--neon); }
 
 /* régua: um risco por destaque, para achar na live inteira */
 .fita__regua { position: relative; grid-column: 2; grid-row: 1; background: var(--noite-2); }
@@ -296,6 +320,42 @@ button { font: inherit; }
 .boas-vindas li::before { content: counter(passo); position: absolute; left: 14px; top: 12px; width: 30px; height: 30px; display: grid; place-items: center; background: var(--noite); color: var(--neon); border-radius: 6px; font: 700 .9rem var(--mono); }
 .boas-vindas .obs { grid-column: 1 / -1; }
 
+/* gravação: colar a transcrição inteira */
+.gravado {
+  grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 32px; align-items: start;
+  margin-top: 18px; padding: 28px; background: var(--noite); color: #dfe3ff; border-radius: 10px;
+}
+.gravado .etiqueta { color: #aab1e0; }
+.gravado h2 { margin: 0 0 14px; font: 900 clamp(1.7rem, 3vw, 2.4rem)/.98 var(--ui); font-stretch: 62%; text-transform: uppercase; color: #fff; }
+.gravado h2 em { font-style: normal; color: var(--noite); background: var(--neon); padding: 0 6px; }
+.gravado__passos { margin: 0; padding-left: 20px; display: grid; gap: 8px; font-size: .93rem; color: #c3c8ec; }
+.gravado__passos b { color: #fff; }
+.gravado .obs { color: #8189bf; }
+.gravado__caixa { display: grid; gap: 10px; padding: 10px; border: 2px dashed transparent; border-radius: 8px; transition: border-color .2s, background .2s; }
+.gravado__caixa.is-sobre { border-color: var(--neon); background: rgba(230, 255, 79, .06); }
+.gravado textarea {
+  width: 100%; min-height: 190px; resize: vertical; padding: 14px 16px; border: 0; border-radius: 6px;
+  font: .86rem/1.6 var(--mono); color: var(--tinta);
+  background: repeating-linear-gradient(180deg, var(--papel) 0 27px, #e9e1c9 27px 28px);
+}
+.gravado textarea:focus { outline: 3px solid var(--neon); outline-offset: 2px; }
+.gravado__acoes { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+.gravado__acoes .botao-neon { min-height: 44px; }
+.arquivo { position: relative; display: inline-flex; align-items: center; min-height: 44px; cursor: pointer; }
+.arquivo input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.arquivo:focus-within { outline: 3px solid var(--neon); outline-offset: 2px; }
+.gravado__dica { font: .76rem var(--mono); color: #8189bf; }
+.aviso-gravado { margin: 0; padding: 8px 12px; border-radius: 5px; background: var(--carimbo); color: #fff; font-size: .88rem; }
+.aviso-gravado[hidden] { display: none; }
+
+.resumo-gravado { background: var(--noite); color: #dfe3ff; border-radius: 8px; padding: 22px; }
+.resumo-gravado[hidden] { display: none; }
+.resumo-gravado .etiqueta { color: #aab1e0; }
+.resumo-gravado h2 { margin: 0 0 6px; font: 900 1.9rem/1 var(--ui); font-stretch: 62%; text-transform: uppercase; color: #fff; word-break: break-word; }
+.resumo-gravado p { margin: 0; font: .82rem var(--mono); color: #c3c8ec; }
+.resumo-gravado .carrega { margin-top: 10px; }
+.moldura[hidden], .painel[hidden] { display: none; }
+
 .bancada { flex: 1; display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(340px, 1fr); gap: 0; min-height: 0; }
 .bancada[hidden] { display: none; }
 .bancada__esq { padding: 18px; display: grid; gap: 16px; align-content: start; }
@@ -348,6 +408,7 @@ button { font: inherit; }
 
 /* ---------- telas menores ---------- */
 @media (max-width: 980px) {
+  .gravado { grid-template-columns: 1fr; padding: 20px; }
   .abertura, .boas-vindas, .ensaio__mesa, .bancada { grid-template-columns: 1fr; }
   .maquina { min-height: 0; }
   .maquina .fita { flex: none; height: 340px; margin: 0 8px; }

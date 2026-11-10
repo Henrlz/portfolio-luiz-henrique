@@ -18,11 +18,11 @@ onmessage = async (ev) => {
   const img = g.getImageData(margem, margem, W, H);
   const tinta = limpar(img.data, W, H, escala, alturaPlayer);
   g.putImageData(img, margem, margem);
-  const mudou = comparar(img.data, W, H);
-  // só vale ler (e codificar o PNG) quando tem letra e ela mudou
-  const blob = tinta >= 0.002 && mudou ? await tela.convertToBlob({ type: 'image/png' }) : null;
+  const { novo: mudou, quanto } = comparar(img.data, W, H);
+  // só vale ler (e codificar o PNG) quando tem letra e ela mudou (ou a página pediu este quadro)
+  const blob = tinta >= 0.002 && (mudou || m.sempre) ? await tela.convertToBlob({ type: 'image/png' }) : null;
   const imagem = tela.transferToImageBitmap();
-  postMessage({ tinta, mudou, blob, imagem }, [imagem]);
+  postMessage({ tinta, mudou, quanto, blob, imagem }, [imagem]);
 };
 
 // A legenda do YouTube é texto branco numa caixa escura. Fica preto o que é claro E tem fundo
@@ -85,7 +85,8 @@ function limpar(d, W, H, escala, alturaPlayer) {
       const i = fila[k], x = i % W, y = (i - x) / W;
       if (y < topo) topo = y;
       if (y > base) base = y;
-      if (x === 0 || y === 0 || x === W - 1 || y === H - 1) borda = true;
+      // a borda de baixo não conta: é onde a legenda encosta (o resto já sai por ser alto demais)
+      if (x === 0 || y === 0 || x === W - 1) borda = true;
       if (x > 0 && claro[i - 1] === 1) { claro[i - 1] = 2; fila[n++] = i - 1; }
       if (x < W - 1 && claro[i + 1] === 1) { claro[i + 1] = 2; fila[n++] = i + 1; }
       if (y > 0 && claro[i - W] === 1) { claro[i - W] = 2; fila[n++] = i - W; }
@@ -112,9 +113,17 @@ function comparar(d, W, H) {
     for (let x = 0; x < W; x++) if (d[(y * W + x) * 4] === 0) casas[cy + Math.min(CX - 1, Math.floor(x * CX / W))]++;
   }
   const lado = (W / CX) * (H / CY);
-  let dif = 0;
-  if (anterior) for (let i = 0; i < casas.length; i++) if (Math.abs(casas[i] - anterior[i]) > lado * 0.15) dif++;
-  const novo = !anterior || dif > 6;
+  let dif = 0, comTinta = 0;
+  if (anterior) {
+    for (let i = 0; i < casas.length; i++) {
+      if (casas[i] || anterior[i]) comTinta++;
+      if (Math.abs(casas[i] - anterior[i]) > lado * 0.15) dif++;
+    }
+  }
+  const primeiro = !anterior;
+  const novo = primeiro || dif > 6;
   anterior = casas;
-  return novo;
+  // "quanto": a fração da legenda que mudou. Palavra nova no fim da linha mexe pouco; a legenda
+  // subindo (animação do YouTube) mexe em quase tudo
+  return { novo, quanto: !primeiro && comTinta ? dif / comTinta : 1 };
 }

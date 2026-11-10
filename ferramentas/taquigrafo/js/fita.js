@@ -108,8 +108,40 @@
       return null;
     }
 
+    // Tira das últimas linhas um trecho que não era fala (texto parado de slide ou letreiro que
+    // entrou antes de ser reconhecido). Procura a sequência de palavras (70% iguais basta, a leitura
+    // erra letra) e apaga só ela; linha que fica vazia sai. Devolve se achou.
+    apagar(texto) {
+      const chave = (w) => this.N.normal(w).replace(/[^\p{L}\d]/gu, '');
+      const alvo = String(texto).split(/\s+/).map(chave).filter(Boolean);
+      if (alvo.length < 2) return false;
+      const linhas = this.itens.filter((it) => !it.carimbo).slice(-25);
+      const mapa = [];
+      linhas.forEach((u) => u.palavras.forEach((w, i) => mapa.push({ u, i, k: chave(w) })));
+      for (let ini = mapa.length - alvo.length; ini >= 0; ini--) {
+        let iguais = 0;
+        for (let k = 0; k < alvo.length; k++) if (mapa[ini + k].k === alvo[k]) iguais++;
+        if (iguais < alvo.length * 0.7) continue;
+        const tirar = mapa.slice(ini, ini + alvo.length);
+        // de trás para frente, para os índices das palavras não andarem
+        tirar.slice().reverse().forEach(({ u, i }) => u.palavras.splice(i, 1));
+        new Set(tirar.map((x) => x.u)).forEach((u) => {
+          if (u.palavras.length) { this.pintar(u); return; }
+          this.itens.splice(this.itens.indexOf(u), 1);
+          if (u.el) u.el.remove();
+        });
+        this.depois(false);
+        return true;
+      }
+      return false;
+    }
+
     // a voz ainda decidindo o que ouviu
-    parcial(texto) { this.parcialEl.textContent = texto ? texto + '…' : ''; if (texto) this.rolar(true); }
+    parcial(texto) {
+      if (this.parcialEl.textContent === (texto || '')) return;
+      this.parcialEl.textContent = texto || '';
+      if (texto) this.rolar(true);
+    }
 
     // palavras já anotadas: toda vez que aparecem na fita, ficam marcadas
     chaves(lista) {
@@ -122,10 +154,13 @@
 
     // a palavra saiu: carimbo na fita, no ponto em que foi dita (a mesma nota só atualiza)
     carimbar(nota) {
-      let c = this.itens.find((it) => it.carimbo && it.quando === nota.quando);
+      // várias palavras ditas no mesmo instante ("são acolhimento, vínculo e escuta") têm o mesmo
+      // horário: a chave junta horário e palavra (a grafia original, se uma fonte melhor trocou)
+      const chave = nota.quando + '|' + this.N.normal(nota.lidaComo || nota.palavra);
+      let c = this.itens.find((it) => it.carimbo && (it.chave ? it.chave === chave : it.quando === nota.quando));
       if (!c) {
         if (!this.itens.length) this.papel.replaceChildren();
-        c = { carimbo: true, quando: nota.quando, hora: nota.hora };
+        c = { carimbo: true, quando: nota.quando, hora: nota.hora, chave };
         this.itens.push(c);
       }
       c.palavra = nota.palavra;
@@ -167,7 +202,17 @@
       if (!c.el) { c.el = div; this.papel.append(div); }
     }
 
+    // muita coisa de uma vez (uma gravação inteira): desenha a régua e rola só no fim.
+    // "pausar/retomar" vale para vários lotes seguidos (com pausas entre eles para a página respirar)
+    lote(fn) {
+      this.emLote = (this.emLote || 0) + 1;
+      try { fn(); } finally { this.emLote--; this.depois(); }
+    }
+    pausar() { this.emLote = (this.emLote || 0) + 1; }
+    retomar() { this.emLote = Math.max(0, (this.emLote || 0) - 1); this.depois(); }
+
     depois(rolar = true) {
+      if (this.emLote) return;
       this.pintarRegua();
       if (rolar) this.rolar(true);
       this.aoMudar();
@@ -229,7 +274,7 @@
       for (let i = this.itens.length - 1; i >= 0 && soma < GUARDAR_MAX; i--) {
         const it = this.itens[i];
         soma += it.carimbo ? 1 : it.palavras.length;
-        guardar.unshift(it.carimbo ? { carimbo: true, palavra: it.palavra, hora: it.hora, quando: it.quando, fontes: it.fontes }
+        guardar.unshift(it.carimbo ? { carimbo: true, palavra: it.palavra, hora: it.hora, quando: it.quando, fontes: it.fontes, chave: it.chave }
           : { fonte: it.fonte, palavras: it.palavras, hora: it.hora, quando: it.quando, ultimo: it.ultimo });
       }
       return { itens: guardar, chaves: this.chavesLista };

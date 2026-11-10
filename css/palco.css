@@ -1,0 +1,580 @@
+/* ===================== Palco da prévia =====================
+   Uma sala escura que se abre a partir do clique: o projeto num notebook, o brilho na cor
+   do projeto, o texto ao lado e a película com todos embaixo. */
+
+/* o botão do card ganha um olho */
+.project-previa {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.project-previa::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Cpath d='M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Cpath d='M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+@property --cor {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #4493f8;
+}
+
+/* o palco trava a rolagem da página. Sem a barra de rolagem o site ficava 15-17px mais largo atrás
+   do palco: o topo pulava ao abrir e o site inteiro pulava de volta no fim do fechamento, e o
+   canvas dos pontinhos do topo, medido nessa largura se a janela mudasse com o palco aberto,
+   ficava errado depois (a barra que volta não dispara resize). Com o lugar da barra reservado,
+   nada atrás do palco se mexe. Esse lugar mostra o fundo da raiz: escuro como o palco, menos atrás
+   do topo do site (que no computador continua à vista) */
+html.palco-aberto {
+  overflow: hidden;
+  scrollbar-gutter: stable;
+  background: linear-gradient(var(--bg) 72px, #090b12 72px) fixed;
+}
+/* o aviso de cookies espera o palco fechar (senão cobre a película) */
+html.palco-aberto .cookie-banner { display: none; }
+
+.palco {
+  --cor: #4493f8;
+  --tinta: #eef0f7;
+  --apagada: rgba(238, 240, 247, 0.64);
+  --fio: rgba(255, 255, 255, 0.12);
+  --topo: 72px;
+  position: fixed;
+  top: var(--topo);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 90;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  color: var(--tinta);
+  background: #090b12;
+  transition: --cor 0.9s ease;
+}
+
+.palco[hidden] { display: none; }
+
+.palco.is-abrindo { animation: palcoAbre 0.62s cubic-bezier(0.7, 0, 0.2, 1) both; }
+.palco.is-fechando { animation: palcoFecha 0.42s cubic-bezier(0.6, 0, 0.8, 0.4) both; }
+
+@keyframes palcoAbre {
+  from { clip-path: circle(0 at var(--x) calc(var(--y) - var(--topo))); }
+  to { clip-path: circle(160vmax at var(--x) calc(var(--y) - var(--topo))); }
+}
+
+@keyframes palcoFecha {
+  from { clip-path: circle(160vmax at var(--x) calc(var(--y) - var(--topo))); }
+  to { clip-path: circle(0 at var(--x) calc(var(--y) - var(--topo))); }
+}
+
+/* o clima: brilho na cor do projeto e um grão de filme por cima */
+.palco__brilho {
+  position: absolute;
+  inset: -10%;
+  pointer-events: none;
+  background:
+    radial-gradient(42% 48% at 70% 46%, color-mix(in srgb, var(--cor) 46%, transparent), transparent 72%),
+    radial-gradient(30% 34% at 12% 92%, color-mix(in srgb, var(--cor) 22%, transparent), transparent 70%),
+    radial-gradient(26% 30% at 95% 6%, color-mix(in srgb, var(--cor) 16%, transparent), transparent 70%);
+  filter: blur(20px);
+}
+
+.palco__grao {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+.palco__topo,
+.palco__miolo,
+.palco__pelicula { position: relative; }
+
+/* "4 de 10: Cedro Decor" para o leitor de tela; na tela o número grande já diz isso */
+.palco__aviso {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* topo: número grande, etiqueta e navegação */
+.palco__topo {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 18px clamp(16px, 4vw, 56px) 6px;
+}
+
+.palco__conta {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  overflow: hidden;
+}
+
+.palco__num {
+  display: inline-block;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--tinta);
+}
+
+.palco__total {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--apagada);
+}
+
+.palco__tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--cor) 60%, white);
+  border: 1px solid color-mix(in srgb, var(--cor) 55%, transparent);
+  background: color-mix(in srgb, var(--cor) 14%, transparent);
+  border-radius: 999px;
+  padding: 4px 11px;
+}
+
+.palco__tag:empty { display: none; }
+
+.palco__nav {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.palco__bt {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--fio);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--tinta);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.palco__bt:hover,
+.palco__bt:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--cor);
+  transform: translateY(-2px);
+}
+
+.palco__bt:focus-visible,
+.palco__abrir:focus-visible,
+.quadro:focus-visible,
+.notebook__tela:focus-visible {
+  outline: 2px solid var(--cor);
+  outline-offset: 3px;
+}
+
+/* miolo: o texto e, ao lado, o notebook */
+.palco__miolo {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.8fr) minmax(0, 1.35fr);
+  gap: clamp(28px, 4vw, 64px);
+  align-items: center;
+  padding: 8px clamp(16px, 4vw, 56px);
+  min-height: 0;
+}
+
+.palco__texto {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  min-height: 0;
+}
+
+.palco__titulo {
+  margin: 0 0 16px;
+  font-size: clamp(2rem, 3.6vw, 3.3rem);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  background: linear-gradient(100deg, var(--tinta) 30%, color-mix(in srgb, var(--cor) 60%, white));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.palco__titulo:focus { outline: none; }
+
+.palco__desc {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 10px 22px 0;
+  font-size: 0.98rem;
+  line-height: 1.7;
+  color: var(--apagada);
+  scrollbar-width: thin;
+  scrollbar-color: var(--fio) transparent;
+  -webkit-mask-image: linear-gradient(#000 80%, transparent);
+  mask-image: linear-gradient(#000 80%, transparent);
+}
+
+.palco__desc strong,
+.palco__desc b,
+.palco__desc em { color: var(--tinta); }
+
+.palco__desc code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.85em;
+  color: var(--tinta);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.palco__stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 22px;
+  padding: 0;
+  list-style: none;
+}
+
+.palco__stack li {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--tinta);
+  border: 1px solid var(--fio);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.palco__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+}
+
+.palco__abrir {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 22px;
+  border-radius: 999px;
+  background: var(--tinta);
+  color: #0b0d14;
+  font-weight: 700;
+  font-size: 0.95rem;
+  box-shadow: 0 10px 30px -10px color-mix(in srgb, var(--cor) 70%, transparent);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+}
+
+.palco__abrir svg { transition: transform 0.25s ease; }
+
+.palco__abrir:hover {
+  transform: translateY(-2px);
+  background: color-mix(in srgb, var(--cor) 22%, white);
+  box-shadow: 0 16px 36px -10px color-mix(in srgb, var(--cor) 80%, transparent);
+}
+
+.palco__abrir:hover svg { transform: translate(3px, -3px); }
+
+.palco__dica {
+  font-size: 0.78rem;
+  color: var(--apagada);
+}
+
+/* o notebook, desenhado em CSS; inclinado de leve, endireita quando o mouse chega */
+.palco__maquina {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  min-height: 0;
+  max-height: 100%;
+  perspective: 1800px;
+  touch-action: pan-y; /* o arrasto para o lado é nosso: troca de projeto */
+}
+
+.notebook {
+  width: min(100%, calc((100vh - var(--topo) - 280px) * 1.6 + 20px));
+  transform: rotateY(-7deg) rotateX(3deg);
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.palco__maquina:hover .notebook { transform: none; }
+
+.notebook__tampa {
+  padding: 10px 10px 12px;
+  border-radius: 16px 16px 6px 6px;
+  background: linear-gradient(160deg, #262a36, #14161d);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 50px 90px -40px rgba(0, 0, 0, 0.9),
+    0 0 140px -30px color-mix(in srgb, var(--cor) 65%, transparent);
+}
+
+.notebook__barra {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 10px;
+  border-radius: 8px 8px 0 0;
+  background: #1d2029;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.notebook__bolinhas { display: inline-flex; gap: 6px; flex: none; }
+.notebook__bolinhas i { width: 9px; height: 9px; border-radius: 50%; background: #3a3f4d; }
+.notebook__bolinhas i:first-child { background: #ff5f57; }
+.notebook__bolinhas i:nth-child(2) { background: #febc2e; }
+.notebook__bolinhas i:nth-child(3) { background: #28c840; }
+
+.notebook__url {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 0.72rem "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  color: rgba(238, 240, 247, 0.7);
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  padding: 3px 12px;
+}
+
+.notebook__tela {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 0 0 6px 6px;
+  background: #fff;
+  scrollbar-width: none;
+}
+
+.notebook__tela::-webkit-scrollbar { display: none; }
+
+.notebook__tela img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.notebook__base {
+  position: relative;
+  height: 16px;
+  margin: 0 -7%;
+  border-radius: 2px 2px 18px 18px;
+  background: linear-gradient(#3a3f4d, #181b23 70%);
+  box-shadow: 0 24px 40px -18px rgba(0, 0, 0, 0.9);
+}
+
+.notebook__base::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 16%;
+  height: 6px;
+  transform: translateX(-50%);
+  border-radius: 0 0 8px 8px;
+  background: #11131a;
+}
+
+/* carregando o print: uma página-fantasma com um brilho passando, não uma tela branca parada */
+.notebook__carrega {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: none;
+  background:
+    linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.7) 50%, transparent 70%) -100% 0 / 60% 100% no-repeat,
+    linear-gradient(#e6e8ef 0 0) 7% 9% / 30% 7% no-repeat,
+    linear-gradient(#e6e8ef 0 0) 7% 23% / 62% 4% no-repeat,
+    linear-gradient(#e6e8ef 0 0) 7% 31% / 48% 4% no-repeat,
+    linear-gradient(#e6e8ef 0 0) 7% 70% / 40% 30% no-repeat,
+    linear-gradient(#e6e8ef 0 0) 93% 70% / 40% 30% no-repeat,
+    #f6f7fa;
+  animation: brilhoPassa 1.3s linear infinite;
+}
+
+.notebook__tela.is-carregando .notebook__carrega { display: block; }
+.notebook__tela.is-carregando img { opacity: 0; }
+
+@keyframes brilhoPassa {
+  to { background-position: 250% 0, 7% 9%, 7% 23%, 7% 31%, 7% 70%, 93% 70%, 0 0; }
+}
+
+/* o print não veio: no lugar do esqueleto piscando para sempre, uma frase curta */
+.notebook__erro {
+  position: absolute;
+  inset: 0;
+  display: none;
+  place-items: center;
+  margin: 0;
+  padding: 24px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #5b6170;
+  background: #f6f7fa;
+}
+
+.notebook__tela.is-erro .notebook__erro { display: grid; }
+.notebook__tela.is-erro img { display: none; }
+
+/* a película: miniaturas de todos, com os furinhos do filme em cima e embaixo */
+.palco__pelicula {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding: 20px clamp(16px, 4vw, 56px);
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.16) 2.5px, transparent 3px) 0 4px / 18px 10px repeat-x,
+    radial-gradient(circle, rgba(255, 255, 255, 0.16) 2.5px, transparent 3px) 0 calc(100% - 4px) / 18px 10px repeat-x,
+    rgba(0, 0, 0, 0.45);
+  border-top: 1px solid var(--fio);
+  scrollbar-width: none;
+}
+
+.palco__pelicula::-webkit-scrollbar { display: none; }
+
+.quadro {
+  position: relative;
+  flex: 0 0 auto;
+  width: 148px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  scroll-snap-align: center;
+  opacity: 0.5;
+  transform: scale(0.94);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.quadro img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 6px;
+  background: #1d2029;
+  box-shadow: 0 0 0 1px var(--fio);
+  transition: box-shadow 0.3s ease;
+}
+
+.quadro:hover { opacity: 0.85; transform: scale(0.98); }
+.quadro.is-ativo { opacity: 1; transform: scale(1); }
+.quadro.is-ativo img { box-shadow: 0 0 0 2px var(--cor), 0 10px 26px -10px color-mix(in srgb, var(--cor) 80%, transparent); }
+
+.quadro__num {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: #fff;
+  background: rgba(9, 11, 18, 0.78);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.quadro__nome {
+  display: block;
+  margin-top: 7px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* trocar de projeto: o texto entra em cascata e a tela desliza do lado de onde veio */
+.palco.is-trocando .palco__tag,
+.palco.is-trocando .palco__titulo,
+.palco.is-trocando .palco__desc,
+.palco.is-trocando .palco__acoes { animation: palcoEntra 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.palco.is-trocando .palco__titulo { animation-delay: 0.04s; }
+.palco.is-trocando .palco__desc { animation-delay: 0.1s; }
+.palco.is-trocando .palco__acoes { animation-delay: 0.22s; }
+.palco.is-trocando .palco__stack li { animation: palcoEntra 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: calc(0.14s + var(--k, 0) * 0.03s); }
+.palco.is-trocando .notebook__tela img { animation: telaEntra 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.palco.is-trocando .palco__num { animation: numGira 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+@keyframes palcoEntra {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes telaEntra {
+  from { opacity: 0; transform: translateX(calc(var(--dir, 1) * 48px)) scale(1.02); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes numGira {
+  from { opacity: 0; transform: translateY(calc(var(--dir, 1) * 70%)); }
+  to { opacity: 1; transform: none; }
+}
+
+/* telas menores: o notebook em cima, o texto embaixo, tudo rolando */
+@media (max-width: 900px) {
+  .palco__miolo {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    align-items: start;
+    overflow-y: auto;
+    gap: 22px;
+    padding-top: 4px;
+    padding-bottom: 20px;
+  }
+
+  .palco__maquina { order: -1; }
+  .notebook { width: 100%; max-width: 100%; transform: none; }
+  .notebook__base { margin: 0 -3%; }
+  .palco__desc { overflow: visible; -webkit-mask-image: none; mask-image: none; padding-bottom: 0; }
+  .palco__texto { max-height: none; }
+  .palco__dica { display: none; }
+}
+
+/* celular: o palco cobre tudo, inclusive o topo do site */
+@media (max-width: 800px) {
+  html.palco-aberto { background: #090b12; }
+  .palco { --topo: 0px; z-index: 400; }
+  .palco__topo { padding-top: 14px; }
+  .palco__num { font-size: 1.7rem; }
+  .palco__bt { width: 38px; height: 38px; }
+  .palco__titulo { font-size: 2rem; }
+  .quadro { width: 112px; }
+  .palco__pelicula { padding-top: 14px; padding-bottom: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .palco,
+  .palco *,
+  .palco *::before { animation: none !important; transition: none !important; }
+}

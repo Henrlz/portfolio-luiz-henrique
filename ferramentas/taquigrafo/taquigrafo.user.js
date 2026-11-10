@@ -38,7 +38,8 @@
     'musica', 'aplausos', 'risos']);
 
   // particípio logo depois de "vai ser" é aviso ("vai ser dita"), não a palavra
-  const PARTICIPIOS = /^(dita|dito|falada|falado|passada|passado|revelada|revelado|anunciada|anunciado|divulgada|divulgado|mostrada|mostrado|liberada|liberado|informada|informado)$/;
+  // (no plural também: "as palavras-chave vão ser ditas" não anota DITAS)
+  const PARTICIPIOS = /^(?:dit|falad|passad|revelad|anunciad|divulgad|mostrad|liberad|informad)[ao]s?$/;
 
   // gatilhos: depois deles vem a palavra. Live pode ter várias ("a segunda palavra é…",
   // "palavra-chave número 3:…", "1ª palavra: …"), por isso a ordem e o número entram no gatilho
@@ -82,6 +83,12 @@
     let letras = '';
     let j = k;
     while (j < tokens.length && /^\p{L}$/u.test(tokens[j])) { letras += tokens[j]; j++; }
+    // a fala continua com "e a segunda…", "e o…": esse "e"/"a" não é letra da palavra soletrada
+    // (só quando o que vem depois é "segunda", "a gente", "eu"…: "vídeo", "núcleo" terminam em -eo de verdade)
+    if (letras.length >= 5 && j < tokens.length && (/^(?:segund|terceir|quart|quint|sext|setim|oitav|non|decim|proxim|outr|ultim|palavr|codig|chave|nov|mesm)/.test(normal(tokens[j])) || ENCHIMENTO.has(normal(tokens[j])) || FRASE.has(normal(tokens[j])))) {
+      const fim = normal(letras.slice(-2));
+      if (fim === 'ea' || fim === 'eo') { letras = letras.slice(0, -2); j -= 2; }
+    }
     // "ultima": a palavra é a última coisa dita até agora; na legenda ao vivo ela ainda pode estar pela metade
     if (letras.length >= 3) return { palavra: letras.toUpperCase(), soletrada: true, ultima: j >= tokens.length };
     const hifen = /^(\p{L}-){2,}\p{L}$/u.test(tokens[k]);
@@ -93,23 +100,68 @@
 
   // lista depois de "as palavras-chave são": vai até o ponto final, separada por vírgula ou "e".
   // Cada item guarda a sua posição no texto (assim cada um vira uma anotação)
+  // "são duas: …", "são as seguintes: …": a contagem não é palavra-chave
+  const CONTAGEM = /^\s*(?:as\s+)?(?:duas|dois|tres|quatro|cinco|seis|sete|oito|nove|dez|seguintes)(?![\p{L}\d])\s*:?\s*/u;
+  // "e" que separa itens; entre duas letras soltas é letra de palavra soletrada ("a c o l h e r")
+  const SEPARA = /(?<!(?:^|\s)\p{L})\s+[eE]\s+|\s+[eE]\s+(?!\p{L}(?:\s|$))/gu;
+  // palavra que começa uma frase comum: a lista acabou antes dela ("…e escuta e eu quero…")
+  const FRASE = new Set(['eu', 'voce', 'voces', 'nos', 'ele', 'ela', 'eles', 'elas', 'vamos', 'vamo', 'bora', 'quero', 'queria', 'mas', 'porque',
+    'porem', 'lembrando', 'depois', 'certo', 'beleza', 'obrigado', 'obrigada', 'boa', 'bom', 'ja', 'tambem', 'nao', 'sim', 'como', 'quando',
+    'onde', 'se', 'com', 'sem', 'por', 'sobre', 'no', 'na', 'nas', 'em', 'os', 'as', 'ao', 'aos', 'pelo', 'pela', 'todos', 'todas', 'temos',
+    'tem', 'tenho', 'estamos', 'estao', 'sao', 'foi', 'era', 'essas', 'estas', 'esses', 'estes', 'me', 'te', 'lhe', 'vale', 'valem',
+    'importantes', 'fundamentais', 'essenciais', 'obrigatorias',
+    // recado de slide embaixo de "Três palavras-chave" ("fiquem atentos", "aguardem")
+    'fiquem', 'fique', 'atentos', 'atentas', 'atento', 'prestem', 'aguardem', 'aguarde', 'acompanhem', 'participem', 'confiram', 'vejam',
+    'lembrem', 'lembre', 'guardem', 'cliquem', 'acessem', 'sigam', 'venham', 'serao', 'vao', 'virao', 'saem', 'sairao', 'durante', 'ao', 'ate']);
   function lerLista(original, ini) {
     const resto = original.slice(ini, ini + 260);
     const fim = resto.search(/[.!?;\n]/);
-    const trecho = fim >= 0 ? resto.slice(0, fim) : resto;
-    const itens = [];
+    let trecho = fim >= 0 ? resto.slice(0, fim) : resto;
+    const conta = CONTAGEM.exec(normal(trecho));
+    const pulo = conta ? conta[0].length : 0;
+    trecho = trecho.slice(pulo);
+    ini += pulo;
+    // partes separadas por vírgula ou "e", cada uma com a sua posição no trecho
+    const partes = [];
     const re = /[^,]+/g;
-    let m;
-    while ((m = re.exec(trecho)) && itens.length < 12) {
-      const pedaco = m[0], comeco = m.index;
-      pedaco.split(/\s+e\s+/).forEach((parte, k, partes) => {
-        const off = comeco + pedaco.indexOf(parte);
-        const p = lerPalavra(original.slice(0, ini + off + parte.length), ini + off);
-        if (!p) return;
+    let m, v = 0;
+    while ((m = re.exec(trecho))) {
+      let de = 0, s;
+      SEPARA.lastIndex = 0;
+      while ((s = SEPARA.exec(m[0]))) { partes.push({ texto: m[0].slice(de, s.index), off: m.index + de, v }); de = s.index + s[0].length; }
+      partes.push({ texto: m[0].slice(de), off: m.index + de, v: v++ });
+    }
+    const chave = (w) => normal(w.replace(/[^\p{L}\d-]/gu, ''));
+    const itens = [];
+    for (let k = 0; k < partes.length && itens.length < 12; k++) {
+      const { texto, off } = partes[k];
+      const ultimaParte = k === partes.length - 1;
+      const palavras = [...texto.matchAll(/\S+/g)].filter((x) => !ENCHIMENTO.has(chave(x[0])));
+      if (!palavras.length) continue;
+      // "as palavras-chave vão ser ditas no final…": é aviso, não lista
+      if (!itens.length && PARTICIPIOS.test(chave(palavras[0][0])) && (palavras.length > 1 || ultimaParte)) break;
+      // Legenda ao vivo não tem vírgula nem ponto. A primeira parte, seguida de "e", pode ser
+      // a lista sem vírgula ("acolhimento vínculo escuta e empatia"): cada palavra é um item.
+      // Nas outras, o item é a primeira palavra e o resto é a fala que seguiu
+      const soletrada = /^\s*(?:\p{L}\s+){2,}\p{L}(?:\s|$)/u.test(texto);
+      let escolhidas;
+      if (soletrada) escolhidas = [{ ini: off, fim: off + texto.trimEnd().length, ultima: ultimaParte }];
+      else {
+        const lista = !itens.length && !ultimaParte && palavras.length <= 6 && !palavras.some((x) => FRASE.has(chave(x[0])));
+        escolhidas = (lista ? palavras : palavras.slice(0, 1)).map((x, i, arr) => ({
+          ini: off + x.index, fim: off + x.index + x[0].length,
+          ultima: ultimaParte && x === palavras[palavras.length - 1] && i === arr.length - 1
+        }));
+        if (FRASE.has(chave(palavras[0][0]))) break;
+      }
+      for (const e of escolhidas) {
+        const p = lerPalavra(original.slice(0, ini + e.fim), ini + e.ini);
         // sem ponto final, o último item pode estar pela metade na legenda ao vivo
-        const ultimoItem = fim < 0 && comeco + pedaco.length >= trecho.length && k === partes.length - 1;
-        itens.push({ ...p, ultima: ultimoItem, pos: ini + off });
-      });
+        if (p) itens.push({ ...p, ultima: fim < 0 && e.ultima, pos: ini + e.ini });
+      }
+      // a fala seguiu depois do item: a lista acabou (a não ser que venha outra vírgula)
+      const sobrou = soletrada ? palavras.some((x) => x[0].length > 1) : palavras.length > escolhidas.length;
+      if (sobrou && palavras.length > 2 && !partes.slice(k + 1).some((p) => p.v !== partes[k].v)) break;
     }
     return itens;
   }
@@ -160,18 +212,77 @@
         if (ok) { melhor = k; break; }
       }
       // a legenda às vezes corrige a última palavra: se só ela mudou, troca em vez de repetir
+      let corrigiu = false;
       if (!melhor && a.length && novas.length > 1 && cmp(a[a.length - 1]) !== cmp(novas[0])) {
         const idx = a.length - 1;
         for (let k = Math.min(novas.length - 1, a.length, 60); k > 0; k--) {
           let ok = true;
           for (let i = 0; i < k; i++) { if (cmp(a[idx - k + 1 + i]) !== cmp(novas[i])) { ok = false; break; } }
-          if (ok && k >= 2) { a.splice(idx - k + 1); melhor = 0; break; }
+          if (ok && k >= 2) { a.splice(idx - k + 1); melhor = 0; corrigiu = true; break; }
         }
+      }
+      // Lida na imagem, a mesma frase sai um pouco diferente de uma leitura para outra ("antes a
+      // ente come ar" / "antes a gente começar"). Sem emenda exata, procura por semelhança e fica
+      // com a leitura nova, que costuma ser a mais completa; senão a frase sairia duas vezes
+      // (emenda exata de uma ou duas palavras pode ser coincidência: "…para que" + "que v escrito…")
+      if (melhor < 3 && !corrigiu && a.length >= 3 && novas.length >= 3) {
+        const k = this.emendaParecida(novas);
+        if (k > melhor) { a.splice(a.length - k); melhor = 0; }
       }
       const acrescimo = novas.slice(melhor);
       a.push(...acrescimo);
       if (a.length > this.limite) { this.cortadas += a.length - this.limite; a.splice(0, a.length - this.limite); }
       return acrescimo;
+    }
+    // quantas palavras do fim do que já temos são o começo da leitura nova, aceitando palavra
+    // trocada, juntada ou partida (no máximo uma diferença a cada 4 palavras, e 3 em comum)
+    emendaParecida(novas) {
+      const a = this.palavras;
+      const cmp = (x) => normal(x).replace(/[^\p{L}\d]/gu, '');
+      const igual = (x, y) => { const p = cmp(x), q = cmp(y); return p === q || (p.length >= 3 && q.length >= 3 && parecidas(p, q)); };
+      // distância entre duas sequências de palavras (trocar, pôr ou tirar uma palavra custa 1)
+      const dist = (xs, ys) => {
+        let ant = Array.from({ length: ys.length + 1 }, (_, j) => j);
+        for (let i = 1; i <= xs.length; i++) {
+          const cur = [i];
+          for (let j = 1; j <= ys.length; j++) cur[j] = Math.min(ant[j] + 1, cur[j - 1] + 1, ant[j - 1] + (igual(xs[i - 1], ys[j - 1]) ? 0 : 1));
+          ant = cur;
+        }
+        return ant[ys.length];
+      };
+      // a emenda tem de começar onde a leitura nova começa: se a primeira palavra do trecho velho
+      // não bate com o começo da nova (com uma de folga), as palavras de antes são fala de verdade
+      // e não podem ser apagadas como se fossem "diferença"
+      // (primeiro com a âncora exata; a folga de uma palavra só se a exata não achar nada)
+      const exata = (fim) => igual(fim[0], novas[0]);
+      const folga = (fim) => (fim.length > 1 && igual(fim[1], novas[0])) || (novas.length > 1 && igual(fim[0], novas[1]));
+      return this.emendaCom(novas, exata, igual, dist) || this.emendaCom(novas, folga, igual, dist);
+    }
+    emendaCom(novas, ancora, igual, dist) {
+      const a = this.palavras;
+      for (let k = Math.min(a.length, 30); k >= 3; k--) {
+        const fim = a.slice(-k);
+        if (!ancora(fim)) continue;
+        for (let m = Math.min(novas.length, k + 3); m >= Math.max(3, k - 3); m--) {
+          const d = dist(fim, novas.slice(0, m));
+          if (d > Math.floor(Math.max(k, m) / 4) || k - d < 3) continue;
+          // nunca apaga uma palavra-chave anunciada que não está na leitura nova: "a primeira
+          // palavra-chave é acolhimento…" e "a segunda… é vínculo…" são frases diferentes. O anúncio
+          // pode começar um pouco antes do trecho ("…a palavra-chave é | acolhimento e…")
+          const anunciadas = detectar(a.slice(-(k + 8)).join(' ')).achados.map((x) => x.palavra).filter((p) => fim.some((w) => igual(w, p)));
+          if (anunciadas.some((p) => !novas.some((w) => igual(w, p)))) continue;
+          return k;
+        }
+      }
+      return 0;
+    }
+    // texto que chega inteiro e sem sobreposição (um trecho do Whisper): só soma. A procura
+    // de sobreposição do "adicionar" engoliria uma palavra repetida na emenda ("…acolhimento." "Acolhimento…")
+    acrescentar(texto) {
+      const novas = String(texto).replace(/\[[^\]]*\]/g, ' ').split(/\s+/).filter(Boolean);
+      this.palavras.push(...novas);
+      if (this.palavras.length > this.limite) { this.cortadas += this.palavras.length - this.limite; this.palavras.splice(0, this.palavras.length - this.limite); }
+      return novas;
     }
     ultimas(n = 80) { return this.palavras.slice(-n).join(' '); }
     // procura nas últimas palavras; cada gatilho ganha um número fixo (para não anotar duas vezes)
@@ -243,7 +354,7 @@
       this.aoNovo = o.aoNovo || (() => {});     // palavra ou aviso novo: apitar, notificar, desenhar
       this.aoMudar = o.aoMudar || (() => {});   // repetição, trecho crescendo, limpeza: salvar e redesenhar
       this.notas = [];
-      this.marcas = new Set();
+      this.marcas = new Map();
       this.janela = null;                       // depois de um aviso, guarda o que for dito por 2 minutos
       this.ultimoAviso = 0;
     }
@@ -295,9 +406,12 @@
       const d = base.procurar(70, final);
       let novos = 0;
       d.achados.forEach((a) => {
+        // a posição sozinha não basta: a leitura nova pode trocar o trecho e trazer outra palavra ali
+        // (mas a mesma palavra relida com uma letra diferente continua sendo a mesma anotação)
         const marca = fonte + '@' + a.marca;
-        if (this.marcas.has(marca)) return;
-        this.marcas.add(marca);
+        const vistas = this.marcas.get(marca) || [];
+        if (vistas.some((p) => parecidas(p, a.palavra))) return;
+        this.marcas.set(marca, vistas.concat(a.palavra));
         novos++;
         // trecho em volta do anúncio: um pouco antes, a frase toda e um pouco depois
         const i = a.marca - base.cortadas;
@@ -326,7 +440,17 @@
 
     // texto lido da tela (slide): "Palavra-chave" como rótulo, com a palavra na linha de baixo
     tela(textoOCR, confiancaOCR) {
-      const d = detectar(String(textoOCR).replace(/(palavra[\s-]*chave|c[oó]digo de presen[cç]a)\s*\n+/gi, '$1: ').replace(/\s+/g, ' '));
+      let t = String(textoOCR).replace(/(palavra[\s-]*chave|c[oó]digo de presen[cç]a)\s*:?\s*\n+/gi, '$1: ');
+      // "PALAVRAS-CHAVE" com um item por linha: as linhas curtas logo abaixo viram a lista
+      // (as linhas que não são item, como "Código de presença: 4821", voltam para o texto)
+      t = t.replace(/(palavras[\s-]*chaves?)\s*:?\s*\n+((?:[^\n]{1,40}(?:\n|$)){1,12})/gi, (_, rot, itens) => {
+        const ls = itens.split('\n');
+        let i = 0;
+        for (; i < ls.length; i++) { const l = ls[i].trim(); if (!l || l.split(/\s+/).length > 2 || /[:\d]|palavra|c[oó]digo/i.test(l)) break; }
+        if (!i) return _;
+        return rot + ': ' + ls.slice(0, i).map((x) => x.trim()).join(', ') + '.\n' + ls.slice(i).join('\n');
+      });
+      const d = detectar(t.replace(/\s+/g, ' '));
       d.achados.forEach((a) => this.anotar({ palavra: a.palavra, fonte: 'tela', trecho: String(textoOCR).replace(/\s+/g, ' ').slice(0, 160), confianca: confiancaOCR > 70 ? 'alta' : 'media' }));
       return d;
     }
