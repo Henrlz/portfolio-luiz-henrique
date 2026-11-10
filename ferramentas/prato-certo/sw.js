@@ -4,7 +4,7 @@
    - Ícones (jsDelivr), fotos de produtos e fontes: usa a cópia guardada e atualiza por trás.
    - Busca de produtos (Open Food Facts): sempre na rede, nunca guardada.
    Ao mudar arquivos do app, suba a VERSAO para os aparelhos pegarem a atualização. */
-var VERSAO = 'prato-certo-v2';
+var VERSAO = 'prato-certo-v3';
 var APP = [
   './', './index.html', './manifest.webmanifest', './favicon.svg',
   './css/style.css',

@@ -84,6 +84,7 @@ button { cursor: pointer; }
   padding: 2px 8px; border-radius: 999px; background: #eef2f6; color: var(--suave); vertical-align: middle; white-space: nowrap;
 }
 .selo--rede { background: #fff4e0; color: #9a5b00; }
+.selo--oficial { background: #e7f4f5; color: var(--primaria-escura); }
 .selo--meu { background: #e8f7ee; color: #157a3c; }
 .selo--off { background: #e8f0fe; color: #1d4ed8; }
 

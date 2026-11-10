@@ -80,7 +80,7 @@
     return { id: txt(i.id, 40) || Math.random().toString(36).slice(2), nome: txt(i.nome, 80), marca: txt(i.marca, 60),
       gramas: faixa(i.gramas, 5000), refeicao: ID_REF.test(i.refeicao) ? i.refeicao : 'geral',
       kcal: faixa(i.kcal, 20000), prot: faixa(i.prot, 2000), carb: faixa(i.carb, 2000), gord: faixa(i.gord, 2000), fibra: faixa(i.fibra, 1000),
-      qtdUn: i.qtdUn ? faixa(i.qtdUn, 100) || null : null, un: i.qtdUn ? txt(i.un, 30) : '',
+      qtdUn: i.qtdUn ? faixa(i.qtdUn, 100) || null : null, un: i.qtdUn ? txt(i.un, 30) : '', semPeso: !!(i.semPeso && i.qtdUn),
       img: imgSegura(i.img) };
   }
   function limpoPerfil(p) {
@@ -739,6 +739,8 @@
 
   /* texto da quantidade de um item: "2 ovos… " → "2 unidades · 100 g" */
   function textoQtd(i) {
+    /* itens de rede sem peso informado mostram só a contagem ("2 unidades") */
+    if (i.semPeso) return n1(i.qtdUn) + ' ' + esc(plural(i.un || 'unidade', i.qtdUn));
     return (i.qtdUn ? n1(i.qtdUn) + ' ' + esc(plural(i.un || 'unidade', i.qtdUn)) + ' · ' : '') + n0(i.gramas) + ' g';
   }
 
@@ -956,6 +958,18 @@
   var buscaTimer = null, buscaCtl = null, ultimaBusca = '';
   var visiveis = [], mostrarEscondidos = false, ultimaLista = [];
   var ROTULO_ORIGEM = { off: 'produto', rede: 'rede · aprox.', meu: 'meu' };
+  function seloDe(a) {
+    if (a.origem === 'rede' && a.conf === 'oficial') return '<em class="selo selo--oficial">tabela oficial</em>';
+    return ROTULO_ORIGEM[a.origem] ? '<em class="selo selo--' + a.origem + '">' + ROTULO_ORIGEM[a.origem] + '</em>' : '';
+  }
+  /* rede: valores por unidade vendida; demais: por 100 g */
+  function numerosDe(a) {
+    if (a.origem === 'rede') {
+      var k = a.porcao / 100;
+      return n0(a.kcal * k) + ' kcal por unidade · P ' + n0(a.prot * k) + ' · C ' + n0(a.carb * k) + ' · G ' + n0(a.gord * k);
+    }
+    return n0(a.kcal) + ' kcal/100 g · P ' + n0(a.prot) + ' · C ' + n0(a.carb) + ' · G ' + n0(a.gord);
+  }
 
   function desenharResultados(lista) {
     ultimaLista = lista;
@@ -970,8 +984,8 @@
       var a = x.a;
       return '<li><button type="button" class="res" data-i="' + i + '">' + ico(imgDe(a)) + '<span class="res__corpo">' +
         '<span class="res__nome">' + esc(a.nome) + (a.marca ? ' <small>' + esc(a.marca) + '</small>' : '') +
-          (ROTULO_ORIGEM[a.origem] ? ' <em class="selo selo--' + a.origem + '">' + ROTULO_ORIGEM[a.origem] + '</em>' : '') + '</span>' +
-        '<span class="res__num">' + n0(a.kcal) + ' kcal/100 g · P ' + n0(a.prot) + ' · C ' + n0(a.carb) + ' · G ' + n0(a.gord) + '</span>' +
+          ' ' + seloDe(a) + '</span>' +
+        '<span class="res__num">' + numerosDe(a) + '</span>' +
         (x.av.avisos.length ? '<span class="res__aviso">⚠ ' + esc(x.av.avisos.join(' · ')) + '</span>' : '') +
         '</span></button></li>';
     }).join('');
@@ -1089,7 +1103,11 @@
     $('addIco').src = imgDe(a);
     $('addNome').textContent = a.nome + (a.marca ? ' · ' + a.marca : '');
     var un = unidadeDe(a);
-    $('addInfo').textContent = '1 ' + un + ' = ' + (un === 'porção' && a.unidade && a.unidade !== '100 g' ? a.unidade.replace(/\s*\(.*$/, '') + ', ' : '') + n0(a.porcao) + ' g';
+    $('addInfo').textContent = a.semPeso
+      ? 'Valores por unidade (a rede não informa o peso) · ' + (a.conf === 'oficial' ? 'tabela oficial' : 'aproximado')
+      : '1 ' + un + ' = ' + (un === 'porção' && a.unidade && a.unidade !== '100 g' ? a.unidade.replace(/\s*\(.*$/, '') + ', ' : '') + n0(a.porcao) + (/ ml\)/.test(a.unidade || '') ? ' ml' : ' g') +
+        (a.origem === 'rede' ? ' · ' + (a.conf === 'oficial' ? 'tabela oficial' : 'aproximado') : '');
+    $('addModoGBox').hidden = !!a.semPeso;
     $('addModoUn').textContent = plural(un, 2);
     var av = Saude.avaliar(a, regras);
     $('addAtencao').hidden = !av.avisos.length;
@@ -1129,7 +1147,7 @@
     var g = gramasAtuais();
     var q = parseFloat(String($('addQtd').value).replace(',', '.')) || 0;
     $('addUnidTxt').textContent = modoQtd === 'un'
-      ? plural(unidadeDe(escolhido), q) + (g ? ' · ' + n0(g) + ' g' : '')
+      ? plural(unidadeDe(escolhido), q) + (g && !escolhido.semPeso ? ' · ' + n0(g) + ' g' : '')
       : 'gramas' + (g && escolhido.porcao ? ' · ≈ ' + n1(g / escolhido.porcao) + ' ' + plural(unidadeDe(escolhido), g / escolhido.porcao) : '');
     if (!(g > 0)) { $('addConta').textContent = ''; return; }
     var v = Calculo.porcao(escolhido, g);
@@ -1148,6 +1166,7 @@
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       nome: escolhido.nome, marca: escolhido.marca || '', gramas: Math.round(g), refeicao: refeicaoAlvo,
       qtdUn: modoQtd === 'un' ? q : null, un: modoQtd === 'un' ? unidadeDe(escolhido) : '',
+      semPeso: !!(escolhido.semPeso && modoQtd === 'un'),
       kcal: v.kcal, prot: v.prot, carb: v.carb, gord: v.gord, fibra: v.fibra,
       img: imgSegura(escolhido.img) || (escolhido.origem === 'meu' ? Alimentos.ICONE_GENERICO : '')
     };
