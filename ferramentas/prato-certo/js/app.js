@@ -30,18 +30,98 @@
   /* ---------------- estado e armazenamento ---------------- */
   var estado = { perfil: null, diario: {}, meus: [] };
 
+  /* ---- cookies: só o perfil (cabe em ~300 bytes), como plano B do localStorage ---- */
+  var COOKIE_PERFIL = 'pc_perfil', COOKIE_AVISO = 'pc_aviso';
+  function caminhoCookie() { return location.pathname.replace(/[^/]*$/, '') || '/'; }
+  function gravarCookie(nome, valor, dias) {
+    try {
+      document.cookie = nome + '=' + encodeURIComponent(valor) + '; max-age=' + Math.round(dias * 86400) +
+        '; path=' + caminhoCookie() + '; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
+    } catch (e) { /* cookies bloqueados */ }
+  }
+  function lerCookie(nome) {
+    try {
+      var partes = document.cookie ? document.cookie.split('; ') : [];
+      for (var i = 0; i < partes.length; i++) {
+        var k = partes[i].indexOf('=');
+        if (partes[i].slice(0, k) === nome) return decodeURIComponent(partes[i].slice(k + 1));
+      }
+    } catch (e) { /* ignora */ }
+    return null;
+  }
+  function apagarCookie(nome) {
+    try { document.cookie = nome + '=; max-age=0; path=' + caminhoCookie() + '; SameSite=Lax'; } catch (e) { /* ok */ }
+  }
+
+  /* reconstrói o estado só com tipos e formatos esperados: serve para o que vem do
+     localStorage, do cookie e de um arquivo de backup (que pode ter sido editado) */
+  var DATA = /^\d{4}-\d{2}-\d{2}$/;
+  var num = function (v) { v = Number(v); return isFinite(v) ? v : 0; };
+  /* número dentro de uma faixa realista: um backup editado não pode trazer 999999 kcal */
+  var faixa = function (v, max) { v = num(v); return v < 0 ? 0 : (v > max ? max : v); };
+  var txt = function (v, max) { return String(v == null ? '' : v).slice(0, max || 80); };
+  function limpoItem(i) {
+    if (!i || typeof i !== 'object') return null;
+    return { id: txt(i.id, 40) || Math.random().toString(36).slice(2), nome: txt(i.nome, 80), marca: txt(i.marca, 60),
+      gramas: faixa(i.gramas, 5000), refeicao: REFEICOES.some(function (r) { return r.id === i.refeicao; }) ? i.refeicao : 'lanche',
+      kcal: faixa(i.kcal, 20000), prot: faixa(i.prot, 2000), carb: faixa(i.carb, 2000), gord: faixa(i.gord, 2000), fibra: faixa(i.fibra, 1000) };
+  }
+  function limpoPerfil(p) {
+    if (!p || typeof p !== 'object') return null;
+    var q = { sexo: p.sexo === 'f' ? 'f' : 'm', idade: num(p.idade), peso: num(p.peso), altura: num(p.altura),
+      atividade: Calculo.FATORES[p.atividade] ? p.atividade : 'leve',
+      objetivo: Calculo.OBJETIVOS[p.objetivo] ? p.objetivo : 'manter',
+      pesoAlvo: p.pesoAlvo == null || p.pesoAlvo === '' ? null : num(p.pesoAlvo) };
+    return Calculo.validar(q) ? null : q;
+  }
+  function limparEstado(v) {
+    var s = { perfil: null, diario: {}, meus: [] };
+    if (!v || typeof v !== 'object') return s;
+    s.perfil = limpoPerfil(v.perfil);
+    if (v.diario && typeof v.diario === 'object') {
+      Object.keys(v.diario).slice(0, 800).forEach(function (k) {
+        if (!DATA.test(k) || !Array.isArray(v.diario[k])) return;
+        var lista = v.diario[k].slice(0, 200).map(limpoItem).filter(Boolean);
+        if (lista.length) s.diario[k] = lista;
+      });
+    }
+    if (Array.isArray(v.meus)) {
+      s.meus = v.meus.slice(0, 300).map(function (a) {
+        if (!a || typeof a !== 'object') return null;
+        return { id: txt(a.id, 40) || 'meu-' + Math.random().toString(36).slice(2), origem: 'meu', nome: txt(a.nome, 80), marca: '',
+          kcal: faixa(a.kcal, 900), prot: faixa(a.prot, 100), carb: faixa(a.carb, 100), gord: faixa(a.gord, 100), fibra: faixa(a.fibra, 100),
+          porcao: num(a.porcao) > 0 ? Math.min(num(a.porcao), 2000) : 100, unidade: txt(a.unidade, 40) || '100 g' };
+      }).filter(function (a) { return a && a.nome && a.prot + a.carb + a.gord <= 100.5; });
+    }
+    return s;
+  }
+
   function carregar() {
     try {
       var v = JSON.parse(localStorage.getItem(CHAVE));
-      if (v && typeof v === 'object') {
-        estado.perfil = v.perfil || null;
-        estado.diario = v.diario || {};
-        estado.meus = Array.isArray(v.meus) ? v.meus : [];
-      }
+      if (v && typeof v === 'object') estado = limparEstado(v);
     } catch (e) { /* armazenamento bloqueado ou corrompido: começa vazio */ }
+    /* localStorage vazio mas o cookie lembra o perfil (ex.: o navegador limpou o armazenamento) */
+    if (!estado.perfil) {
+      try {
+        var p = limpoPerfil(JSON.parse(lerCookie(COOKIE_PERFIL)));
+        if (p) estado.perfil = p;
+      } catch (e) { /* cookie ausente ou inválido */ }
+    }
   }
+  var pediuPersistencia = false;
   function salvar() {
     try { localStorage.setItem(CHAVE, JSON.stringify(estado)); } catch (e) { /* modo privado */ }
+    if (estado.perfil) {
+      var p = estado.perfil;
+      gravarCookie(COOKIE_PERFIL, JSON.stringify({ sexo: p.sexo, idade: p.idade, peso: p.peso, altura: p.altura,
+        atividade: p.atividade, objetivo: p.objetivo, pesoAlvo: p.pesoAlvo }), 400);
+    }
+    /* pede ao navegador para não apagar o armazenamento por falta de espaço */
+    if (!pediuPersistencia && navigator.storage && navigator.storage.persist) {
+      pediuPersistencia = true;
+      navigator.storage.persist().catch(function () { /* ok */ });
+    }
   }
 
   function chaveData(d) {
@@ -609,10 +689,63 @@
     aplicarPerfil(true);
   });
 
+  /* ---------------- backup: levar os dados para outro aparelho, sem conta ---------------- */
+  function dataArquivo() { return chaveData(new Date()); }
+
+  $('baixarBackup').addEventListener('click', function () {
+    var corpo = JSON.stringify({ app: 'prato-certo', versao: 1, exportado: new Date().toISOString(),
+      perfil: estado.perfil, diario: estado.diario, meus: estado.meus }, null, 2);
+    var url = URL.createObjectURL(new Blob([corpo], { type: 'application/json' }));
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'prato-certo-backup-' + dataArquivo() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+    $('backupStatus').textContent = 'Backup baixado. Guarde o arquivo e use "Restaurar backup" em outro aparelho.';
+  });
+
+  $('restaurarBackup').addEventListener('change', function () {
+    var arq = this.files && this.files[0];
+    var campo = this;
+    if (!arq) return;
+    function fim(msg, erro) { $('backupStatus').textContent = msg; $('backupStatus').className = 'backup__status' + (erro ? ' backup__status--erro' : ''); campo.value = ''; }
+    if (arq.size > 3 * 1024 * 1024) return fim('Arquivo grande demais para ser um backup do Prato Certo.', true);
+    var leitor = new FileReader();
+    leitor.onerror = function () { fim('Não consegui ler esse arquivo.', true); };
+    leitor.onload = function () {
+      var dados;
+      try { dados = JSON.parse(leitor.result); } catch (e) { return fim('Esse arquivo não é um backup válido (JSON quebrado).', true); }
+      if (!dados || dados.app !== 'prato-certo') return fim('Esse arquivo não parece ser um backup do Prato Certo.', true);
+      var novo = limparEstado(dados);
+      if (!novo.perfil && !Object.keys(novo.diario).length && !novo.meus.length) return fim('O backup está vazio ou com dados inválidos.', true);
+      var tem = estado.perfil || Object.keys(estado.diario).length || estado.meus.length;
+      if (tem && !window.confirm('Isso substitui os dados atuais deste navegador pelos do backup. Continuar?')) return fim('Restauração cancelada.', false);
+      estado = novo;
+      salvar();
+      if (estado.perfil) { preencherForm(estado.perfil); aplicarPerfil(true); } else { desenharMeus(); }
+      diaAtual = HOJE;
+      fim('Backup restaurado: ' + Object.keys(estado.diario).length + ' dias e ' + estado.meus.length + ' alimentos seus.', false);
+    };
+    leitor.readAsText(arq);
+  });
+
+  /* ---------------- aviso de armazenamento (uma vez) ---------------- */
+  function mostrarAviso() {
+    if (lerCookie(COOKIE_AVISO)) return;
+    $('aviso').hidden = false;
+    $('avisoOk').addEventListener('click', function () {
+      gravarCookie(COOKIE_AVISO, '1', 365);
+      $('aviso').hidden = true;
+    });
+  }
+
   /* ---------------- apagar tudo ---------------- */
   $('apagar').addEventListener('click', function () {
     if (!window.confirm('Apagar seu perfil, seu diário e seus alimentos cadastrados deste navegador?')) return;
     try { localStorage.removeItem(CHAVE); } catch (e) { /* ok */ }
+    apagarCookie(COOKIE_PERFIL);
     window.location.reload();
   });
 
@@ -623,4 +756,5 @@
     preencherForm(estado.perfil);
     aplicarPerfil(false);
   }
+  mostrarAviso();
 })();

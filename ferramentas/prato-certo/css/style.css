@@ -258,4 +258,22 @@ button { cursor: pointer; }
 .rodape strong { color: var(--tinta); font-weight: 500; }
 .rodape__volta { display: inline-block; margin-top: 14px; font-weight: 500; }
 
+/* ---------- backup e aviso de armazenamento ---------- */
+.backup { max-width: 70ch; margin-bottom: 18px; padding: 16px 0; border-bottom: 1px solid var(--linha); }
+.backup__tit { font: 400 1.4rem var(--serifa); color: var(--tinta); margin-bottom: 4px; }
+.backup .acoes { margin: 12px 0 4px; }
+.backup__arq { display: inline-flex; align-items: center; cursor: pointer; }
+.backup__status { min-height: 1.4em; margin-top: 6px; font-size: .82rem; }
+.backup__status--erro { color: var(--acima); }
+
+.aviso {
+  position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 20;
+  max-width: 640px; margin: 0 auto; padding: 16px 18px;
+  display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+  background: var(--tinta); color: var(--papel); border-radius: 16px; font-size: .88rem;
+}
+.aviso p { flex: 1; min-width: 220px; }
+.aviso strong { font-weight: 700; }
+.aviso .botao { background: var(--papel); color: var(--tinta); border-color: var(--papel); min-height: 40px; padding: 6px 18px; }
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }

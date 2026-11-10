@@ -177,9 +177,24 @@
   <strong>aproximados</strong> e variam de fonte para fonte. Produtos de mercado vêm da
   <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">Open Food Facts</a>, base colaborativa que pode ter erros.
   Para o número exato, fotografe a tabela nutricional.</p>
-  <p>Seus dados ficam só neste navegador. <button type="button" class="link" id="apagar">Apagar meus dados</button></p>
+  <div class="backup">
+    <p class="backup__tit">Seus dados, sem conta</p>
+    <p>Tudo fica só neste navegador (armazenamento local e um cookie com o seu perfil), sem enviar nada a ninguém. Para levar para outro aparelho, baixe um backup e restaure lá.</p>
+    <div class="acoes">
+      <button type="button" class="botao botao--leve" id="baixarBackup">Baixar backup</button>
+      <label class="botao botao--leve backup__arq" for="restaurarBackup">Restaurar backup</label>
+      <input type="file" id="restaurarBackup" accept="application/json,.json" hidden>
+    </div>
+    <p class="backup__status" id="backupStatus" role="status" aria-live="polite"></p>
+  </div>
+  <p><button type="button" class="link" id="apagar">Apagar meus dados</button></p>
   <a class="rodape__volta" href="../../index.html#projetos">← voltar ao portfólio</a>
 </footer>
+
+<div class="aviso" id="aviso" role="region" aria-label="Aviso sobre dados salvos" hidden>
+  <p>Para lembrar da sua meta e do seu diário sem criar conta, este app guarda dados <strong>só neste navegador</strong>: armazenamento local e um cookie com o seu perfil. Nada é enviado a ninguém, e você pode apagar tudo no rodapé.</p>
+  <button type="button" class="botao" id="avisoOk">Entendi</button>
+</div>
 
 <script src="js/calculo.js"></script>
 <script src="js/alimentos.js"></script>
