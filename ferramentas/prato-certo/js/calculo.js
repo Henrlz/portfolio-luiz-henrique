@@ -49,7 +49,12 @@ var Calculo = (function () {
     var base = tmb(p);
     var gasto = base * f.fator;
 
-    var kcal = gasto * (1 + o.ajuste);
+    /* gestação/amamentação: sem déficit calórico (só com acompanhamento profissional) */
+    var gestante = !!(p.saude && Array.isArray(p.saude.condicoes) && p.saude.condicoes.indexOf('gestante') !== -1);
+    var ajuste = gestante ? Math.max(o.ajuste, 0) : o.ajuste;
+    var semDeficit = gestante && o.ajuste < 0;
+
+    var kcal = gasto * (1 + ajuste);
     /* piso de segurança: nunca abaixo da TMB nem de 1200 kcal */
     var piso = Math.max(base, 1200);
     var limitada = kcal < piso;
@@ -86,6 +91,7 @@ var Calculo = (function () {
       agua: Math.round((p.peso * 35) / 100) / 10,   /* litros */
       kgSemana: Math.round(kgSemana * 100) / 100,
       limitada: limitada,
+      semDeficit: semDeficit,
       prazo: prazo,
       imc: Math.round((p.peso / Math.pow(p.altura / 100, 2)) * 10) / 10
     };

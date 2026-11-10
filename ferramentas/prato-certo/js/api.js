@@ -6,7 +6,26 @@ var Api = (function () {
   'use strict';
 
   var BASE = 'https://world.openfoodfacts.org/cgi/search.pl';
-  var CAMPOS = 'code,product_name,brands,nutriments,serving_size,serving_quantity,quantity';
+  var CAMPOS = 'code,product_name,brands,nutriments,serving_size,serving_quantity,quantity,allergens_tags,traces_tags,ingredients_analysis_tags,categories_tags';
+
+  /* marcas para o filtro de saúde a partir do que a própria base informa */
+  var ALERGENO = {
+    'en:gluten': 'gluten', 'en:milk': 'leite', 'en:eggs': 'ovo', 'en:peanuts': 'amendoim', 'en:nuts': 'castanhas',
+    'en:fish': 'peixe', 'en:crustaceans': 'crustaceo', 'en:molluscs': 'crustaceo', 'en:soybeans': 'soja'
+  };
+  function marcasDe(p, n) {
+    var m = {};
+    (p.allergens_tags || []).forEach(function (t) { if (ALERGENO[t]) m[ALERGENO[t]] = 1; });
+    var analise = p.ingredients_analysis_tags || [];
+    if (analise.indexOf('en:non-vegetarian') !== -1) m.carne = 1;
+    if (analise.indexOf('en:non-vegan') !== -1) m.animal = 1;
+    var bebida = (p.categories_tags || []).some(function (c) { return /beverages|bebidas|drinks/.test(c); });
+    if ((p.categories_tags || []).some(function (c) { return /alcoholic|alcoolic|beers|wines|cervej/.test(c); })) m.alcool = 1;
+    var acucar = num(n.sugars_100g), sodio = num(n.sodium_100g);
+    if (acucar != null && acucar >= (bebida ? 7.5 : 15)) m.acucar = 1;
+    if (sodio != null && sodio >= 0.6) m.sodio = 1;
+    return Object.keys(m);
+  }
 
   function num(v) {
     var n = Number(v);
@@ -44,7 +63,8 @@ var Api = (function () {
       kcal: kcal, prot: prot, carb: carb, gord: gord,
       fibra: num(n.fiber_100g) || 0,
       porcao: serv && serv > 0 && serv < 1000 ? serv : 100,
-      unidade: serv && serv > 0 && serv < 1000 ? (p.serving_size || serv + ' g') : '100 g'
+      unidade: serv && serv > 0 && serv < 1000 ? (p.serving_size || serv + ' g') : '100 g',
+      marcas: marcasDe(p, n)
     };
   }
 

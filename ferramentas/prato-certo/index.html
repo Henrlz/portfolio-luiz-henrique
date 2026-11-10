@@ -3,200 +3,241 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Prato Certo | Calorias e macros do seu dia</title>
-<meta name="description" content="Calcule sua meta diária de calorias e macronutrientes pelo peso e altura e veja o dia como um prato: cada alimento é buscado, lido de uma foto da tabela nutricional ou cadastrado.">
-<meta name="theme-color" content="#f1eee6">
-<script>
-  /* ?tema=claro ou ?tema=escuro fixa o tema; sem isso, segue o sistema */
-  try { var t = new URLSearchParams(location.search).get('tema'); if (t === 'claro' || t === 'escuro') document.documentElement.setAttribute('data-tema', t); } catch (e) {}
-</script>
+<title>Prato Certo | Calorias, nutrientes e saúde</title>
+<meta name="description" content="Responda um questionário rápido e receba sua meta diária de calorias e nutrientes, com os alimentos filtrados pelo seu perfil de saúde. Busca de alimentos, leitura da tabela nutricional por foto e diário.">
+<meta name="theme-color" content="#ffffff">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<header class="topo">
-  <svg class="topo__logo" viewBox="0 0 32 32" aria-hidden="true">
-    <circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="4"/>
-    <path d="M16 4a12 12 0 0 1 11.4 8.3" fill="none" stroke="var(--prot)" stroke-width="4" stroke-linecap="butt"/>
-    <path d="M27.9 14.3a12 12 0 0 1-3.6 10.6" fill="none" stroke="var(--carb)" stroke-width="4"/>
-    <path d="M22.6 26.9A12 12 0 0 1 8.4 25.6" fill="none" stroke="var(--gord)" stroke-width="4"/>
-  </svg>
-  <h1 class="topo__nome">prato certo</h1>
-  <p class="topo__sub">o dia, servido em um prato</p>
-</header>
-
-<main class="grade">
-
-  <!-- 01 meta -->
-  <section class="bloco" id="meta" aria-labelledby="tMeta">
-    <h2 class="titulo" id="tMeta"><span class="idx">01</span>Sua meta</h2>
-
-    <form id="formPerfil" novalidate>
-      <fieldset class="sexo">
-        <legend>Sexo biológico</legend>
-        <label><input type="radio" name="sexo" value="m" checked><span>Homem</span></label>
-        <label><input type="radio" name="sexo" value="f"><span>Mulher</span></label>
-      </fieldset>
-
-      <div class="trio">
-        <label class="campo"><span>Idade</span>
-          <input id="idade" type="number" inputmode="numeric" min="14" max="100" placeholder="anos"></label>
-        <label class="campo"><span>Peso</span>
-          <input id="peso" type="number" inputmode="decimal" step="0.1" min="30" max="300" placeholder="kg"></label>
-        <label class="campo"><span>Altura</span>
-          <input id="altura" type="number" inputmode="numeric" min="120" max="230" placeholder="cm"></label>
-      </div>
-
-      <label class="campo"><span>Atividade física</span>
-        <select id="atividade"></select></label>
-
-      <label class="campo"><span>Objetivo</span>
-        <select id="objetivo"></select></label>
-
-      <label class="campo"><span>Peso que quer atingir <em>opcional</em></span>
-        <input id="pesoAlvo" type="number" inputmode="decimal" step="0.1" min="30" max="300" placeholder="kg"></label>
-
-      <p class="erro" id="erroPerfil" role="alert" hidden></p>
-      <div class="acoes">
-        <button class="botao" type="submit">Calcular meta</button>
-        <button class="botao botao--leve" type="button" id="exemplo">Ver um exemplo</button>
-      </div>
-    </form>
-
-    <div id="resultadoMeta" hidden></div>
-  </section>
-
-  <!-- 02 dia -->
-  <section class="bloco bloco--dia" id="dia" aria-labelledby="tDia" hidden>
-    <h2 class="titulo" id="tDia"><span class="idx">02</span>Seu dia</h2>
-
-    <nav class="datas" aria-label="Trocar de dia">
-      <button type="button" class="datas__seta" id="diaAnt" aria-label="Dia anterior">←</button>
-      <div class="datas__meio">
-        <strong id="diaTexto"></strong>
-        <button type="button" class="link" id="diaHoje" hidden>voltar para hoje</button>
-      </div>
-      <button type="button" class="datas__seta" id="diaProx" aria-label="Próximo dia">→</button>
-    </nav>
-
-    <div class="prato" id="rotulo" aria-live="polite"></div>
-
-    <div class="busca">
-      <label class="busca__rotulo" for="busca">o que você comeu?</label>
-      <input id="busca" type="search" autocomplete="off" placeholder="arroz, ovo cozido, pão de queijo, whey…" aria-controls="resultados">
-      <p class="busca__status" id="buscaStatus" role="status" aria-live="polite"></p>
-      <ul class="resultados" id="resultados" hidden></ul>
-
-      <form class="painel" id="formAdicionar" hidden>
-        <div class="painel__nome">
-          <strong id="addNome"></strong>
-          <small id="addInfo"></small>
-        </div>
-        <div class="duo">
-          <label class="campo"><span>Quantidade (g)</span>
-            <input id="addGramas" type="number" inputmode="decimal" min="1" max="5000" step="1"></label>
-          <label class="campo"><span>Refeição</span>
-            <select id="addRefeicao"></select></label>
-        </div>
-        <p class="painel__conta" id="addConta" aria-live="polite"></p>
-        <div class="acoes">
-          <button class="botao" type="submit">Adicionar ao prato</button>
-          <button class="botao botao--leve" type="button" id="addCancelar">Cancelar</button>
-        </div>
-      </form>
-
-      <!-- cadastro: foto da tabela, código de barras ou digitar -->
-      <form class="painel manual" id="formManual" hidden>
-        <p class="painel__tit">Cadastrar alimento</p>
-
-        <div class="atalhos">
-          <label class="atalho" for="manFoto">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.2"/></svg>
-            <span>Ler a tabela pela foto</span>
-          </label>
-          <input id="manFoto" type="file" accept="image/*" hidden>
-          <div class="codigo">
-            <input id="manCodigo" type="text" inputmode="numeric" maxlength="14" placeholder="código de barras" aria-label="Código de barras">
-            <button type="button" class="botao botao--leve" id="manBuscarCodigo">Buscar</button>
-          </div>
-        </div>
-        <p class="manual__status" id="manStatus" role="status" aria-live="polite"></p>
-
-        <label class="campo"><span>Nome</span><input id="manNome" type="text" maxlength="60" placeholder="ex.: granola da padaria"></label>
-
-        <fieldset class="base">
-          <legend>Os valores da tabela são por</legend>
-          <label><input type="radio" name="manBase" value="100" checked><span>100 g</span></label>
-          <label><input type="radio" name="manBase" value="porcao"><span>porção</span></label>
-          <label class="campo base__g" id="manPorcaoBox" hidden><span>porção (g)</span>
-            <input id="manPorcao" type="number" inputmode="decimal" min="1" max="2000" step="any"></label>
-        </fieldset>
-
-        <div class="penta">
-          <label class="campo"><span>kcal</span><input id="manKcal" type="number" inputmode="decimal" min="0" step="any"></label>
-          <label class="campo"><span>prot. g</span><input id="manProt" type="number" inputmode="decimal" min="0" step="any"></label>
-          <label class="campo"><span>carbo g</span><input id="manCarb" type="number" inputmode="decimal" min="0" step="any"></label>
-          <label class="campo"><span>gord. g</span><input id="manGord" type="number" inputmode="decimal" min="0" step="any"></label>
-          <label class="campo"><span>fibra g</span><input id="manFibra" type="number" inputmode="decimal" min="0" step="any"></label>
-        </div>
-
-        <label class="marca"><input type="checkbox" id="manSalvar" checked><span>guardar em “Meus alimentos”</span></label>
-        <p class="erro" id="erroManual" role="alert" hidden></p>
-        <div class="acoes">
-          <button class="botao" type="submit">Usar este alimento</button>
-          <button class="botao botao--leve" type="button" id="manCancelar">Cancelar</button>
-        </div>
-        <p class="manual__nota">A foto é lida aqui no seu aparelho e não é enviada a ninguém. Só o leitor de texto é baixado, uma vez.</p>
-      </form>
-
-      <details class="meus" id="meus" hidden>
-        <summary>Meus alimentos <span id="meusN"></span></summary>
-        <ul id="meusLista"></ul>
-      </details>
+<!-- =============== 1. conta =============== -->
+<main class="tela tela--centro" id="telaConta" hidden>
+  <div class="cartao entrada">
+    <div class="logo">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="var(--primaria)"/><circle cx="20" cy="20" r="10.5" fill="none" stroke="#fff" stroke-width="3"/><path d="M15.5 20.3l3.2 3.2 6-6.6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Prato Certo</span>
     </div>
+    <h1 class="entrada__tit">Crie sua conta</h1>
+    <p class="entrada__sub">Responda algumas perguntas e receba sua meta diária de calorias e nutrientes, com os alimentos filtrados para a sua saúde.</p>
 
-    <div class="refeicoes" id="refeicoes"></div>
-  </section>
+    <button type="button" class="botao-google" id="entrarGoogle">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.5l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.8 6C12.4 13.7 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.8-6A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.7l7.9-6z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.2-13.5-9.9l-7.9 6C6.6 42.6 14.6 48 24 48z"/></svg>
+      <span>Continuar com Google</span>
+      <em class="selo">demonstração</em>
+    </button>
 
-  <!-- 03 semana -->
-  <section class="bloco bloco--semana" id="semana" aria-labelledby="tSemana" hidden>
-    <h2 class="titulo" id="tSemana"><span class="idx">03</span>Sete pratos</h2>
-    <div class="sete" id="grafico"></div>
-    <p class="semana__nota" id="semanaNota"></p>
-  </section>
+    <div class="ou"><span>ou crie uma conta local</span></div>
 
+    <form id="formConta" novalidate>
+      <label class="campo"><span>Como podemos te chamar?</span>
+        <input id="contaNome" type="text" maxlength="40" autocomplete="given-name" placeholder="Seu nome"></label>
+      <p class="erro" id="erroConta" role="alert" hidden></p>
+      <button class="botao botao--cheio botao--largo" type="submit">Criar conta e começar</button>
+    </form>
+    <p class="entrada__nota">Sem senha e sem e-mail: a conta fica guardada só neste aparelho.</p>
+
+    <div class="entrada__extras">
+      <button type="button" class="link" id="verDemo">Ver uma demonstração</button>
+      <span aria-hidden="true">·</span>
+      <label class="link" for="restaurarBackupEntrada">Tenho um backup</label>
+      <input type="file" id="restaurarBackupEntrada" accept="application/json,.json" hidden>
+    </div>
+  </div>
+  <a class="volta" href="../../index.html#projetos">← voltar ao portfólio</a>
 </main>
 
-<footer class="rodape">
-  <p>Meta pela equação de Mifflin-St Jeor: estimativa de partida, não é prescrição; converse com um nutricionista.
-  Alimentos comuns vêm de uma base local de referência (TACO e USDA, arredondados). Itens de redes de fast food são
-  <strong>aproximados</strong> e variam de fonte para fonte. Produtos de mercado vêm da
-  <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">Open Food Facts</a>, base colaborativa que pode ter erros.
-  Para o número exato, fotografe a tabela nutricional.</p>
-  <div class="backup">
-    <p class="backup__tit">Seus dados, sem conta</p>
-    <p>Tudo fica só neste navegador (armazenamento local e um cookie com o seu perfil), sem enviar nada a ninguém. Para levar para outro aparelho, baixe um backup e restaure lá.</p>
-    <div class="acoes">
-      <button type="button" class="botao botao--leve" id="baixarBackup">Baixar backup</button>
-      <label class="botao botao--leve backup__arq" for="restaurarBackup">Restaurar backup</label>
-      <input type="file" id="restaurarBackup" accept="application/json,.json" hidden>
+<!-- =============== 2. questionário =============== -->
+<main class="tela tela--centro" id="telaQuest" hidden>
+  <div class="cartao quest">
+    <div class="quest__topo">
+      <span class="quest__passo" id="questPasso"></span>
+      <button type="button" class="link" id="questCancelar" hidden>Cancelar edição</button>
     </div>
-    <p class="backup__status" id="backupStatus" role="status" aria-live="polite"></p>
+    <div class="progresso" aria-hidden="true"><i id="questBarra"></i></div>
+    <form id="formQuest" novalidate>
+      <div id="questCorpo" aria-live="polite"></div>
+      <p class="erro" id="erroQuest" role="alert" hidden></p>
+      <div class="quest__nav">
+        <button type="button" class="botao botao--leve" id="questVoltar">Voltar</button>
+        <span class="quest__espaco"></span>
+        <button type="button" class="link" id="questPular" hidden>Pular</button>
+        <button type="submit" class="botao botao--cheio" id="questAvancar">Continuar</button>
+      </div>
+    </form>
   </div>
-  <p><button type="button" class="link" id="apagar">Apagar meus dados</button></p>
-  <a class="rodape__volta" href="../../index.html#projetos">← voltar ao portfólio</a>
-</footer>
+</main>
 
-<div class="aviso" id="aviso" role="region" aria-label="Aviso sobre dados salvos" hidden>
-  <p>Para lembrar da sua meta e do seu diário sem criar conta, este app guarda dados <strong>só neste navegador</strong>: armazenamento local e um cookie com o seu perfil. Nada é enviado a ninguém, e você pode apagar tudo no rodapé.</p>
-  <button type="button" class="botao" id="avisoOk">Entendi</button>
+<!-- =============== 3. painel =============== -->
+<div id="telaApp" hidden>
+  <header class="barra">
+    <div class="barra__in">
+      <div class="logo logo--peq">
+        <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="var(--primaria)"/><circle cx="20" cy="20" r="10.5" fill="none" stroke="#fff" stroke-width="3"/><path d="M15.5 20.3l3.2 3.2 6-6.6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Prato Certo</span>
+      </div>
+      <details class="menu" id="menu">
+        <summary><span class="avatar" id="avatar"></span><span class="menu__nome" id="menuNome"></span></summary>
+        <div class="menu__lista">
+          <button type="button" id="editarRespostas">Editar minhas respostas</button>
+          <button type="button" id="baixarBackup">Baixar backup dos dados</button>
+          <label for="restaurarBackup">Restaurar backup</label>
+          <input type="file" id="restaurarBackup" accept="application/json,.json" hidden>
+          <hr>
+          <button type="button" class="perigo" id="apagar">Apagar conta e dados</button>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main class="painel">
+    <p class="ola" id="ola"></p>
+
+    <div class="grade">
+      <section class="col">
+        <!-- resumo do dia -->
+        <div class="cartao" aria-labelledby="tHoje">
+          <div class="cartao__cab">
+            <h2 id="tHoje">Resumo do dia</h2>
+            <nav class="datas" aria-label="Trocar de dia">
+              <button type="button" class="datas__seta" id="diaAnt" aria-label="Dia anterior">‹</button>
+              <strong id="diaTexto"></strong>
+              <button type="button" class="datas__seta" id="diaProx" aria-label="Próximo dia">›</button>
+            </nav>
+          </div>
+          <button type="button" class="link link--peq" id="diaHoje" hidden>voltar para hoje</button>
+          <div class="resumo" id="rotulo" aria-live="polite"></div>
+        </div>
+
+        <!-- adicionar -->
+        <div class="cartao" aria-labelledby="tAdd">
+          <div class="cartao__cab"><h2 id="tAdd">Adicionar alimento</h2></div>
+          <div class="busca">
+            <div class="busca__campo">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+              <input id="busca" type="search" autocomplete="off" placeholder="Buscar: arroz, ovo, pão de queijo, Big Mac…" aria-label="Buscar alimento" aria-controls="resultados">
+            </div>
+            <p class="busca__status" id="buscaStatus" role="status" aria-live="polite"></p>
+            <ul class="resultados" id="resultados" hidden></ul>
+
+            <form class="subpainel" id="formAdicionar" hidden>
+              <div class="subpainel__nome"><strong id="addNome"></strong><small id="addInfo"></small></div>
+              <p class="atencao" id="addAtencao" hidden></p>
+              <div class="duo">
+                <label class="campo"><span>Quantidade (g)</span>
+                  <input id="addGramas" type="number" inputmode="decimal" min="1" max="5000" step="1"></label>
+                <label class="campo"><span>Refeição</span>
+                  <select id="addRefeicao"></select></label>
+              </div>
+              <p class="subpainel__conta" id="addConta" aria-live="polite"></p>
+              <div class="acoes">
+                <button class="botao botao--cheio" type="submit">Adicionar</button>
+                <button class="botao botao--leve" type="button" id="addCancelar">Cancelar</button>
+              </div>
+            </form>
+
+            <form class="subpainel" id="formManual" hidden>
+              <p class="subpainel__tit">Cadastrar alimento</p>
+              <div class="atalhos">
+                <label class="botao botao--leve atalho" for="manFoto">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.2"/></svg>
+                  Ler a tabela pela foto
+                </label>
+                <input id="manFoto" type="file" accept="image/*" hidden>
+                <div class="codigo">
+                  <input id="manCodigo" type="text" inputmode="numeric" maxlength="14" placeholder="Código de barras" aria-label="Código de barras">
+                  <button type="button" class="botao botao--leve" id="manBuscarCodigo">Buscar</button>
+                </div>
+              </div>
+              <p class="manual__status" id="manStatus" role="status" aria-live="polite"></p>
+
+              <label class="campo"><span>Nome</span><input id="manNome" type="text" maxlength="60" placeholder="ex.: granola da padaria"></label>
+
+              <fieldset class="escolha">
+                <legend>Os valores da tabela são por</legend>
+                <label><input type="radio" name="manBase" value="100" checked><span>100 g</span></label>
+                <label><input type="radio" name="manBase" value="porcao"><span>porção</span></label>
+                <label class="campo campo--mini" id="manPorcaoBox" hidden><span>porção (g)</span>
+                  <input id="manPorcao" type="number" inputmode="decimal" min="1" max="2000" step="any"></label>
+              </fieldset>
+
+              <div class="penta">
+                <label class="campo"><span>Calorias</span><input id="manKcal" type="number" inputmode="decimal" min="0" step="any"></label>
+                <label class="campo"><span>Proteína (g)</span><input id="manProt" type="number" inputmode="decimal" min="0" step="any"></label>
+                <label class="campo"><span>Carbo (g)</span><input id="manCarb" type="number" inputmode="decimal" min="0" step="any"></label>
+                <label class="campo"><span>Gordura (g)</span><input id="manGord" type="number" inputmode="decimal" min="0" step="any"></label>
+                <label class="campo"><span>Fibra (g)</span><input id="manFibra" type="number" inputmode="decimal" min="0" step="any"></label>
+              </div>
+
+              <fieldset class="chips" id="manMarcas">
+                <legend>Contém <small>(para o filtro de saúde; a foto marca sozinha quando o rótulo informa)</small></legend>
+              </fieldset>
+
+              <label class="check"><input type="checkbox" id="manSalvar" checked><span>Guardar em “Meus alimentos”</span></label>
+              <p class="erro" id="erroManual" role="alert" hidden></p>
+              <div class="acoes">
+                <button class="botao botao--cheio" type="submit">Usar este alimento</button>
+                <button class="botao botao--leve" type="button" id="manCancelar">Cancelar</button>
+              </div>
+              <p class="nota-fina">A foto é lida neste aparelho e não é enviada a ninguém. Só o leitor de texto é baixado, uma vez.</p>
+            </form>
+
+            <details class="meus" id="meus" hidden>
+              <summary>Meus alimentos <span id="meusN"></span></summary>
+              <ul id="meusLista"></ul>
+            </details>
+          </div>
+        </div>
+
+        <!-- refeições -->
+        <div class="cartao" aria-labelledby="tRef">
+          <div class="cartao__cab"><h2 id="tRef">Refeições</h2></div>
+          <div class="refeicoes" id="refeicoes"></div>
+        </div>
+      </section>
+
+      <aside class="col col--lado">
+        <div class="cartao" aria-labelledby="tMeta">
+          <div class="cartao__cab"><h2 id="tMeta">Sua meta diária</h2></div>
+          <div id="resultadoMeta"></div>
+        </div>
+
+        <div class="cartao" aria-labelledby="tSaude">
+          <div class="cartao__cab">
+            <h2 id="tSaude">Perfil de saúde</h2>
+            <button type="button" class="link link--peq" id="editarSaude">Editar</button>
+          </div>
+          <div id="saudeResumo"></div>
+        </div>
+
+        <div class="cartao" aria-labelledby="tSemana">
+          <div class="cartao__cab"><h2 id="tSemana">Últimos 7 dias</h2></div>
+          <div class="semana" id="grafico"></div>
+          <p class="nota-fina" id="semanaNota"></p>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="rodape">
+    <p>O Prato Certo é uma ferramenta de apoio e <strong>não substitui orientação médica ou nutricional</strong>. A meta usa a equação de Mifflin-St Jeor. Alimentos comuns vêm de uma base local de referência (TACO e USDA, arredondados); itens de redes de fast food são <strong>aproximados</strong>; produtos de mercado vêm da <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">Open Food Facts</a>, base colaborativa que pode ter erros. O filtro de saúde depende das informações de cada alimento: em caso de alergia grave, confira sempre o rótulo.</p>
+    <p>Seus dados ficam só neste navegador (armazenamento local e um cookie com o seu perfil). Para trocar de aparelho, use “Baixar backup” no menu.</p>
+    <a class="volta" href="../../index.html#projetos">← voltar ao portfólio</a>
+  </footer>
 </div>
 
+<div class="aviso" id="aviso" role="region" aria-label="Aviso sobre dados salvos" hidden>
+  <p>Para lembrar da sua conta, das respostas e do diário, este app guarda dados <strong>só neste navegador</strong> (armazenamento local e um cookie com o seu perfil). Nada é enviado a ninguém.</p>
+  <button type="button" class="botao botao--cheio" id="avisoOk">Entendi</button>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
 <script src="js/calculo.js"></script>
+<script src="js/saude.js"></script>
 <script src="js/alimentos.js"></script>
 <script src="js/api.js"></script>
 <script src="js/rotulo.js"></script>

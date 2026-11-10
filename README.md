@@ -19,13 +19,13 @@ Site estático (HTML, CSS e JavaScript puro), sem build, publicado no GitHub Pag
 |---|---|---|
 | Toque Gourmet Especial | Freelance | HTML, CSS, JS, Firebase Auth, Firestore, Vercel Functions, Supabase Storage |
 | Emissão de Contas a Receber | Profissional (demo, dados fictícios) | React, TypeScript, Vite, TanStack Query, Supabase |
-| Prato Certo | Pessoal | HTML, CSS, JS, SVG, Open Food Facts API, Tesseract.js (OCR), LocalStorage |
+| Prato Certo | Pessoal | HTML, CSS, JS, Open Food Facts API, Tesseract.js (OCR), LocalStorage, cookies |
 | FiscalView, Cedro Decor, Consultório, Nosso Sim, Traço, Qual bico?, Margem, Taquígrafo | Pessoais | Ver `ferramentas/` |
 | Aprovação de Tarefas no Planner, Automação de Estoque no Omie | Power Automate | Power Automate, Omie |
 
 Os projetos pessoais publicados ficam em `ferramentas/<nome>/` e abrem direto pelo portfólio.
 Alguns são aplicações React já compiladas (só o resultado, sem o código-fonte).
-O Prato Certo (contador de calorias e macros) lê a foto da tabela nutricional por OCR no próprio navegador e usa valores aproximados para itens de redes de fast food: o rodapé do app avisa isso.
+O Prato Certo (contador de calorias e nutrientes) tem conta local com questionário guiado e filtro de alimentos pelo perfil de saúde; o botão "Continuar com Google" é só ilustrativo. Ele lê a foto da tabela nutricional por OCR no próprio navegador e usa valores aproximados para itens de redes de fast food: o app avisa isso.
 O painel do Cedro Decor é uma demonstração: o login é simbólico e os dados ficam no `localStorage`.
 
 ## Estrutura

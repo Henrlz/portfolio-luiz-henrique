@@ -34,6 +34,28 @@ var Rotulo = (function () {
     return achados;
   }
 
+  /* avisos obrigatórios do rótulo brasileiro → marcas do filtro de saúde.
+     Considera também "pode conter" (traços), porque para alergia isso importa. */
+  function alergenos(t) {
+    var m = {};
+    var corrido = t.replace(/\s+/g, ' ');
+    if (!/nao contem gluten|sem gluten|isento de gluten/.test(corrido) && /contem gluten/.test(corrido)) m.gluten = 1;
+    if (!/nao contem lactose|zero lactose|sem lactose|isento de lactose/.test(corrido) && /contem lactose/.test(corrido)) m.leite = 1;
+    var trechos = corrido.match(/(alergicos?\s*:?\s*)?(contem|pode conter)[^.]{0,160}/g) || [];
+    trechos.forEach(function (s) {
+      if (/nao contem/.test(s)) return;
+      if (/leite/.test(s)) m.leite = 1;
+      if (/\bovos?\b/.test(s)) m.ovo = 1;
+      if (/amendoim/.test(s)) m.amendoim = 1;
+      if (/castanha|nozes|\bnoz\b|amendoa|avela|caju|pistache|macadamia|peca/.test(s)) m.castanhas = 1;
+      if (/peixe/.test(s)) m.peixe = 1;
+      if (/crustaceo|camarao|lagosta|caranguejo|molusco/.test(s)) m.crustaceo = 1;
+      if (/\bsoja\b/.test(s)) m.soja = 1;
+      if (/trigo|centeio|cevada|aveia/.test(s)) m.gluten = 1;
+    });
+    return Object.keys(m);
+  }
+
   function interpretar(texto) {
     var t = limpar(texto);
     var linhas = t.split(/\n+/).map(function (l) { return l.trim(); }).filter(Boolean);
@@ -104,6 +126,7 @@ var Rotulo = (function () {
       if (!coerente(p)) { descartados.push(NOMES[chave]); return; }
       achados[chave] = p;
     });
+    res.marcas = alergenos(t);
     if (descartados.length) res.avisos.push('Não consegui ler com segurança: ' + descartados.join(', ') + '. Digite esse valor.');
 
     /* decide a base: se achamos a coluna de 100 g, usa ela; senão, os valores são da porção */
@@ -194,5 +217,5 @@ var Rotulo = (function () {
     return r.data.text || '';
   }
 
-  return { ler: ler, interpretar: interpretar };
+  return { ler: ler, interpretar: interpretar, alergenos: alergenos };
 })();

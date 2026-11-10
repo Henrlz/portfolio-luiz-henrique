@@ -160,6 +160,34 @@ var Alimentos = (function () {
   });
   REDES.forEach(function (a) { LISTA.push(a); });
 
+  /* marcas para o filtro de saúde (ver saude.js). "acucar" e "sodio" só onde o
+     alimento passa do limite da lupa da ANVISA por 100 g/100 ml. */
+  var MARCAS = {
+    'Macarrão cozido': ['gluten'], 'Aveia em flocos': ['gluten'], 'Pão francês': ['gluten'],
+    'Pão de forma integral': ['gluten'], 'Biscoito cream cracker': ['gluten', 'sodio'],
+    'Peito de frango grelhado': ['carne'], 'Coxa de frango cozida sem pele': ['carne'], 'Patinho grelhado': ['carne'],
+    'Alcatra grelhada': ['carne'], 'Carne moída refogada': ['carne'], 'Presunto fatiado': ['carne', 'sodio'],
+    'Bacon frito': ['carne', 'sodio'],
+    'Ovo cozido': ['ovo'], 'Ovo frito': ['ovo'], 'Ovo cru (inteiro)': ['ovo'], 'Clara de ovo cozida': ['ovo'],
+    'Gema de ovo cozida': ['ovo'], 'Ovo de codorna cozido': ['ovo'],
+    'Tilápia grelhada': ['peixe'], 'Salmão grelhado': ['peixe'], 'Atum em lata (natural)': ['peixe'],
+    'Sardinha em lata': ['peixe'], 'Camarão cozido': ['crustaceo'],
+    'Leite integral': ['leite'], 'Leite desnatado': ['leite'], 'Iogurte natural integral': ['leite'],
+    'Iogurte grego natural': ['leite'], 'Queijo mussarela': ['leite'], 'Queijo minas frescal': ['leite'],
+    'Requeijão cremoso': ['leite'], 'Queijo parmesão ralado': ['leite', 'sodio'], 'Ricota': ['leite'],
+    'Cream cheese': ['leite'], 'Manteiga': ['leite'], 'Pão de queijo': ['leite', 'ovo'],
+    'Chocolate ao leite': ['leite', 'acucar'],
+    'Pasta de amendoim': ['amendoim'], 'Amendoim torrado': ['amendoim'],
+    'Castanha-do-pará': ['castanhas'], 'Amêndoa': ['castanhas'], 'Noz': ['castanhas'], 'Castanha de caju': ['castanhas'],
+    'Tofu': ['soja'], 'Mel': ['animal', 'acucar'], 'Açúcar refinado': ['acucar'],
+    'Uva-passa': ['acucar'], 'Tâmara': ['acucar'], 'Refrigerante de cola': ['acucar'], 'Cerveja': ['alcool'],
+    /* redes: receitas padrão (pão de trigo, queijo, carne, maionese com ovo) */
+    'Big Mac': ['gluten', 'leite', 'carne', 'ovo'], 'Cheeseburger': ['gluten', 'leite', 'carne'],
+    'McNuggets (10 unidades)': ['gluten', 'carne'], 'Whopper': ['gluten', 'carne', 'ovo'],
+    'Pizza de brigadeiro (1 fatia)': ['gluten', 'leite', 'acucar'], 'Sanduíche de peru 15 cm': ['gluten', 'carne']
+  };
+  LISTA.forEach(function (a) { a.marcas = MARCAS[a.nome] || []; });
+
   /* tira acento e caixa: "Pão" casa com "pao" */
   function norm(s) {
     return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
