@@ -1,21 +1,33 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Consultório — Gestão Clínica para Psicólogos (Demo)</title>
-    <meta name="description" content="Demo de sistema de gestão clínica para psicólogos: pacientes, sessões, pagamentos e relatórios. Dados fictícios." />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%237d9b76'/%3E%3Cpath d='M50 20 C30 30 25 55 40 75 C48 82 58 78 65 65 C78 45 70 25 50 20 Z' fill='%23fff'/%3E%3C/svg%3E">
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
-    />
-    <script type="module" crossorigin src="./assets/index-Ch3KHnvj.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-D4JlS9Z3.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Consultório | Agenda e prontuário (demo)</title>
+  <meta name="description" content="Agenda semanal, prontuário e conta corrente por paciente para psicólogos, com modo discreto. Demonstração com dados fictícios.">
+  <meta name="theme-color" content="#a8492a">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23a8492a'/%3E%3Cpath d='M9 22V10h14v12M9 15h14M14 10v12' stroke='%23fff' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/consultorio.css">
+  <script>
+    try {
+      var t = localStorage.getItem('consultorio:tema');
+      if (t === 'escuro' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.dataset.tema = 'escuro';
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <div class="app">
+    <nav class="trilho" id="trilho" aria-label="Seções"></nav>
+    <main id="conteudo" tabindex="-1"></main>
+  </div>
+  <div class="veu" id="veu"></div>
+  <aside class="gaveta" id="gaveta" aria-hidden="true"></aside>
+  <dialog id="dlg"></dialog>
+  <div class="recado" id="recado" role="status" aria-live="polite"></div>
+  <div id="recibo" aria-hidden="true"></div>
+  <script type="module" src="js/app.js"></script>
+</body>
 </html>

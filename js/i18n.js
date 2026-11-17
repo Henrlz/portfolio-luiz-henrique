@@ -93,7 +93,7 @@
       'projects.receivables.short': 'Monta o borderô de títulos a receber: importa a planilha de receita, casa cada cliente com o cadastro, confere CNPJ e conta contábil e gera o arquivo do ERP.',
       'projects.fiscal.short': 'Apuração de vendas por canal que nasceu em VBA: demonstrativo com trocas, descontos e tributos, e uma conferência que aponta o que olhar antes de fechar o mês.',
       'projects.cedro.short': 'Loja de móveis navegada pela planta do showroom, com peças desenhadas em escala e uma calculadora que diz se o móvel cabe no seu cômodo. <em>(admin: <code>admin</code> / <code>cedrodecor2026</code>)</em>',
-      'projects.clinic.short': 'Gestão para psicólogos: pacientes, agenda de sessões, pagamentos e relatórios financeiros com gráficos. <em>(para entrar, crie uma conta com qualquer e-mail)</em>',
+      'projects.clinic.short': 'Agenda de psicóloga na hora clínica de 50 minutos: fecha a sessão com presença, falta cobrada ou abonada, nota privada e pagamento, e tem modo discreto para quando alguém olha a tela.',
       'projects.wedding.short': 'Um caderno para planejar um casamento a dois: convidados, orçamento, fornecedores, checklist e contagem regressiva. <em>(código de acesso: 0809)</em>',
       'projects.tattoo.short': 'Site editorial e monocromático para um estúdio de tatuagem, com galeria filtrável, lightbox e agendamento pelo WhatsApp.',
       'projects.fuel.short': 'Etanol ou gasolina, montado como um pátio de posto: calcula o limite certo para o consumo do seu carro e simula o abastecimento.',
@@ -116,7 +116,7 @@
 
       'projects.clinic.icon': 'Gestão clínica',
       'projects.clinic.title': 'Consultório',
-      'projects.clinic.desc': 'Sistema de gestão clínica para psicólogos: cadastro de pacientes com nível de complexidade, agenda de sessões, controle de pagamentos e relatórios financeiros com gráficos. <em>(demo com dados fictícios: crie uma conta com qualquer e-mail/senha para entrar)</em>',
+      'projects.clinic.desc': 'Feito a partir da rotina de uma psicóloga, sem tela de login nem cadastro: abre direto na semana. Cada paciente tem cor e horário fixo (semanal ou quinzenal) e a agenda marca encaixes, faltas e desmarcações. Ao clicar numa sessão, um painel fecha o atendimento: realizada, falta cobrada pela política de 24 horas ou abonada, nota privada e pagamento na hora. A ficha do paciente junta o prontuário em linha do tempo e a conta corrente com saldo; o financeiro do mês separa o que é do mês do que está atrasado e imprime recibo com valor por extenso. O modo discreto troca nomes por iniciais e borra as notas. Reescrito do zero para o portfólio. <em>(demo com pacientes e notas fictícios)</em>',
 
       'projects.wedding.icon': 'Planner de casamento',
       'projects.wedding.desc': 'App romântico para planejar um casamento a dois: convidados, orçamento, fornecedores, checklist e contagem regressiva, com uma tela de entrada protegida por senha e animações autorais. <em>(demo pessoal, código de acesso: 0809)</em>',
@@ -227,7 +227,7 @@
       'projects.receivables.short': 'Builds the receivables batch: imports the revenue sheet, matches each client to the registry, checks tax ID and ledger account and generates the ERP import file.',
       'projects.fiscal.short': 'Sales-by-channel tax statement that started in VBA: returns, discounts and taxes laid out like a ledger, plus checks that flag what to review before closing the month.',
       'projects.cedro.short': 'Furniture store browsed through the showroom floor plan, with pieces drawn to scale and a calculator that tells whether it fits your room. <em>(admin: <code>admin</code> / <code>cedrodecor2026</code>)</em>',
-      'projects.clinic.short': 'Practice management for psychologists: patients, session schedule, payments and financial reports with charts. <em>(to get in, create an account with any email)</em>',
+      'projects.clinic.short': 'Psychologist scheduling built on the 50-minute clinical hour: close each session with attendance, charged or waived no-show, private note and payment, plus a discreet mode for when someone can see the screen.',
       'projects.wedding.short': 'A notebook for a couple to plan their wedding: guests, budget, vendors, checklist and countdown. <em>(access code: 0809)</em>',
       'projects.tattoo.short': 'Editorial, monochrome site for a tattoo studio, with a filterable gallery, lightbox and WhatsApp booking.',
       'projects.fuel.short': 'Ethanol or petrol, built like a gas station forecourt: works out the right threshold for your car’s mileage and simulates filling up.',
@@ -250,7 +250,7 @@
 
       'projects.clinic.icon': 'Clinic management',
       'projects.clinic.title': 'Clinic Manager',
-      'projects.clinic.desc': 'Clinic management system for psychologists: patient records with complexity level, session scheduling, payment control and financial reports with charts. <em>(demo with fictitious data: create an account with any e-mail/password to get in)</em>',
+      'projects.clinic.desc': 'Built around a psychologist\'s routine, with no sign-up screen: it opens straight on the week. Each patient has a color and a fixed slot (weekly or every two weeks), and the schedule shows extra sessions, no-shows and cancellations. Clicking a session opens a panel to close it: done, no-show charged under the 24-hour policy or waived, a private note and payment on the spot. The patient record combines a timeline of session notes with a running account balance; the monthly finance view separates what belongs to the month from what is overdue and prints receipts with the amount in words. Discreet mode swaps names for initials and blurs the notes. Rewritten from scratch for the portfolio. <em>(demo with fictitious patients and notes)</em>',
 
       'projects.wedding.icon': 'Wedding planner',
       'projects.wedding.desc': 'A romantic app for planning a wedding together: guests, budget, vendors, checklist and countdown, with a password-protected entry screen and original animations. <em>(personal demo, access code: 0809)</em>',
@@ -366,7 +366,7 @@
       'projects.receivables.short': 'Arma la remesa de títulos por cobrar: importa la planilla de ingresos, vincula cada cliente con el registro, verifica CNPJ y cuenta contable y genera el archivo del ERP.',
       'projects.fiscal.short': 'Liquidación de ventas por canal que nació en VBA: devoluciones, descuentos e impuestos en formato de estado contable, con verificaciones de lo que hay que revisar antes del cierre.',
       'projects.cedro.short': 'Tienda de muebles que se recorre por el plano del showroom, con piezas dibujadas a escala y una calculadora que dice si el mueble cabe en tu cuarto. <em>(admin: <code>admin</code> / <code>cedrodecor2026</code>)</em>',
-      'projects.clinic.short': 'Gestión para psicólogos: pacientes, agenda de sesiones, pagos e informes financieros con gráficos. <em>(para entrar, crea una cuenta con cualquier correo)</em>',
+      'projects.clinic.short': 'Agenda de psicóloga en la hora clínica de 50 minutos: cierra la sesión con asistencia, falta cobrada o perdonada, nota privada y pago, y tiene modo discreto para cuando alguien mira la pantalla.',
       'projects.wedding.short': 'Un cuaderno para planear una boda en pareja: invitados, presupuesto, proveedores, checklist y cuenta regresiva. <em>(código de acceso: 0809)</em>',
       'projects.tattoo.short': 'Sitio editorial y monocromático para un estudio de tatuajes, con galería filtrable, lightbox y reservas por WhatsApp.',
       'projects.fuel.short': 'Etanol o gasolina, armado como una estación de servicio: calcula el límite justo para el consumo de tu auto y simula la carga.',
@@ -389,7 +389,7 @@
 
       'projects.clinic.icon': 'Gestión clínica',
       'projects.clinic.title': 'Consultorio',
-      'projects.clinic.desc': 'Sistema de gestión clínica para psicólogos: registro de pacientes con nivel de complejidad, agenda de sesiones, control de pagos e informes financieros con gráficos. <em>(demo con datos ficticios: crea una cuenta con cualquier correo/contraseña para entrar)</em>',
+      'projects.clinic.desc': 'Hecho a partir de la rutina de una psicóloga, sin pantalla de registro: abre directo en la semana. Cada paciente tiene color y horario fijo (semanal o quincenal) y la agenda marca sesiones extra, faltas y cancelaciones. Al hacer clic en una sesión, un panel la cierra: realizada, falta cobrada según la política de 24 horas o perdonada, nota privada y pago en el momento. La ficha del paciente reúne la historia clínica en línea de tiempo y la cuenta corriente con saldo; el financiero del mes separa lo del mes de lo atrasado e imprime recibos con el valor en letras. El modo discreto cambia nombres por iniciales y difumina las notas. Reescrito desde cero para el portafolio. <em>(demo con pacientes y notas ficticios)</em>',
 
       'projects.wedding.icon': 'Organizador de boda',
       'projects.wedding.desc': 'App romántica para planificar una boda en pareja: invitados, presupuesto, proveedores, checklist y cuenta regresiva, con una pantalla de entrada protegida por contraseña y animaciones propias. <em>(demo personal, código de acceso: 0809)</em>',
