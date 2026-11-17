@@ -77,7 +77,10 @@
       <div class="hero-actions">
         <a href="#contato" class="btn btn-primary" data-i18n="hero.cta_contact">Entrar em contato</a>
         <a href="#projetos" class="btn btn-ghost" data-i18n="hero.cta_projects">Ver projetos</a>
-        <a href="assets/curriculo/Luiz-Henrique-Pereira-Curriculo-PT.pdf" class="btn btn-ghost" target="_blank" rel="noopener" data-i18n="hero.cta_cv" data-i18n-href="cv.file">Baixar currículo</a>
+        <span class="cv-par">
+          <a href="assets/curriculo/Luiz-Henrique-Pereira-Curriculo-PT.pdf" class="btn btn-ghost" target="_blank" rel="noopener" data-i18n="hero.cta_cv" data-i18n-href="cv.file">Ver currículo</a>
+          <a href="assets/curriculo/Luiz-Henrique-Pereira-Curriculo-PT.pdf" class="btn btn-ghost btn-icon" download data-i18n-href="cv.file" title="Baixar currículo (PDF)" aria-label="Baixar currículo (PDF)" data-i18n-title="cv.download" data-i18n-aria="cv.download"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></a>
+        </span>
       </div>
     </div>
     <a href="#sobre" class="scroll-hint" aria-label="Rolar para a seção Sobre" data-i18n-aria="a11y.scroll">
@@ -559,10 +562,13 @@
 
       <!-- Currículo em PDF: o idioma do arquivo acompanha o idioma do site (js/i18n.js) -->
       <div class="contact-cv">
-        <a href="assets/curriculo/Luiz-Henrique-Pereira-Curriculo-PT.pdf" class="btn btn-primary" target="_blank" rel="noopener" data-i18n-href="cv.file">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
-          <span data-i18n="contact.cv">Baixar currículo (PDF)</span>
-        </a>
+        <span class="cv-par">
+          <a href="assets/curriculo/Luiz-Henrique-Pereira-Curriculo-PT.pdf" class="btn btn-primary" target="_blank" rel="noopener" data-i18n-href="cv.file">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span data-i18n="contact.cv">Ver currículo</span>
+          </a>
+          <a href="assets/curriculo/Luiz-Henrique-Pereira-Curriculo-PT.pdf" class="btn btn-primary btn-icon" download data-i18n-href="cv.file" title="Baixar currículo (PDF)" aria-label="Baixar currículo (PDF)" data-i18n-title="cv.download" data-i18n-aria="cv.download"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></a>
+        </span>
         <a href="assets/curriculo/Luiz-Henrique-Pereira-Resume-EN.pdf" class="contact-cv-alt" target="_blank" rel="noopener" data-i18n="contact.cv_alt" data-i18n-href="cv.file_alt">Resume in English</a>
       </div>
     </div>

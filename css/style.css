@@ -1042,3 +1042,13 @@ section {
   transition: color 0.2s ease;
 }
 .contact-cv-alt:hover { color: var(--accent); }
+
+/* par "Ver currículo" + botão só com o ícone de baixar */
+.cv-par { display: inline-flex; gap: 8px; }
+.btn-icon { padding: 13px 15px; }
+.btn-icon svg { display: block; }
+@media (max-width: 600px) {
+  .hero-actions .cv-par { width: 100%; }
+  .hero-actions .cv-par .btn:first-child { flex: 1 1 auto; width: auto; }
+  .cv-par .btn-icon { width: auto; flex: 0 0 auto; }
+}

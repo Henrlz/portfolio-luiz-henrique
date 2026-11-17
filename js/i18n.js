@@ -41,7 +41,8 @@
       'hero.desc': 'Trabalho com desenvolvimento back-end, front-end, automações e banco de dados, criando soluções práticas para o dia a dia, de sites a sistemas internos.',
       'hero.cta_contact': 'Entrar em contato',
       'hero.cta_projects': 'Ver projetos',
-      'hero.cta_cv': 'Baixar currículo',
+      'hero.cta_cv': 'Ver currículo',
+      'cv.download': 'Baixar currículo (PDF)',
       'cv.file': 'assets/curriculo/Luiz-Henrique-Pereira-Curriculo-PT.pdf',
       'cv.file_alt': 'assets/curriculo/Luiz-Henrique-Pereira-Resume-EN.pdf',
 
@@ -141,7 +142,7 @@
       'contact.intro': 'Vamos conversar sobre um projeto, uma vaga ou uma ideia.',
       'contact.email': 'Email',
       'contact.phone': 'Telefone',
-      'contact.cv': 'Baixar currículo (PDF)',
+      'contact.cv': 'Ver currículo',
       'contact.cv_alt': 'Resume in English',
 
       'footer.rights': 'Todos os direitos reservados.',
@@ -174,7 +175,8 @@
       'hero.desc': 'I work with back-end and front-end development, automation and databases, building practical everyday solutions — from websites to internal systems.',
       'hero.cta_contact': 'Get in touch',
       'hero.cta_projects': 'View projects',
-      'hero.cta_cv': 'Download resume',
+      'hero.cta_cv': 'View resume',
+      'cv.download': 'Download resume (PDF)',
       'cv.file': 'assets/curriculo/Luiz-Henrique-Pereira-Resume-EN.pdf',
       'cv.file_alt': 'assets/curriculo/Luiz-Henrique-Pereira-Curriculo-PT.pdf',
 
@@ -279,7 +281,7 @@
       'contact.intro': 'Let’s talk about a project, a job or an idea.',
       'contact.email': 'Email',
       'contact.phone': 'Phone',
-      'contact.cv': 'Download resume (PDF)',
+      'contact.cv': 'View resume',
       'contact.cv_alt': 'Currículo em português',
 
       'footer.rights': 'All rights reserved.',
@@ -312,7 +314,8 @@
       'hero.desc': 'Trabajo con desarrollo back-end, front-end, automatizaciones y bases de datos, creando soluciones prácticas para el día a día, desde sitios web hasta sistemas internos.',
       'hero.cta_contact': 'Ponerse en contacto',
       'hero.cta_projects': 'Ver proyectos',
-      'hero.cta_cv': 'Descargar currículum',
+      'hero.cta_cv': 'Ver currículum',
+      'cv.download': 'Descargar currículum (PDF, en inglés)',
       'cv.file': 'assets/curriculo/Luiz-Henrique-Pereira-Resume-EN.pdf',
       'cv.file_alt': 'assets/curriculo/Luiz-Henrique-Pereira-Curriculo-PT.pdf',
 
@@ -417,7 +420,7 @@
       'contact.intro': 'Hablemos de un proyecto, una vacante o una idea.',
       'contact.email': 'Correo',
       'contact.phone': 'Teléfono',
-      'contact.cv': 'Descargar currículum (PDF, en inglés)',
+      'contact.cv': 'Ver currículum (en inglés)',
       'contact.cv_alt': 'Versión en portugués',
 
       'footer.rights': 'Todos los derechos reservados.',
