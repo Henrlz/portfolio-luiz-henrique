@@ -1024,3 +1024,21 @@ section {
   border-color: var(--accent);
   color: var(--accent);
 }
+
+/* Currículo em PDF (seção de contato) */
+.contact-cv {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+  margin-top: 32px;
+}
+.contact-cv .btn { gap: 9px; }
+.contact-cv-alt {
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+.contact-cv-alt:hover { color: var(--accent); }

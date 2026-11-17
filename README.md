@@ -12,6 +12,7 @@ Site estático (HTML, CSS e JavaScript puro), sem build, publicado no GitHub Pag
 - Três idiomas, com troca em tempo real (`js/i18n.js`).
 - Prévia interativa de cada projeto (`js/previa.js`, `css/palco.css`).
 - Navegação acessível (`aria-label`, foco, `prefers-reduced-motion`).
+- Currículo em PDF em português e em inglês (`assets/curriculo/`): o botão do topo e o da seção de contato baixam a versão no idioma escolhido no site.
 
 ## Projetos
 

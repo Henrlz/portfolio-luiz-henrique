@@ -41,6 +41,9 @@
       'hero.desc': 'Trabalho com desenvolvimento back-end, front-end, automações e banco de dados, criando soluções práticas para o dia a dia, de sites a sistemas internos.',
       'hero.cta_contact': 'Entrar em contato',
       'hero.cta_projects': 'Ver projetos',
+      'hero.cta_cv': 'Baixar currículo',
+      'cv.file': 'assets/curriculo/Luiz-Henrique-Pereira-Curriculo-PT.pdf',
+      'cv.file_alt': 'assets/curriculo/Luiz-Henrique-Pereira-Resume-EN.pdf',
 
       'about.title': 'Sobre',
       'about.p1': 'Sou técnico em informática, formado com forte atuação prática em banco de dados, e hoje curso Bacharelado em Ciência da Computação pela Uninter, com foco em desenvolvimento.',
@@ -138,6 +141,8 @@
       'contact.intro': 'Vamos conversar sobre um projeto, uma vaga ou uma ideia.',
       'contact.email': 'Email',
       'contact.phone': 'Telefone',
+      'contact.cv': 'Baixar currículo (PDF)',
+      'contact.cv_alt': 'Resume in English',
 
       'footer.rights': 'Todos os direitos reservados.',
 
@@ -169,6 +174,9 @@
       'hero.desc': 'I work with back-end and front-end development, automation and databases, building practical everyday solutions — from websites to internal systems.',
       'hero.cta_contact': 'Get in touch',
       'hero.cta_projects': 'View projects',
+      'hero.cta_cv': 'Download resume',
+      'cv.file': 'assets/curriculo/Luiz-Henrique-Pereira-Resume-EN.pdf',
+      'cv.file_alt': 'assets/curriculo/Luiz-Henrique-Pereira-Curriculo-PT.pdf',
 
       'about.title': 'About',
       'about.p1': 'I’m a qualified IT technician with strong hands-on experience in databases, and I’m currently studying for a Bachelor’s degree in Computer Science at Uninter, focused on development.',
@@ -271,6 +279,8 @@
       'contact.intro': 'Let’s talk about a project, a job or an idea.',
       'contact.email': 'Email',
       'contact.phone': 'Phone',
+      'contact.cv': 'Download resume (PDF)',
+      'contact.cv_alt': 'Currículo em português',
 
       'footer.rights': 'All rights reserved.',
 
@@ -302,6 +312,9 @@
       'hero.desc': 'Trabajo con desarrollo back-end, front-end, automatizaciones y bases de datos, creando soluciones prácticas para el día a día, desde sitios web hasta sistemas internos.',
       'hero.cta_contact': 'Ponerse en contacto',
       'hero.cta_projects': 'Ver proyectos',
+      'hero.cta_cv': 'Descargar currículum',
+      'cv.file': 'assets/curriculo/Luiz-Henrique-Pereira-Resume-EN.pdf',
+      'cv.file_alt': 'assets/curriculo/Luiz-Henrique-Pereira-Curriculo-PT.pdf',
 
       'about.title': 'Sobre mí',
       'about.p1': 'Soy técnico en informática, titulado y con fuerte experiencia práctica en bases de datos, y actualmente curso la Licenciatura en Ciencia de la Computación en Uninter, con enfoque en desarrollo.',
@@ -404,6 +417,8 @@
       'contact.intro': 'Hablemos de un proyecto, una vacante o una idea.',
       'contact.email': 'Correo',
       'contact.phone': 'Teléfono',
+      'contact.cv': 'Descargar currículum (PDF, en inglés)',
+      'contact.cv_alt': 'Versión en portugués',
 
       'footer.rights': 'Todos los derechos reservados.',
 
@@ -464,6 +479,7 @@
     });
     setAttrFromData('data-i18n-title', 'title');
     setAttrFromData('data-i18n-aria', 'aria-label');
+    setAttrFromData('data-i18n-href', 'href'); // currículo no idioma do site
 
     if (d['meta.title']) document.title = d['meta.title'];
     var desc = document.querySelector('meta[name="description"]');
