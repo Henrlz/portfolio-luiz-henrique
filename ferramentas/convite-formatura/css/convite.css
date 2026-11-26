@@ -272,7 +272,9 @@ button { font: inherit; cursor: pointer; }
   .botao-confirmar, .botao-fugir { min-width: 124px; padding: 16px 28px; font-size: 22px; }
   .recadinho { font-size: 22px; }
   .cena-agora { gap: 14px; padding: 16px 0; }
-  .agora-tem { width: 112vw; max-height: none; }
+  /* Mais larga que a tela e centralizada à mão: a grade alinharia pela esquerda. */
+  .agora-tem { width: 112vw; max-height: none; justify-self: start; margin-left: -6vw; }
+  .selos .selo { --rot: 0deg; }
   .agora-depois { font-size: 28px; }
 }
 @media (max-width: 560px) {
