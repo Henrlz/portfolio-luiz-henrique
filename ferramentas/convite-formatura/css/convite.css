@@ -42,21 +42,24 @@ button { font: inherit; cursor: pointer; }
 .pergunta .letra { display: inline-block; opacity: 0; transform: translateY(18px) rotate(-8deg) scale(0.7); animation: escrever 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) forwards; animation-delay: calc(var(--n) * 55ms + 300ms); }
 .pergunta .espaco { display: inline-block; width: 0.32em; }
 @keyframes escrever { to { opacity: 1; transform: none; } }
-/* Figurinhas (capelo, Ψ e diploma) abaixo da pergunta e do "Agora tem!". */
+/* Figurinhas (capelo, Ψ e diploma) como barra de carregamento: aparecem
+   apagadas, acendem uma por uma e, quando a última acende, a tela troca.
+   Quem marca o tempo é o JavaScript (classes .visivel e .cheio). */
 .selos { display: flex; justify-content: center; align-items: center; gap: clamp(16px, 3vw, 30px); margin-top: clamp(22px, 4.5vh, 42px); }
-.selo { width: clamp(58px, 5.6vw, 76px); height: auto; overflow: visible; filter: drop-shadow(0 6px 8px rgba(60, 5, 25, 0.35)); opacity: 0; }
-.selo:nth-child(1) { --k: 0; --rot: -8deg; }
-.selo:nth-child(2) { --k: 1; --rot: 5deg; }
-.selo:nth-child(3) { --k: 2; --rot: -5deg; }
-.cena-pergunta .selo { animation: selo-entrar 0.55s cubic-bezier(0.2, 1.6, 0.4, 1) forwards, balancar 3.2s ease-in-out infinite; animation-delay: calc(var(--k) * 0.16s + 1.9s), calc(var(--k) * 0.4s + 2.6s); }
 .cena-agora .selos-agora { margin-top: 4px; }
-.cena-agora.ativa .selo { animation: selo-entrar 0.55s cubic-bezier(0.2, 1.6, 0.4, 1) forwards, balancar 3.2s ease-in-out infinite; animation-delay: calc(var(--k) * 0.16s + 1s), calc(var(--k) * 0.4s + 1.8s); }
-@keyframes selo-entrar {
-  from { opacity: 0; transform: translateY(18px) scale(0.3) rotate(-25deg); }
-  to { opacity: 1; transform: rotate(var(--rot)); }
+.selo { width: clamp(58px, 5.6vw, 76px); height: auto; overflow: visible; opacity: 0; transform: scale(0.82) rotate(var(--rot)); transition: opacity 0.35s ease; }
+.selo:nth-child(1) { --rot: -8deg; }
+.selo:nth-child(2) { --rot: 5deg; }
+.selo:nth-child(3) { --rot: -5deg; }
+.selos.visivel .selo { opacity: 0.42; filter: grayscale(1) brightness(2.4) contrast(0.5); }
+.selos.visivel .selo.cheio { animation: acender 0.6s cubic-bezier(0.2, 1.6, 0.4, 1) forwards, balancar 3.2s ease-in-out infinite 0.7s; }
+@keyframes acender {
+  0% { opacity: 0.42; transform: scale(0.82) rotate(var(--rot)); filter: grayscale(1) brightness(2.4) contrast(0.5); }
+  55% { opacity: 1; transform: scale(1.28) rotate(calc(var(--rot) * -1.5)); filter: drop-shadow(0 6px 8px rgba(60, 5, 25, 0.35)); }
+  100% { opacity: 1; transform: scale(1) rotate(var(--rot)); filter: drop-shadow(0 6px 8px rgba(60, 5, 25, 0.35)); }
 }
 @keyframes balancar { 0%, 100% { translate: 0 0; } 50% { translate: 0 -6px; } }
-.cena-pergunta .selo.voando { animation: voar 0.8s cubic-bezier(0.2, 0.7, 0.3, 1) forwards; animation-delay: 0s; }
+.cena-pergunta .selos.visivel .selo.voando { animation: voar 0.8s cubic-bezier(0.2, 0.7, 0.3, 1) forwards; }
 
 /* Antes de explodir: a pergunta treme e incha um pouco. */
 .pergunta.tremendo { animation: tremer 0.42s linear; }
@@ -124,13 +127,7 @@ button { font: inherit; cursor: pointer; }
   20% { opacity: 1; }
   100% { opacity: 0.95; transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(1); }
 }
-.seguir { position: relative; overflow: hidden; border: 0; border-radius: 999px; padding: 15px 34px; background: var(--creme); color: var(--magenta-escuro); font: 800 19px var(--ui); box-shadow: 0 6px 0 #5e0a28; opacity: 0; }
-.cena-agora.ativa .seguir { animation: surgir 0.5s ease forwards 1.3s; }
-.seguir .carga { position: absolute; inset: 0; background: rgba(169, 2, 64, 0.16); transform-origin: left; transform: scaleX(0); }
-.cena-agora.ativa .seguir .carga { animation: carregar 4.2s linear forwards 1.3s; }
 @keyframes carregar { to { transform: scaleX(1); } }
-.seguir .rotulo { position: relative; }
-.seguir .rotulo::after { content: ' \2193'; }
 
 /* ---------------- Cena 3: convite ---------------- */
 .cena-convite { position: relative; inset: auto; min-height: 100vh; display: none; }

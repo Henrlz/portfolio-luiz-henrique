@@ -95,12 +95,38 @@
   var modelo = $('tpl-selos');
   document.querySelectorAll('[data-selos]').forEach(function (caixa) { caixa.appendChild(modelo.content.cloneNode(true)); });
   var selosPergunta = document.querySelectorAll('#cena-pergunta .selo');
-  var TEMPO_PERGUNTA = 4000;
-  var explosao = null;
+  var caixaPergunta = document.querySelector('#cena-pergunta [data-selos]');
+  var caixaAgora = document.querySelector('#cena-agora [data-selos]');
+
+  // Carregamento: as figurinhas aparecem apagadas e acendem uma por uma;
+  // quando a última acende, a tela troca. Tempos em ms desde o início da tela.
+  var CARGA_PERGUNTA = { aparecer: 900, acender: [1700, 2550, 3400], fim: 4000 };
+  var CARGA_AGORA = { aparecer: 450, acender: [1400, 2700, 4000], fim: 5100 };
+  var cargas = [];
+
+  function limparCarga() {
+    cargas.forEach(clearTimeout);
+    cargas = [];
+  }
+
+  function carregarSelos(caixa, tempos, aoTerminar) {
+    limparCarga();
+    var selos = caixa.querySelectorAll('.selo');
+    caixa.classList.remove('visivel');
+    selos.forEach(function (s) { s.classList.remove('cheio', 'voando'); });
+    cargas.push(setTimeout(function () { caixa.classList.add('visivel'); }, tempos.aparecer));
+    tempos.acender.forEach(function (t, i) {
+      cargas.push(setTimeout(function () {
+        selos[i].classList.add('cheio');
+        var r = selos[i].getBoundingClientRect();
+        estourar(r.left + r.width / 2, r.top + r.height / 2, 16, 4);
+      }, t));
+    });
+    cargas.push(setTimeout(aoTerminar, tempos.fim));
+  }
 
   function agendarExplosao() {
-    clearTimeout(explosao);
-    explosao = setTimeout(explodirPergunta, TEMPO_PERGUNTA);
+    carregarSelos(caixaPergunta, CARGA_PERGUNTA, explodirPergunta);
   }
 
   /** Tremida rápida e as letras voam para todos os lados. */
@@ -194,7 +220,6 @@
   var cenaPergunta = $('cena-pergunta');
   var cenaAgora = $('cena-agora');
   var cenaConvite = $('cena-convite');
-  var avancoAutomatico = null;
 
   function mostrar(cena) {
     [cenaPergunta, cenaAgora, cenaConvite].forEach(function (c) {
@@ -221,7 +246,7 @@
   }
 
   function irParaAgora() {
-    clearTimeout(explosao);
+    limparCarga();
     var r = pergunta.getBoundingClientRect();
     var x = r.left + r.width / 2, y = r.top + r.height / 2;
     estourar(x, y, 160, 11);
@@ -237,14 +262,12 @@
       mostrar(cenaAgora);
       cortina.remove();
       setTimeout(function () { estourar(innerWidth / 2, innerHeight * 0.42, 140, 11); chuva(3.2); }, 450);
-      avancoAutomatico = setTimeout(irParaConvite, 5600);
-      $('seguir').focus({ preventScroll: true });
+      carregarSelos(caixaAgora, CARGA_AGORA, irParaConvite);
     }, 760);
   }
 
   function irParaConvite() {
-    clearTimeout(avancoAutomatico);
-    clearTimeout(explosao);
+    limparCarga();
     guardar('convite:visto', '1');
     mostrar(cenaConvite);
     document.body.classList.add('no-convite');
@@ -253,7 +276,6 @@
     setTimeout(function () { chuva(1.6); }, 900);
   }
 
-  $('seguir').addEventListener('click', irParaConvite);
   $('pular').addEventListener('click', irParaConvite);
   if (ler('convite:visto')) $('pular').hidden = false;
   agendarExplosao();
