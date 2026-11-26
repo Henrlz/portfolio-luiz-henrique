@@ -86,69 +86,35 @@
   desenharGranulado();
 
   // ------------------------------------------------------------------
-  // Botão "Não" que foge
+  // Sem botões: a pergunta fica no ar uns 4 segundos, as letras tremem e
+  // explodem em confete, e entra o "Agora tem!".
   // ------------------------------------------------------------------
-  var nao = $('botao-nao');
-  var sim = $('botao-sim');
-  var recado = $('recadinho');
-  var fugas = 0;
-  var FRASES = [
-    ['Tem certeza?', 'opa, acho que você errou o botão'],
-    ['Pensa bem…', 'o botão de não está meio tímido hoje'],
-    ['Nem vem!', 'ele não quer ser apertado'],
-    ['Errou!', 'quase… mas não'],
-    ['Não vale', 'a resposta certa está brilhando ali do lado'],
-    ['Desiste', 'é dia 20, à noite, prometo que vale a pena'],
-    ['Sério?', 'esse botão foi programado pra fugir mesmo'],
-    ['Tá bom…', 'só sobrou um botão, né'],
-  ];
+  var pergunta = $('pergunta');
+  var TEMPO_PERGUNTA = 4000;
+  var explosao = null;
 
-  function fugir(e) {
-    if (e) { e.preventDefault(); e.stopPropagation(); }
-    var r = nao.getBoundingClientRect();
-    if (!nao.classList.contains('fugindo')) {
-      nao.style.left = r.left + 'px';
-      nao.style.top = r.top + 'px';
-      nao.style.width = r.width + 'px';
-      // Sai de dentro da área animada: ancestral com animação de transform
-      // vira referência do position: fixed e o botão some da tela.
-      document.body.appendChild(nao);
-      nao.classList.add('fugindo');
-      void nao.offsetWidth;
-    }
-    var w = r.width, h = r.height;
-    var margem = 16;
-    var s = sim.getBoundingClientRect();
-    var alvo, tentativas = 0;
-    do {
-      alvo = {
-        x: margem + Math.random() * (innerWidth - w - margem * 2),
-        y: margem + Math.random() * (innerHeight - h - margem * 2),
-      };
-      tentativas++;
-    } while (tentativas < 40 && (
-      Math.hypot(alvo.x - r.left, alvo.y - r.top) < Math.min(innerWidth, innerHeight) * 0.28 ||
-      (alvo.x < s.right + 20 && alvo.x + w > s.left - 20 && alvo.y < s.bottom + 20 && alvo.y + h > s.top - 20)
-    ));
-    nao.style.left = alvo.x + 'px';
-    nao.style.top = alvo.y + 'px';
-    fugas++;
-    var frase = FRASES[Math.min(fugas - 1, FRASES.length - 1)];
-    nao.textContent = frase[0];
-    nao.style.setProperty('--encolher', Math.max(0.55, 1 - fugas * 0.06));
-    nao.style.setProperty('--giro', ((Math.random() - 0.5) * 24).toFixed(1) + 'deg');
-    sim.style.setProperty('--crescer', Math.min(1.45, 1 + fugas * 0.06));
-    recado.textContent = frase[1];
-    recado.classList.remove('pulo');
-    void recado.offsetWidth;
-    recado.classList.add('pulo');
-    if (fugas >= FRASES.length + 2) { nao.style.opacity = '0'; nao.disabled = true; recado.textContent = 'o não desistiu. só sobrou o sim!'; }
+  function agendarExplosao() {
+    clearTimeout(explosao);
+    explosao = setTimeout(explodirPergunta, TEMPO_PERGUNTA);
   }
-  var ponteiroFino = window.matchMedia('(pointer: fine)').matches;
-  if (ponteiroFino) nao.addEventListener('pointerenter', fugir);
-  nao.addEventListener('pointerdown', fugir);
-  nao.addEventListener('click', fugir);
-  nao.addEventListener('focus', function () { if (fugas > 0 || !ponteiroFino) fugir(); });
+
+  /** Tremida rápida e as letras voam para todos os lados. */
+  function explodirPergunta() {
+    if (calmo) { irParaAgora(); return; }
+    pergunta.classList.add('tremendo');
+    setTimeout(function () {
+      pergunta.classList.remove('tremendo');
+      pergunta.querySelectorAll('.letra').forEach(function (l) {
+        var ang = Math.random() * Math.PI * 2;
+        var dist = 40 + Math.random() * 60;
+        l.style.setProperty('--fx', (Math.cos(ang) * dist).toFixed(1) + 'vw');
+        l.style.setProperty('--fy', (Math.sin(ang) * dist).toFixed(1) + 'vh');
+        l.style.setProperty('--fr', ((Math.random() - 0.5) * 720).toFixed(0) + 'deg');
+        l.classList.add('voando');
+      });
+      irParaAgora();
+    }, 420);
+  }
 
   // ------------------------------------------------------------------
   // Confete
@@ -250,11 +216,10 @@
   }
 
   function irParaAgora() {
-    var r = sim.getBoundingClientRect();
+    clearTimeout(explosao);
+    var r = pergunta.getBoundingClientRect();
     var x = r.left + r.width / 2, y = r.top + r.height / 2;
-    estourar(x, y, 110, 9);
-    if (nao.classList.contains('fugindo')) nao.style.opacity = '0';
-    recado.textContent = 'ebaaa!';
+    estourar(x, y, 160, 11);
     var cortina = document.createElement('div');
     cortina.className = 'cortina';
     cortina.style.setProperty('--x', x + 'px');
@@ -274,6 +239,7 @@
 
   function irParaConvite() {
     clearTimeout(avancoAutomatico);
+    clearTimeout(explosao);
     guardar('convite:visto', '1');
     mostrar(cenaConvite);
     document.body.classList.add('no-convite');
@@ -282,27 +248,21 @@
     setTimeout(function () { chuva(1.6); }, 900);
   }
 
-  sim.addEventListener('click', irParaAgora);
   $('seguir').addEventListener('click', irParaConvite);
   $('pular').addEventListener('click', irParaConvite);
   if (ler('convite:visto')) $('pular').hidden = false;
+  agendarExplosao();
 
   $('de-novo').addEventListener('click', function () {
     document.body.classList.remove('no-convite');
-    fugas = 0;
-    nao.className = 'botao-nao';
-    nao.removeAttribute('style');
-    $('respostas').appendChild(nao);
-    nao.disabled = false;
-    nao.textContent = 'Não';
-    sim.style.removeProperty('--crescer');
-    recado.textContent = '';
     mostrar(cenaPergunta);
-    document.querySelectorAll('.pergunta .letra').forEach(function (l) { l.style.animation = 'none'; void l.offsetWidth; l.style.animation = ''; });
-    var resp = $('respostas');
-    resp.style.animation = 'none'; void resp.offsetWidth; resp.style.animation = '';
+    document.querySelectorAll('.pergunta .letra').forEach(function (l) {
+      l.classList.remove('voando');
+      l.style.animation = 'none'; void l.offsetWidth; l.style.animation = '';
+    });
     granuladoAtivo = true;
     desenharGranulado();
+    agendarExplosao();
   });
 
   // ------------------------------------------------------------------

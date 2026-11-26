@@ -42,20 +42,36 @@ button { font: inherit; cursor: pointer; }
 .pergunta .letra { display: inline-block; opacity: 0; transform: translateY(18px) rotate(-8deg) scale(0.7); animation: escrever 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) forwards; animation-delay: calc(var(--n) * 55ms + 300ms); }
 .pergunta .espaco { display: inline-block; width: 0.32em; }
 @keyframes escrever { to { opacity: 1; transform: none; } }
+/* Antes de explodir: a pergunta treme e incha um pouco. */
+.pergunta.tremendo { animation: tremer 0.42s linear; }
+@keyframes tremer {
+  0% { transform: none; }
+  20% { transform: translate(-4px, 2px) rotate(-1.2deg) scale(1.02); }
+  40% { transform: translate(5px, -3px) rotate(1.4deg) scale(1.05); }
+  60% { transform: translate(-6px, 3px) rotate(-1.6deg) scale(1.08); }
+  80% { transform: translate(6px, -2px) rotate(1.8deg) scale(1.12); }
+  100% { transform: scale(1.16); }
+}
+/* As letras voam para todos os lados junto com o confete. */
+.pergunta .letra.voando { animation: voar 0.8s cubic-bezier(0.2, 0.7, 0.3, 1) forwards; animation-delay: 0s; }
+@keyframes voar {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translate(var(--fx), var(--fy)) rotate(var(--fr)) scale(1.6); }
+}
 
 .respostas { position: relative; display: flex; justify-content: center; gap: 22px; margin-top: clamp(28px, 6vh, 56px); min-height: 64px; opacity: 0; animation: surgir 0.6s ease forwards 1.9s; }
 @keyframes surgir { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-.botao-sim, .botao-nao {
+.botao-confirmar, .botao-fugir {
   min-width: 132px; padding: 14px 30px; border-radius: 999px;
   font: 800 22px var(--ui); letter-spacing: 0.02em;
   transition: transform 0.25s cubic-bezier(0.2, 1.6, 0.4, 1), box-shadow 0.2s, background 0.2s;
 }
-.botao-sim { background: var(--creme); color: var(--magenta); border: 0; box-shadow: 0 6px 0 var(--vinho), 0 14px 30px -10px rgba(0, 0, 0, 0.45); transform: scale(var(--crescer, 1)); animation: chamar 2.4s ease-in-out infinite 3s; }
-.botao-sim:hover { box-shadow: 0 4px 0 var(--vinho), 0 10px 26px -10px rgba(0, 0, 0, 0.45); }
-.botao-sim:active { transform: scale(calc(var(--crescer, 1) * 0.96)) translateY(3px); box-shadow: 0 2px 0 var(--vinho); }
+.botao-confirmar { background: var(--creme); color: var(--magenta); border: 0; box-shadow: 0 6px 0 var(--vinho), 0 14px 30px -10px rgba(0, 0, 0, 0.45); transform: scale(var(--crescer, 1)); animation: chamar 2.4s ease-in-out infinite 3s; }
+.botao-confirmar:hover { box-shadow: 0 4px 0 var(--vinho), 0 10px 26px -10px rgba(0, 0, 0, 0.45); }
+.botao-confirmar:active { transform: scale(calc(var(--crescer, 1) * 0.96)) translateY(3px); box-shadow: 0 2px 0 var(--vinho); }
 @keyframes chamar { 0%, 100% { rotate: 0deg; } 6% { rotate: -5deg; } 12% { rotate: 4deg; } 18% { rotate: 0deg; } }
-.botao-nao { background: transparent; color: var(--creme); border: 2px solid rgba(255, 243, 236, 0.75); }
-.botao-nao.fugindo { position: fixed; z-index: 5; margin: 0; transition: left 0.32s cubic-bezier(0.2, 1.3, 0.4, 1), top 0.32s cubic-bezier(0.2, 1.3, 0.4, 1), transform 0.3s, opacity 0.3s; transform: scale(var(--encolher, 1)) rotate(var(--giro, 0deg)); }
+.botao-fugir { background: transparent; color: var(--creme); border: 2px solid rgba(255, 243, 236, 0.75); }
+.botao-fugir.fugindo { position: fixed; z-index: 5; margin: 0; transition: left 0.32s cubic-bezier(0.2, 1.3, 0.4, 1), top 0.32s cubic-bezier(0.2, 1.3, 0.4, 1), transform 0.3s, opacity 0.3s; transform: scale(var(--encolher, 1)) rotate(var(--giro, 0deg)); }
 .recadinho { min-height: 28px; margin: 22px 0 0; font: 24px var(--mao); color: var(--creme); opacity: 0.92; }
 .recadinho.pulo { animation: pulo 0.4s ease; }
 @keyframes pulo { 50% { transform: scale(1.12) rotate(-2deg); } }
@@ -221,7 +237,7 @@ button { font: inherit; cursor: pointer; }
   .pergunta .l1, .pergunta .l2 { display: block; }
   .pergunta .l1 { margin-right: 0; }
   .respostas { gap: 14px; margin-top: 40px; }
-  .botao-sim, .botao-nao { min-width: 124px; padding: 16px 28px; font-size: 22px; }
+  .botao-confirmar, .botao-fugir { min-width: 124px; padding: 16px 28px; font-size: 22px; }
   .recadinho { font-size: 22px; }
   .cena-agora { gap: 14px; padding: 16px 0; }
   .agora-tem { width: 112vw; max-height: none; }
