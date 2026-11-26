@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Convite de formatura</title>
+  <meta name="description" content="Já tem compromisso dia 20/12/26?">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#b6275d">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Convite de formatura">
+  <meta property="og:description" content="Já tem compromisso dia 20/12/26? Abre que tem uma pergunta pra você.">
+  <meta property="og:image" content="https://henrlz.github.io/portfolio-luiz-henrique/ferramentas/convite-formatura/img/convite-og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="819">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23b6275d'/%3E%3Cpath d='M4 13l12-6 12 6-12 6z' fill='%23fff3ec'/%3E%3Cpath d='M9 16v5c0 2 3.5 3.5 7 3.5s7-1.5 7-3.5v-5' fill='none' stroke='%23fff3ec' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Nunito:wght@600;800&family=Patrick+Hand+SC&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="img/agora-tem.webp">
+  <link rel="stylesheet" href="css/convite.css">
+</head>
+<body>
+  <!-- Cena 1: a pergunta -->
+  <section class="cena cena-pergunta ativa" id="cena-pergunta" aria-labelledby="pergunta">
+    <canvas class="granulado" id="granulado" aria-hidden="true"></canvas>
+    <div class="miolo">
+      <h1 class="pergunta" id="pergunta" aria-label="Já tem compromisso dia 20/12/26?">
+        <span class="linha" data-texto="JÁ TEM COMPROMISSO"></span>
+        <span class="linha" data-texto="DIA 20/12/26?"></span>
+      </h1>
+      <div class="respostas" id="respostas">
+        <button class="botao-sim" id="botao-sim" type="button">Sim</button>
+        <button class="botao-nao" id="botao-nao" type="button">Não</button>
+      </div>
+      <p class="recadinho" id="recadinho" aria-live="polite"></p>
+    </div>
+    <button class="pular" id="pular" type="button" hidden>pular para o convite</button>
+  </section>
+
+  <!-- Cena 2: agora tem! -->
+  <section class="cena cena-agora" id="cena-agora" aria-label="Agora tem!" aria-hidden="true">
+    <div class="recortes" id="recortes" aria-hidden="true"></div>
+    <figure class="agora-tem">
+      <img src="img/agora-tem.webp" width="1055" height="686" alt="Agora tem! Escrito com letras recortadas, com capelo de formatura, livros, um lírio e o símbolo da psicologia.">
+    </figure>
+    <button class="seguir" id="seguir" type="button"><span class="carga" aria-hidden="true"></span><span class="rotulo">então anota aí</span></button>
+  </section>
+
+  <!-- Cena 3: o convite -->
+  <section class="cena cena-convite" id="cena-convite" aria-labelledby="titulo-convite" aria-hidden="true">
+    <div class="papel">
+      <div class="rasgo rasgo-a" aria-hidden="true"></div>
+      <div class="rasgo rasgo-b" aria-hidden="true"></div>
+
+      <div class="convite">
+        <figure class="retrato peca" style="--i:0">
+          <img src="img/foto.webp" width="560" height="905" alt="A formanda sorrindo, em foto preto e branco recortada sobre papel magenta, com capelo, livros e o símbolo da psicologia.">
+          <svg class="seta" viewBox="0 0 160 70" aria-hidden="true"><path d="M6 52 C 40 10, 100 6, 140 30" /><path d="M126 16 L142 31 L122 38" /></svg>
+        </figure>
+
+        <div class="bilhetes">
+          <article class="bilhete bilhete-grande peca" style="--i:1">
+            <span class="fita" aria-hidden="true"></span>
+            <h2 id="titulo-convite">Depois de 5 longos anos, eu vou me <em>formar</em>
+              <svg class="risco" viewBox="0 0 300 30" aria-hidden="true"><path d="M4 20 C 70 8, 160 6, 296 12" /><path d="M30 26 C 110 16, 200 14, 270 18" /></svg>
+            </h2>
+          </article>
+
+          <article class="bilhete peca" style="--i:2">
+            <span class="fita" aria-hidden="true"></span>
+            <div class="com-icone">
+              <svg class="icone" viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="9" width="38" height="33" rx="6"/><path d="M5 19h38M15 4v10M33 4v10"/><path d="M17 26l3 3 3-3M25 26l3 3 3-3M17 33l3-3 3 3M25 33l3-3 3 3"/></svg>
+              <div>
+                <p class="rotulo-bilhete">Data:</p>
+                <p class="destaque">20/12/2026<br>às 20h</p>
+              </div>
+            </div>
+            <p class="obs">(sei que é meio tarde, mas não desiste de mim!)</p>
+          </article>
+
+          <article class="bilhete bilhete-rosa peca" style="--i:3">
+            <span class="fita" aria-hidden="true"></span>
+            <p class="presenca">sua presença é muito importante pra mim! <svg class="coracao" viewBox="0 0 32 28" aria-hidden="true"><path d="M16 26C6 19 2 14 2 9a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 5-4 10-14 17z"/></svg></p>
+          </article>
+
+          <article class="bilhete peca" style="--i:4">
+            <span class="fita" aria-hidden="true"></span>
+            <div class="com-icone">
+              <svg class="icone" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 45s15-14.5 15-26A15 15 0 0 0 9 19c0 11.5 15 26 15 26z" class="cheio"/><circle cx="24" cy="19" r="5.5" class="furo"/></svg>
+              <div>
+                <p class="rotulo-bilhete">Local:</p>
+                <p class="destaque menor">Estância Árvore da Vida, Sumaré</p>
+              </div>
+            </div>
+            <p class="endereco">Estrada Estância Árvore da Vida, s/n<br>Sumaré, SP · CEP 13176-050</p>
+            <a class="botao-papel" id="mapa" target="_blank" rel="noopener">Abrir no mapa</a>
+          </article>
+
+          <article class="bilhete bilhete-contagem peca" style="--i:5" aria-live="off">
+            <span class="fita" aria-hidden="true"></span>
+            <p class="rotulo-bilhete" id="contagem-titulo">Faltam</p>
+            <div class="contagem" id="contagem">
+              <div><b data-u="dias">--</b><span>dias</span></div>
+              <div><b data-u="horas">--</b><span>horas</span></div>
+              <div><b data-u="min">--</b><span>min</span></div>
+              <div><b data-u="seg">--</b><span>seg</span></div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="acoes peca" style="--i:6">
+        <button class="botao-papel cheio" id="agenda" type="button">Salvar na agenda</button>
+        <button class="botao-papel" id="ver-imagem" type="button">Ver o convite em imagem</button>
+        <button class="link-replay" id="de-novo" type="button">ver a pergunta de novo</button>
+      </div>
+    </div>
+  </section>
+
+  <dialog class="moldura" id="moldura" aria-label="Convite em imagem">
+    <img src="img/convite.webp" width="1518" height="1036" alt="Convite de formatura: depois de 5 longos anos, eu vou me formar. 20/12/2026 às 20h, Estância Árvore da Vida, Sumaré.">
+    <div class="moldura-acoes">
+      <a class="botao-papel cheio" href="img/convite-og.jpg" download="convite-formatura.jpg">Baixar imagem</a>
+      <button class="botao-papel" type="button" id="fechar-moldura">Fechar</button>
+    </div>
+  </dialog>
+
+  <canvas class="confete" id="confete" aria-hidden="true"></canvas>
+  <script src="js/convite.js"></script>
+</body>
+</html>
