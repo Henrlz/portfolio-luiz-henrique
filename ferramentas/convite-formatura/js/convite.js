@@ -90,6 +90,11 @@
   // explodem em confete, e entra o "Agora tem!".
   // ------------------------------------------------------------------
   var pergunta = $('pergunta');
+
+  // Figurinhas: o mesmo trio vai abaixo da pergunta e do "Agora tem!".
+  var modelo = $('tpl-selos');
+  document.querySelectorAll('[data-selos]').forEach(function (caixa) { caixa.appendChild(modelo.content.cloneNode(true)); });
+  var selosPergunta = document.querySelectorAll('#cena-pergunta .selo');
   var TEMPO_PERGUNTA = 4000;
   var explosao = null;
 
@@ -104,7 +109,7 @@
     pergunta.classList.add('tremendo');
     setTimeout(function () {
       pergunta.classList.remove('tremendo');
-      pergunta.querySelectorAll('.letra').forEach(function (l) {
+      Array.prototype.slice.call(pergunta.querySelectorAll('.letra')).concat(Array.prototype.slice.call(selosPergunta)).forEach(function (l) {
         var ang = Math.random() * Math.PI * 2;
         var dist = 40 + Math.random() * 60;
         l.style.setProperty('--fx', (Math.cos(ang) * dist).toFixed(1) + 'vw');
@@ -256,7 +261,7 @@
   $('de-novo').addEventListener('click', function () {
     document.body.classList.remove('no-convite');
     mostrar(cenaPergunta);
-    document.querySelectorAll('.pergunta .letra').forEach(function (l) {
+    document.querySelectorAll('.pergunta .letra, #cena-pergunta .selo').forEach(function (l) {
       l.classList.remove('voando');
       l.style.animation = 'none'; void l.offsetWidth; l.style.animation = '';
     });

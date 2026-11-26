@@ -18,8 +18,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Nunito:wght@600;800&family=Patrick+Hand+SC&display=swap" rel="stylesheet">
-  <link rel="preload" as="image" href="img/agora-tem.webp?v=4">
-  <link rel="stylesheet" href="css/convite.css?v=4">
+  <link rel="preload" as="image" href="img/agora-tem.webp?v=5">
+  <link rel="stylesheet" href="css/convite.css?v=5">
 </head>
 <body>
   <!-- Cena 1: a pergunta -->
@@ -31,6 +31,7 @@
         <span class="linha l2" data-texto="COMPROMISSO"></span>
         <span class="linha l3" data-texto="DIA 20/12/26?"></span>
       </h1>
+      <div class="selos" data-selos aria-hidden="true"></div>
     </div>
     <button class="pular" id="pular" type="button" hidden>pular para o convite</button>
   </section>
@@ -39,9 +40,40 @@
   <section class="cena cena-agora" id="cena-agora" aria-label="Agora tem!" aria-hidden="true">
     <div class="recortes" id="recortes" aria-hidden="true"></div>
     <figure class="agora-tem">
-      <img src="img/agora-tem.webp?v=4" width="1055" height="686" alt="Agora tem! Escrito com letras recortadas, com capelo de formatura, livros, um lírio e o símbolo da psicologia.">
+      <img src="img/agora-tem.webp?v=5" width="1055" height="686" alt="Agora tem! Escrito com letras recortadas, com capelo de formatura, livros, um lírio e o símbolo da psicologia.">
     </figure>
-    <p class="agora-depois">20 de dezembro, às 20h</p>
+    <div class="selos selos-agora" data-selos aria-hidden="true"></div>
+
+    <!-- Figurinhas: capelo, símbolo da psicologia e diploma com laço rosa -->
+    <template id="tpl-selos">
+      <svg class="selo selo-capelo" viewBox="2 4 68 56">
+        <g stroke="#fff3ec" stroke-width="5" stroke-linejoin="round" fill="none"><path d="M36 9 66 22 36 35 6 22z"/><path d="M18 28v13c0 5 8 9 18 9s18-4 18-9V28"/></g>
+        <path d="M18 28v13c0 5 8 9 18 9s18-4 18-9V28L36 36z" fill="#3a2e31"/>
+        <path d="M36 9 66 22 36 35 6 22z" fill="#2a2124"/>
+        <path d="M36 9 66 22 36 35" fill="none" stroke="#4a3c40" stroke-width="1.5"/>
+        <circle cx="36" cy="22" r="2.6" fill="#d9a441"/>
+        <path d="M36 22c8 1 15 3 20 6v16" fill="none" stroke="#d9a441" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M53 43h6l-1 12c-.3 2-3.7 2-4 0z" fill="#e9b85a" stroke="#c98f2c" stroke-width="1"/>
+      </svg>
+      <svg class="selo selo-psi" viewBox="0 0 64 64">
+        <path d="M9 11l13-2 12 2 12-1 9 2 1 13-1 14 1 14-2 2-13-1-12 1-11-1-9 1-1-13 1-14-1-15z" fill="#f8e3d3" stroke="#fff3ec" stroke-width="3" stroke-linejoin="round"/>
+        <g fill="none" stroke="#b6275d" stroke-width="4.2" stroke-linecap="round"><path d="M32 16v34"/><path d="M19 21c0 14 4 18 13 18s13-4 13-18"/></g>
+        <g stroke="#b6275d" stroke-width="3" stroke-linecap="round"><path d="M16 21h6M42 21h6M26 50h12M28.5 16h7"/></g>
+      </svg>
+      <svg class="selo selo-diploma" viewBox="6 8 64 48">
+        <g transform="rotate(-18 38 32)">
+          <rect x="8" y="22" width="60" height="20" rx="10" fill="#fff3ec"/>
+          <rect x="11" y="25" width="54" height="14" rx="7" fill="#f6e2cf"/>
+          <ellipse cx="62" cy="32" rx="5" ry="7" fill="#ead2bb" stroke="#d8b99c" stroke-width="1.2"/>
+          <ellipse cx="62" cy="32" rx="2" ry="3" fill="#d8b99c"/>
+          <path d="M14 26c3 3 3 9 0 12" fill="none" stroke="#e2c7ad" stroke-width="1.4"/>
+          <rect x="34" y="23" width="7" height="18" rx="2" fill="#e05a8a"/>
+          <path d="M37.5 30c-6-9-17-8-15-1 1 4 9 4 15 1zM37.5 30c6-9 17-8 15-1-1 4-9 4-15 1z" fill="#e8739c" stroke="#c43f71" stroke-width="1.4"/>
+          <path d="M36 33l-7 13 4-1 2 4 3-14zM39 33l7 13-4-1-2 4-3-14z" fill="#d94d80"/>
+          <circle cx="37.5" cy="31" r="3.2" fill="#c43f71"/>
+        </g>
+      </svg>
+    </template>
     <button class="seguir" id="seguir" type="button"><span class="carga" aria-hidden="true"></span><span class="rotulo">então anota aí</span></button>
   </section>
 
@@ -53,7 +85,7 @@
 
       <div class="convite">
         <figure class="retrato peca" style="--i:0">
-          <img src="img/foto.webp?v=4" width="560" height="905" alt="A formanda sorrindo, em foto preto e branco recortada sobre papel magenta, com capelo, livros e o símbolo da psicologia.">
+          <img src="img/foto.webp?v=5" width="560" height="905" alt="A formanda sorrindo, em foto preto e branco recortada sobre papel magenta, com capelo, livros e o símbolo da psicologia.">
           <svg class="seta" viewBox="0 0 160 70" aria-hidden="true"><path d="M6 52 C 40 10, 100 6, 140 30" /><path d="M126 16 L142 31 L122 38" /></svg>
         </figure>
 
@@ -125,6 +157,6 @@
   </dialog>
 
   <canvas class="confete" id="confete" aria-hidden="true"></canvas>
-  <script src="js/convite.js?v=4"></script>
+  <script src="js/convite.js?v=5"></script>
 </body>
 </html>
