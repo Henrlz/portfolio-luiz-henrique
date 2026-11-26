@@ -42,24 +42,30 @@ button { font: inherit; cursor: pointer; }
 .pergunta .letra { display: inline-block; opacity: 0; transform: translateY(18px) rotate(-8deg) scale(0.7); animation: escrever 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) forwards; animation-delay: calc(var(--n) * 55ms + 300ms); }
 .pergunta .espaco { display: inline-block; width: 0.32em; }
 @keyframes escrever { to { opacity: 1; transform: none; } }
-/* Figurinhas (capelo, Ψ e diploma) como barra de carregamento: aparecem
-   apagadas, acendem uma por uma e, quando a última acende, a tela troca.
-   Quem marca o tempo é o JavaScript (classes .visivel e .cheio). */
-.selos { display: flex; justify-content: center; align-items: center; gap: clamp(16px, 3vw, 30px); margin-top: clamp(22px, 4.5vh, 42px); }
+/* Figurinhas (capelo, Ψ e diploma) como UMA barra de carregamento que
+   atravessa as duas primeiras telas: cada uma enche de cor de baixo para
+   cima (--vazio vai de 100% a 0%), o capelo e metade do Ψ na pergunta, o
+   resto no "Agora tem!"; quando o diploma enche, abre o convite. Quem
+   controla o progresso é o JavaScript. */
+.selos { display: flex; justify-content: center; align-items: center; gap: clamp(16px, 3vw, 30px); margin-top: clamp(22px, 4.5vh, 42px); opacity: 0; transition: opacity 0.4s ease; }
+.selos.visivel { opacity: 1; }
 .cena-agora .selos-agora { margin-top: 4px; }
-.selo { width: clamp(58px, 5.6vw, 76px); height: auto; overflow: visible; opacity: 0; transform: scale(0.82) rotate(var(--rot)); transition: opacity 0.35s ease; }
+.selo { position: relative; display: block; width: clamp(58px, 5.6vw, 76px); transform: rotate(var(--rot)); }
 .selo:nth-child(1) { --rot: -8deg; }
 .selo:nth-child(2) { --rot: 5deg; }
 .selo:nth-child(3) { --rot: -5deg; }
-.selos.visivel .selo { opacity: 0.42; filter: grayscale(1) brightness(2.4) contrast(0.5); }
-.selos.visivel .selo.cheio { animation: acender 0.6s cubic-bezier(0.2, 1.6, 0.4, 1) forwards, balancar 3.2s ease-in-out infinite 0.7s; }
-@keyframes acender {
-  0% { opacity: 0.42; transform: scale(0.82) rotate(var(--rot)); filter: grayscale(1) brightness(2.4) contrast(0.5); }
-  55% { opacity: 1; transform: scale(1.28) rotate(calc(var(--rot) * -1.5)); filter: drop-shadow(0 6px 8px rgba(60, 5, 25, 0.35)); }
-  100% { opacity: 1; transform: scale(1) rotate(var(--rot)); filter: drop-shadow(0 6px 8px rgba(60, 5, 25, 0.35)); }
+.selo svg { display: block; width: 100%; height: auto; overflow: visible; }
+.selo .fantasma { opacity: 0.42; filter: grayscale(1) brightness(2.4) contrast(0.5); }
+.selo .cor { position: absolute; inset: 0; clip-path: inset(var(--vazio, 100%) -20% -20% -20%); }
+.selo.cheio .cor { filter: drop-shadow(0 6px 8px rgba(60, 5, 25, 0.35)); }
+.selo.cheio { animation: estalo 0.55s cubic-bezier(0.2, 1.6, 0.4, 1), balancar 3.2s ease-in-out infinite 0.6s; }
+@keyframes estalo {
+  0% { transform: scale(1) rotate(var(--rot)); }
+  50% { transform: scale(1.26) rotate(calc(var(--rot) * -1.5)); }
+  100% { transform: scale(1) rotate(var(--rot)); }
 }
 @keyframes balancar { 0%, 100% { translate: 0 0; } 50% { translate: 0 -6px; } }
-.cena-pergunta .selos.visivel .selo.voando { animation: voar 0.8s cubic-bezier(0.2, 0.7, 0.3, 1) forwards; }
+.cena-pergunta .selo.voando { animation: voar 0.8s cubic-bezier(0.2, 0.7, 0.3, 1) forwards; }
 
 /* Antes de explodir: a pergunta treme e incha um pouco. */
 .pergunta.tremendo { animation: tremer 0.42s linear; }

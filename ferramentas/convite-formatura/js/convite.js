@@ -92,41 +92,95 @@
   var pergunta = $('pergunta');
 
   // Figurinhas: o mesmo trio vai abaixo da pergunta e do "Agora tem!".
+  // Cada uma tem duas camadas: a apagada (fantasma) e a colorida, que vai
+  // sendo revelada de baixo para cima conforme o carregamento avança.
   var modelo = $('tpl-selos');
-  document.querySelectorAll('[data-selos]').forEach(function (caixa) { caixa.appendChild(modelo.content.cloneNode(true)); });
+  document.querySelectorAll('[data-selos]').forEach(function (caixa) {
+    modelo.content.querySelectorAll('svg').forEach(function (desenho) {
+      var selo = document.createElement('span');
+      selo.className = 'selo';
+      ['fantasma', 'cor'].forEach(function (camada) {
+        var copia = desenho.cloneNode(true);
+        copia.setAttribute('class', camada);
+        selo.appendChild(copia);
+      });
+      caixa.appendChild(selo);
+    });
+  });
   var selosPergunta = document.querySelectorAll('#cena-pergunta .selo');
   var caixaPergunta = document.querySelector('#cena-pergunta [data-selos]');
   var caixaAgora = document.querySelector('#cena-agora [data-selos]');
 
-  // Carregamento: as figurinhas aparecem apagadas e acendem uma por uma;
-  // quando a última acende, a tela troca. Tempos em ms desde o início da tela.
-  var CARGA_PERGUNTA = { aparecer: 900, acender: [1700, 2550, 3400], fim: 4000 };
-  var CARGA_AGORA = { aparecer: 450, acender: [1400, 2700, 4000], fim: 5100 };
+  // Um carregamento só, de 0 a 3 (uma unidade por figurinha), dividido
+  // entre as duas primeiras telas: a pergunta leva de 0 a 1,5 (capelo
+  // cheio e meio Ψ) e o "Agora tem!" de 1,5 a 3; no 3 abre o convite.
+  var PARTE_PERGUNTA = { aparecer: 700, inicio: 900, ate: 1.5, duracao: 2900, fim: 4000 };
+  var PARTE_AGORA = { inicio: 600, ate: 3, duracao: 3800, depois: 650 };
+  var progresso = 0;
   var cargas = [];
+  var quadro = null;
 
   function limparCarga() {
     cargas.forEach(clearTimeout);
     cargas = [];
+    clearTimeout(quadro);
   }
 
-  function carregarSelos(caixa, tempos, aoTerminar) {
-    limparCarga();
-    var selos = caixa.querySelectorAll('.selo');
-    caixa.classList.remove('visivel');
-    selos.forEach(function (s) { s.classList.remove('cheio', 'voando'); });
-    cargas.push(setTimeout(function () { caixa.classList.add('visivel'); }, tempos.aparecer));
-    tempos.acender.forEach(function (t, i) {
-      cargas.push(setTimeout(function () {
-        selos[i].classList.add('cheio');
-        var r = selos[i].getBoundingClientRect();
-        estourar(r.left + r.width / 2, r.top + r.height / 2, 16, 4);
-      }, t));
+  /** Pinta o progresso nas duas fileiras e estoura confete quando uma enche. */
+  function pintar(p) {
+    [caixaPergunta, caixaAgora].forEach(function (caixa) {
+      var visivel = caixa.closest('.cena').classList.contains('ativa');
+      caixa.querySelectorAll('.selo').forEach(function (selo, i) {
+        var f = Math.max(0, Math.min(1, p - i));
+        selo.style.setProperty('--vazio', ((1 - f) * 100).toFixed(1) + '%');
+        if (f >= 1 && !selo.classList.contains('cheio')) {
+          selo.classList.add('cheio');
+          if (visivel) {
+            var r = selo.getBoundingClientRect();
+            estourar(r.left + r.width / 2, r.top + r.height / 2, 18, 4);
+          }
+        } else if (f < 1) {
+          selo.classList.remove('cheio');
+        }
+      });
     });
-    cargas.push(setTimeout(aoTerminar, tempos.fim));
+  }
+
+  /** Avança o progresso pelo tempo decorrido (não por quadros), então não
+   *  trava se o navegador pausar a pintura, como em aba de segundo plano. */
+  function encher(ate, duracao, aoTerminar) {
+    var de = progresso;
+    var t0 = Date.now();
+    clearTimeout(quadro);
+    (function passo() {
+      var t = Math.min(1, (Date.now() - t0) / duracao);
+      progresso = de + (ate - de) * t;
+      pintar(progresso);
+      if (t < 1) quadro = setTimeout(passo, 30);
+      else if (aoTerminar) aoTerminar();
+    })();
   }
 
   function agendarExplosao() {
-    carregarSelos(caixaPergunta, CARGA_PERGUNTA, explodirPergunta);
+    limparCarga();
+    progresso = 0;
+    [caixaPergunta, caixaAgora].forEach(function (c) { c.classList.remove('visivel'); });
+    document.querySelectorAll('.selo').forEach(function (s) { s.classList.remove('cheio', 'voando'); });
+    pintar(0);
+    var parte = PARTE_PERGUNTA;
+    cargas.push(setTimeout(function () { caixaPergunta.classList.add('visivel'); }, parte.aparecer));
+    cargas.push(setTimeout(function () { encher(parte.ate, parte.duracao); }, parte.inicio));
+    cargas.push(setTimeout(explodirPergunta, parte.fim));
+  }
+
+  function continuarNoAgora() {
+    var parte = PARTE_AGORA;
+    progresso = Math.max(progresso, PARTE_PERGUNTA.ate);
+    pintar(progresso);
+    caixaAgora.classList.add('visivel');
+    cargas.push(setTimeout(function () {
+      encher(parte.ate, parte.duracao, function () { cargas.push(setTimeout(irParaConvite, parte.depois)); });
+    }, parte.inicio));
   }
 
   /** Tremida rápida e as letras voam para todos os lados. */
@@ -262,7 +316,7 @@
       mostrar(cenaAgora);
       cortina.remove();
       setTimeout(function () { estourar(innerWidth / 2, innerHeight * 0.42, 140, 11); chuva(3.2); }, 450);
-      carregarSelos(caixaAgora, CARGA_AGORA, irParaConvite);
+      continuarNoAgora();
     }, 760);
   }
 
