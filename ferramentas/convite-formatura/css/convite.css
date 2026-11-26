@@ -22,7 +22,7 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
 body { background: var(--magenta); color: var(--tinta); font-family: var(--ui); overflow: hidden; -webkit-tap-highlight-color: transparent; }
-body.no-convite { overflow-y: auto; background: var(--papel); }
+body.no-convite { overflow-y: auto; overflow-x: hidden; background: var(--papel); }
 button { font: inherit; cursor: pointer; }
 :focus-visible { outline: 3px solid var(--amarelo); outline-offset: 3px; }
 
@@ -124,6 +124,14 @@ button { font: inherit; cursor: pointer; }
   100% { transform: scale(1) rotate(-1deg); }
 }
 @keyframes flutuar { 0%, 100% { translate: 0 0; rotate: -1deg; } 50% { translate: 0 -8px; rotate: 0.6deg; } }
+/* Versões retas para o celular: mesma entrada de carimbo, mas terminando sem inclinação. */
+@keyframes carimbo-reto {
+  0% { transform: scale(2.4) rotate(-12deg); opacity: 0; filter: blur(6px); }
+  55% { transform: scale(0.95) rotate(2deg); opacity: 1; filter: none; }
+  75% { transform: scale(1.03) rotate(-1deg); }
+  100% { transform: none; }
+}
+@keyframes flutuar-reto { 0%, 100% { translate: 0 0; } 50% { translate: 0 -6px; } }
 .cena-agora.ativa .agora-tem::after { content: ''; position: absolute; inset: -12% -8%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 220, 230, 0.35), transparent); z-index: -1; animation: brilho 1s ease-out both 0.5s; }
 @keyframes brilho { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: scale(1); } }
 .recortes { position: absolute; inset: 0; pointer-events: none; }
@@ -241,6 +249,11 @@ button { font: inherit; cursor: pointer; }
 
 /* ---------------- Telas pequenas ---------------- */
 @media (max-width: 880px) {
+  /* No celular os bilhetes e a foto ocupam a largura toda: inclinados, as
+     bordas ficam tortas em relação à tela. Aqui fica tudo reto. */
+  .retrato, .bilhetes .bilhete { --giro: 0deg; }
+  .cena-convite { overflow-x: hidden; }
+  .cena-agora.ativa .agora-tem { animation: carimbo-reto 0.75s cubic-bezier(0.2, 1.5, 0.35, 1) both 0.15s, flutuar-reto 5s ease-in-out infinite 1.2s; }
   .convite { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .retrato { width: min(340px, 86vw); margin: 0 auto; }
   .seta { display: none; }
